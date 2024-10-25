@@ -1,0 +1,13 @@
+{
+  "ConnectionStrings": {
+    "PostgreSQLConnection" : "Tu cadena de coneccion"
+  },
+
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}

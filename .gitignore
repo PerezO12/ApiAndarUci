@@ -1,0 +1,56 @@
+# Compiled source
+bin/
+obj/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+
+# Microsoft Visual Studio
+.vscode/
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Configuration files
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+
+# Local databases
+*.mdf
+*.ldf
+*.db
+*.sqlite
+
+# Publish outputs
+publish/
+
+# Logs
+*.log
+
+# Windows image file caches
+*.pdb
+*.pidb
+*.svclog
+*.dbmdl
+*.vspscc
+*.vssscc
+
+# Archivos de entornos virtuales
+.vscode/
+.idea/
+*.vsconfig
+
+# Docker
+docker-compose.override.yml
+
+# Entity Framework migrations log
+*.Designer.cs

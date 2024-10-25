@@ -1,0 +1,6 @@
+@MyApiUCI_HostAddress = http://localhost:5062
+
+GET {{MyApiUCI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
