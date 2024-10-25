@@ -10,5 +10,6 @@ public class ApplicationDbContext : DbContext
 
     }   
 
-    public DbSet<Facultad> facultad { get; set; }     
+    public DbSet<Facultad> facultad { get; set; } 
+    public DbSet<Departamento> departamento { get; set;}    
 }

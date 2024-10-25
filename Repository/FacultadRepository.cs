@@ -6,6 +6,7 @@ namespace MyApiUCI.Repository
 {
 
     public class FacultadRepository : IFacultadRepository
+    
     {
         private readonly ApplicationDbContext _context;
 
@@ -34,6 +35,11 @@ namespace MyApiUCI.Repository
             return facultadModel;
         }
 
+        public async Task<bool> FacultyExists(int id)
+        {
+            return await _context.facultad.AnyAsync(f => f.Id == id);
+        }
+
         public async Task<List<Facultad>> GetAllAsync()
         {
            return await _context.facultad.ToListAsync();
@@ -42,6 +48,7 @@ namespace MyApiUCI.Repository
         public async Task<Facultad?> GetByIdAsync(int id)
         {
             return await _context.facultad.FirstOrDefaultAsync(f => f.Id == id);
+            //return await _context.facultad.FindAsync(id);
         }
 
         public async Task<Facultad?> UpdateAsync(int id, Facultad facultadModel)
