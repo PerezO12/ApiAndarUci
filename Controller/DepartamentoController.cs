@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Departamento;
+using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
 using MyApiUCI.Models;
@@ -25,9 +26,9 @@ namespace MyApiUCI.Controller
 
         //Get
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll( [FromQuery] QueryObject query)
         {
-            var departamentoModel = await _depaRepo.GetAllAsync();
+            var departamentoModel = await _depaRepo.GetAllAsync(query);
             //convertir a deparamentDTOP
             var departamentoDto = departamentoModel.Select(d => d.toDepartamentDto());
 
@@ -95,5 +96,19 @@ namespace MyApiUCI.Controller
             return Ok(departamentoModel.toDepartamentDto());
         }
 
+        [HttpPatch]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdatePatch([FromRoute] int id, [FromBody] PatchDepartamentoDto departamentoDto)
+        {
+            var departamentoModel = await _depaRepo.PatchAsync(id, departamentoDto);
+            if(departamentoModel == null)
+            {
+                return NotFound("Departament does not exist");
+            }
+            return Ok(departamentoModel.toDepartamentDto());
+        
+        }
+
+        
     }
 }

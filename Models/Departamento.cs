@@ -21,6 +21,9 @@ public partial class Departamento
     
     [Column("fechacreacion")]
     public DateTime? Fechacreacion { get; set; } = DateTime.Now.ToUniversalTime();
+    
+    [Column("activo")]
+    public bool Activo { get; set; } = true;
 
     public virtual ICollection<Encargado> Encargados { get; set; } = new List<Encargado>();
 

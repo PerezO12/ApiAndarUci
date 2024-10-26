@@ -31,5 +31,17 @@ namespace MyApiUCI.Mappers
                 FacultadId = departamentoDto.FacultadId
             };
         }
+        public static Departamento toPatchingDepartamento(this Departamento departamento, PatchDepartamentoDto departamentoDto)
+        {
+            if (!string.IsNullOrWhiteSpace(departamentoDto.Nombre))
+            {
+                departamento.Nombre = departamentoDto.Nombre;
+            }
+            if (departamentoDto.FacultadId.HasValue)
+            {
+                departamento.FacultadId = departamentoDto.FacultadId.Value;
+            }
+            return departamento;
+        }
     }
 }

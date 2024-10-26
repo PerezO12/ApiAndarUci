@@ -24,30 +24,32 @@ namespace MyApiUCI.Repository
 
         public async Task<Facultad?> DeleteAsync(int id)
         {
-            var facultadModel = await _context.facultad.FirstOrDefaultAsync(f => f.Id == id);
+            var facultadModel = await _context.facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
             
             if(facultadModel == null)
             {
                 return null;
             }
-            _context.Remove(facultadModel);
+            facultadModel.Activo = false;
             await _context.SaveChangesAsync();
             return facultadModel;
         }
 
         public async Task<bool> FacultyExists(int id)
         {
-            return await _context.facultad.AnyAsync(f => f.Id == id);
+            return await _context.facultad.AnyAsync(f => f.Id == id && f.Activo == true);
         }
 
         public async Task<List<Facultad>> GetAllAsync()
         {
-           return await _context.facultad.ToListAsync();
+           return await _context.facultad
+                .Where(f => f.Activo == true)
+                .ToListAsync();
         }
 
         public async Task<Facultad?> GetByIdAsync(int id)
         {
-            return await _context.facultad.FirstOrDefaultAsync(f => f.Id == id);
+            return await _context.facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
             //return await _context.facultad.FindAsync(id);
         }
 

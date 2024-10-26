@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
 using MyApiUCI.Dtos.Facultad;
+using MyApiUCI.Dtos.Departamento;
 
 
 namespace MyApiUCI.Controller
@@ -61,6 +62,7 @@ namespace MyApiUCI.Controller
 
             return Ok(facultadModel.toFacultadDto());
         }
+
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> Delete([FromRoute]int id) {
@@ -72,5 +74,7 @@ namespace MyApiUCI.Controller
             }
             return Ok(facultadModel.toFacultadDto());
         } 
+
+   
     }
 }
