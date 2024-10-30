@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyApiUCI.Models;
 
@@ -11,15 +12,17 @@ public partial class Formulario
 
     public int? DepartamentoId { get; set; }
 
+    public bool? Firmado { get; set; }
+
     public DateTime? FechaEnvio { get; set; }
 
-    public bool? Firmado { get; set; }
 
     public byte[]? FirmaEncargado { get; set; }
 
-    public DateTime? Fechacreacion { get; set; }
-
+    public DateTime Fechacreacion { get; set; } = DateTime.Now.ToUniversalTime();
+    public DateTime? FechaFirmado { get; set;}
     public virtual Departamento? Departamento { get; set; }
 
     public virtual Estudiante? Estudiante { get; set; }
+
 }
