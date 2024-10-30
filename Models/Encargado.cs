@@ -16,7 +16,8 @@ public partial class Encargado
 
     public byte[] FirmaDigital { get; set; } = null!;
 
-    public bool? Activo { get; set; }
+    [Column("activo")]
+    public bool Activo { get; set; }  = true;
 
     public virtual Departamento? Departamento { get; set; }
 

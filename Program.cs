@@ -59,6 +59,7 @@ builder.Services.AddAuthentication(options => {
 builder.Services.AddScoped<IFacultadRepository, FacultadRepository>();
 builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAcountService, AcountService>();
 
 var app = builder.Build();
 
