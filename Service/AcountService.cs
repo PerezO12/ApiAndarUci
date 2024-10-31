@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Dtos.Cuentas;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Models;
@@ -26,6 +27,25 @@ namespace MyApiUCI.Service
             _tokenService = tokenService;
             _signInManager = signInManager;
             _context = context;
+        }
+
+        public async Task<NewUserDto?> Login(LoginDto loginDto)
+        {
+            var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginDto.UserName.ToLower());
+            if(user == null) return null;
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+
+            if(!result.Succeeded) return null;
+
+            
+            return new NewUserDto
+                {
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Token = await _tokenService.CreateTokenAsync(user)
+                }
+;
         }
 
         public async Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargado(RegisterEncargadoDto registerDto)

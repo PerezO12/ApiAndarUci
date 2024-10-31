@@ -72,5 +72,18 @@ namespace MyApiUCI.Controller
                 return StatusCode(500, new { message = "Error en el servidor", error = ex.Message });
             }
         }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(LoginDto loginDto)
+        {
+            if(!ModelState.IsValid) return BadRequest("Password/Usuario incorrecto");
+
+            var user = await  _acountService.Login(loginDto);
+            
+            if(user == null) return Unauthorized("Usuario o Password Incorrectos");
+
+            return Ok(user);
+            
+        }
     }
 }
