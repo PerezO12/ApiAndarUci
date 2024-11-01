@@ -54,6 +54,10 @@ namespace MyApiUCI.Repository
             var carreras = _context.carrera.Where(c => c.Activo == true).AsQueryable();
             
             //Validacion de busquedas
+            if(query.ListaId.Any())
+            {
+                carreras = carreras.Where(c => query.ListaId.Contains(c.Id));
+            }
             if(!string.IsNullOrWhiteSpace(query.Nombre))
             {
                 carreras = carreras.Where( c => c.Nombre.ToLower() == query.Nombre.ToLower() );

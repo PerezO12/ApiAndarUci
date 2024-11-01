@@ -138,7 +138,10 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
+//Cambiar luego
 app.UseCors("AllowLocalhost5173");
+
+
 app.UseHttpsRedirection();
 
 //mapeo controladores
