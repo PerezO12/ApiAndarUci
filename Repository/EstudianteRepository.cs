@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
@@ -13,10 +14,11 @@ namespace MyApiUCI.Repository
     public class EstudianteRepository : IEstudianteRepository
     {
         private readonly ApplicationDbContext _context;
-        
+
         public EstudianteRepository(ApplicationDbContext context)
         {
             _context = context;
+
         }
 
         public async Task<Estudiante> CreateAsync(Estudiante estudianteModel)
@@ -37,6 +39,7 @@ namespace MyApiUCI.Repository
             return estudianteModel;
         }
         //Falta terminar, unirlos con el usuario
+        /*  */
         public async Task<List<Estudiante>> GetAllAsync(QueryObject query)
         {
 

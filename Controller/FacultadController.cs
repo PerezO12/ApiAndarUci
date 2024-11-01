@@ -3,6 +3,7 @@ using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
 using MyApiUCI.Dtos.Facultad;
 using MyApiUCI.Dtos.Departamento;
+using MyApiUCI.Helpers;
 
 
 namespace MyApiUCI.Controller
@@ -18,9 +19,9 @@ namespace MyApiUCI.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            var facultad = await _facultadRepo.GetAllAsync();
+            var facultad = await _facultadRepo.GetAllAsync(query);
             var facultadDto = facultad.Select( f => f.toFacultadDto());
             
             return Ok(facultadDto);

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Models;
 
@@ -40,11 +41,37 @@ namespace MyApiUCI.Repository
             return await _context.facultad.AnyAsync(f => f.Id == id && f.Activo == true);
         }
 
-        public async Task<List<Facultad>> GetAllAsync()
+        public async Task<List<Facultad>> GetAllAsync(QueryObject query)
         {
-           return await _context.facultad
-                .Where(f => f.Activo == true)
-                .ToListAsync();
+            var facultades = _context.facultad.Where(f => f.Activo == true).AsQueryable();
+
+            if (query.ListaId.Any())
+            {
+                facultades = facultades.Where(f => query.ListaId.Contains(f.Id));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Nombre))
+            {
+                facultades = facultades.Where(f => f.Nombre.ToLower() == query.Nombre.ToLower());
+            }
+
+            // Ordenar
+            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if (query.SortBy.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                {
+                    facultades = query.IsDescending ? facultades.OrderByDescending(f => f.Nombre) : facultades.OrderBy(f => f.Nombre);
+                }
+                else if (query.SortBy.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                {
+                    facultades = query.IsDescending ? facultades.OrderByDescending(f => f.Id) : facultades.OrderBy(f => f.Id);
+                }
+            }
+
+            // Paginación
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+            return await facultades.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<Facultad?> GetByIdAsync(int id)
