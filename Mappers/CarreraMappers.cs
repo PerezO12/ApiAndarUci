@@ -9,6 +9,33 @@ namespace MyApiUCI.Mappers
 {
     public static class CarreraMappers
     {
+
+        public static CarreraDto toCarreraDto(this Carrera carrera)
+        {
+            return new CarreraDto
+            {
+                Id = carrera.Id,
+                Nombre = carrera.Nombre,
+                FacultadId = carrera.FacultadId
+            };
+        }
+        public static Carrera toCarreraFromUpdate(this UpdateCarreraDto carreraDto)
+        {
+            return new Carrera
+            {
+                Nombre = carreraDto.Nombre,
+                FacultadId = carreraDto.FacultadId
+            };
+        }
+        public static Carrera toCarreraFromCreate(this CreateCarreraDto carreraDto)
+        {
+            return new Carrera
+            {
+                Nombre = carreraDto.Nombre,
+                FacultadId = carreraDto.FacultadId
+            };
+        }
+
         public static Carrera toPatchingCarrera(this Carrera carreraModel, PatchCarreraDto carreraDto)
         {
             

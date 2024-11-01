@@ -12,7 +12,7 @@ using MyApiUCI.Repository;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[Controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class DepartamentoController : ControllerBase 
     {
@@ -43,7 +43,7 @@ namespace MyApiUCI.Controller
             var departamentoModel = await _depaRepo.GetByIdAsync(id);
             if(departamentoModel == null)
             {
-                return NotFound("Departament does not exist");
+                return NotFound("Departament no existe");
             }
             return Ok(departamentoModel.toDepartamentDto()); 
         }
@@ -53,6 +53,7 @@ namespace MyApiUCI.Controller
         [HttpPost]
         public async Task<IActionResult> Create( [FromBody]CreateDepartamentoDto departamentoDto)
         {
+            if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
             if( !await _facuRepo.FacultyExists(departamentoDto.FacultadId))
             {
                return NotFound("Faculty does not exist");
@@ -68,16 +69,17 @@ namespace MyApiUCI.Controller
         [Route("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateDepartamentoDto departamentoDto)
         {
+            if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
             if( !await _facuRepo.FacultyExists(departamentoDto.FacultadId))
             {
-               return NotFound("Faculty does not exist");
+               return NotFound("Facultad no existe");
             }
 
             var departamentoModel = await _depaRepo.UpdateAsync(id, departamentoDto.toDepartamentoFromUpdate());
             
             if(departamentoModel == null)
             {
-                return NotFound("Departament does not exist");
+                return NotFound("Departamento no existe");
             }
             
             return Ok(departamentoDto);
@@ -91,7 +93,7 @@ namespace MyApiUCI.Controller
             var departamentoModel = await _depaRepo.DeleteAsync(id);
             if(departamentoModel == null)
             {
-                return NotFound("Departament does not exist");
+                return NotFound("El departamento no existe");
             }
             return Ok(departamentoModel.toDepartamentDto());
         }

@@ -2,6 +2,7 @@
 # Compiled source
 bin/
 obj/
+migrations/
 
 # NuGet
 *.nupkg

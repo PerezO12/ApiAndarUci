@@ -15,7 +15,7 @@ namespace MyApiUCI.Repository
             _context = context;
         }
 
-        public async Task<Facultad> CreatedAsync(Facultad facultadModel)
+        public async Task<Facultad> CreateAsync(Facultad facultadModel)
         {
             await _context.facultad.AddAsync(facultadModel);
             await _context.SaveChangesAsync();

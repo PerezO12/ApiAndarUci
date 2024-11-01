@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Dtos.Carrera;
+using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
 using MyApiUCI.Models;
@@ -40,11 +41,44 @@ namespace MyApiUCI.Repository
             return carreraExist;
         }
 
-        public async Task<List<Carrera>> GetAllAsync()
+        public async Task<bool> ExisteCarrera(int id)
         {
-            return await _context.carrera
+            return await _context.carrera.AnyAsync(c => c.Id == id && c.Activo == true);
+        }
+
+        public async Task<List<Carrera>> GetAllAsync(QueryObject query)
+        {
+            /* return await _context.carrera
                 .Where(c => c.Activo == true)
-                .ToListAsync();
+                .ToListAsync(); */
+            var carreras = _context.carrera.Where(c => c.Activo == true).AsQueryable();
+            
+            //Validacion de busquedas
+            if(!string.IsNullOrWhiteSpace(query.Nombre))
+            {
+                carreras = carreras.Where( c => c.Nombre.ToLower() == query.Nombre.ToLower() );
+            }
+            if(query.FacultadId.HasValue)
+            {
+                carreras = carreras.Where( c => c.FacultadId == query.FacultadId);
+            }
+            //Orndea
+            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if(query.SortBy.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                {
+                    carreras = query.IsDescending ? carreras.OrderByDescending(d => d.Nombre) : carreras.OrderBy(d => d.Nombre);
+                }
+                else if(query.SortBy.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
+                {
+                    carreras = query.IsDescending ? carreras.OrderByDescending(d => d.FacultadId) : carreras.OrderBy( d => d.FacultadId);
+                }
+            }
+            //Paginacion
+            var skipNumber = ( query.PageNumber - 1) * query.PageSize;
+            
+            return await carreras.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+
         }
 
         public async Task<Carrera?> GetByIdAsync(int id)
