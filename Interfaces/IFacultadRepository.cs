@@ -8,13 +8,13 @@ namespace MyApiUCI.Interfaces
 {
     public interface IFacultadRepository
     {
-        Task<List<Facultad>> GetAllAsync();
-        Task<Facultad?> GetByIdAsync(int id);
-        Task<Facultad> CreatedAsync(Facultad facultadModel);
-        Task<Facultad?> UpdateAsync(int id, Facultad facultadModel);
-        //Task<Facultad?> PatchFacultad(int id, Facultad facultad)
-        Task<Facultad?> DeleteAsync(int id);
-        Task<bool> FacultyExists(int id);
+        public Task<List<Facultad>> GetAllAsync();
+        public Task<Facultad?> GetByIdAsync(int id);
+        public Task<Facultad> CreateAsync(Facultad facultadModel);
+        public Task<Facultad?> UpdateAsync(int id, Facultad facultadModel);
+            //Task<Facultad?> PatchFacultad(int id, Facultad facultad)
+        public Task<Facultad?> DeleteAsync(int id);
+        public Task<bool> FacultyExists(int id);
 
     }
 }

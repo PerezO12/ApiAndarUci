@@ -43,7 +43,7 @@ namespace MyApiUCI.Controller
 
             var facultadModel = facultadDto.toFacultadFromCreate();
 
-            await _facultadRepo.CreatedAsync(facultadModel);
+            await _facultadRepo.CreateAsync(facultadModel);
             
             return CreatedAtAction(nameof(GetById), new { id = facultadModel.Id }, facultadModel.toFacultadDto());
         }

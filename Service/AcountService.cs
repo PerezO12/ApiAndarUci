@@ -16,16 +16,28 @@ namespace MyApiUCI.Service
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
+        private readonly IFacultadRepository _facuRepo;
+        private readonly ICarreraRepository _carreraRepo;
+        private readonly IEstudianteRepository _estudianteRepo;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly ApplicationDbContext _context;
-        public AcountService(UserManager<AppUser> userManager,
-                ITokenService tokenService,
-                SignInManager<AppUser> signInManager,
-                ApplicationDbContext context)
+        public AcountService(
+            UserManager<AppUser> userManager,
+            ITokenService tokenService,
+            IFacultadRepository facuRepo,
+            ICarreraRepository carreraRepo,
+            IEstudianteRepository estudianteRepo,
+            SignInManager<AppUser> signInManager,
+            ApplicationDbContext context
+            
+            )
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
+            _facuRepo = facuRepo;
+            _carreraRepo = carreraRepo;
+            _estudianteRepo = estudianteRepo;
             _context = context;
         }
 
@@ -110,15 +122,15 @@ namespace MyApiUCI.Service
             return (IdentityResult.Success, newEncargadoDto);
         }
 
+        //Estudiantes
         public async Task<(IdentityResult, NewEstudianteDto?)> RegisterEstudiante(RegisterEstudianteDto registerDto)
         {
-            //Mejorar esto *****************************************************
             // Verificar si la facultad existe
-            var existeFacultad = await _context.facultad.FindAsync(registerDto.FacultadId);
+            var existeFacultad = await _facuRepo.GetByIdAsync(registerDto.FacultadId);
             if (existeFacultad == null) return (IdentityResult.Failed(new IdentityError { Description = "Facultad no existe" }), null);
 
             // Verificar si la carrera existe
-            var existeCarrera = await _context.carrera.FindAsync(registerDto.CarreraId);
+            var existeCarrera = await _carreraRepo.GetByIdAsync(registerDto.CarreraId);
             if (existeCarrera == null) return (IdentityResult.Failed(new IdentityError { Description = "Facultad no existe" }), null);
             
             // Crear el usuario
@@ -150,15 +162,14 @@ namespace MyApiUCI.Service
                 CarreraId = registerDto.CarreraId,
                 FacultadId = registerDto.FacultadId
             };
-                //Mejorar
+
             try
             {
-                await _context.estudiante.AddAsync(estudiante);
-                await _context.SaveChangesAsync();
+                await _estudianteRepo.CreateAsync(estudiante);
             }
             catch (Exception ex)
             {
-                await _userManager.DeleteAsync(appUser); //pra no dejar usuarios sin estudintes asignados
+                await _userManager.DeleteAsync(appUser);
                 throw new Exception("Error al guardar el estudiante: " + ex.Message);
             }
             
