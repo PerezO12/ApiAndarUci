@@ -17,78 +17,27 @@ namespace MyApiUCI.Controller
     [ApiController]
     public class EstudianteController : ControllerBase
     {
-        private readonly IEstudianteRepository _estudianteRepo;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ICarreraRepository _carreraRepo;
-        private readonly IFacultadRepository _facultadRepo;
+        public readonly IEstudianteService _estudianteService;
 
-        public EstudianteController(
-            IEstudianteRepository estudianteRepository,
-            UserManager<AppUser> user,
-            ICarreraRepository carreraRepo,
-            IFacultadRepository facultadRepo
-            )
+        public EstudianteController(IEstudianteService estudianteService)
         {
-            _estudianteRepo = estudianteRepository;
-            _userManager = user;
-            _carreraRepo  = carreraRepo;
-            _facultadRepo = facultadRepo;
+            _estudianteService = estudianteService;
         }
 
-        //FALTA, y arreglar  y completar **************************************+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         { 
-            var estudiantesModel = await _estudianteRepo.GetAllAsync(query);
+            if (query.PageNumber <= 0)
+            {
+                return BadRequest("El número de página debe ser mayor que cero.");
+            }
 
-            var estudiantesIds = estudiantesModel.Select(e => e.UsuarioId).ToList();
-            var carreraIds = estudiantesModel.Select(e => e.CarreraId).Distinct().ToList();
-            var facultadIds = estudiantesModel.Select(e => e.FacultadId).Distinct().ToList();
-
-
-            var usuariosEstudiantes = await _userManager.Users.Where(u => estudiantesIds.Contains(u.Id))
-                                            .ToListAsync();
-            
-            var carreras = await _carreraRepo.GetAllAsync(new QueryObject{ListaId = carreraIds}); // Suponiendo que tu repositorio acepta lista de IDs
-            var facultades = await _facultadRepo.GetAllAsync(new QueryObject{ListaId = facultadIds});
-
-
-            var estudiantesDatosCombinados = estudiantesModel
-                .Join(
-                    usuariosEstudiantes,
-                    estudiante => estudiante.UsuarioId,
-                    usuario => usuario.Id,
-                    (estudiante, usuario) => new
-                    {
-                        Estudiante = estudiante,
-                        Usuario = usuario
-                    })
-                .Join(
-                    carreras,
-                    combinado => combinado.Estudiante.CarreraId,
-                    carrera => carrera.Id,
-                    (combinado, carrera) => new 
-                    {
-                        combinado.Estudiante,
-                        combinado.Usuario,
-                        Carrera = carrera
-                    })
-                .Join(
-                    facultades,
-                    combinado => combinado.Estudiante.FacultadId,
-                    facultad => facultad.Id,
-                    (combinado, facultad) => new EstudianteDto
-                    {
-                        NombreCompleto = combinado.Usuario.NombreCompleto,
-                        CarnetIdentidad = combinado.Usuario.CarnetIdentidad,
-                        UserName = combinado.Usuario.UserName,
-                        Email = combinado.Usuario.Email,
-                        NumeroTelefono = combinado.Usuario.PhoneNumber,
-                        Carrera = combinado.Carrera.Nombre,
-                        Facultad = facultad.Nombre 
-                    })
-                .ToList();
-            return Ok(estudiantesDatosCombinados);
+            if (query.PageSize <= 0)
+            {
+                return BadRequest("El tamaño de la página debe ser mayor que cero.");
+            }
+           var estudiantes = await _estudianteService.GetEstudiantesWithDetailsAsync(query);
+           return Ok(estudiantes);
         }
     }
 }

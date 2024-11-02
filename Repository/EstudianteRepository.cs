@@ -23,14 +23,14 @@ namespace MyApiUCI.Repository
 
         public async Task<Estudiante> CreateAsync(Estudiante estudianteModel)
         {
-            await _context.estudiante.AddAsync(estudianteModel);
+            await _context.Estudiante.AddAsync(estudianteModel);
             await _context.SaveChangesAsync();
             return estudianteModel;
         }
 
         public async Task<Estudiante?> DeleteAsync(int id)
         {
-            var estudianteModel = await _context.estudiante.FindAsync(id);
+            var estudianteModel = await _context.Estudiante.FindAsync(id);
             if(estudianteModel == null) return null;
 
             estudianteModel.Activo = false;
@@ -43,8 +43,13 @@ namespace MyApiUCI.Repository
         public async Task<List<Estudiante>> GetAllAsync(QueryObject query)
         {
 
-            var estudiantes = _context.estudiante.Where(e => e.Activo == true).AsQueryable();
-        
+            var estudiantes = _context.Estudiante.Where(e => e.Activo == true).AsQueryable();
+
+            if (query.ListaId.Any())
+            {
+                estudiantes = estudiantes.Where(e => query.ListaId.Contains(e.Id));
+            }
+
             if(query.FacultadId.HasValue)
             {
                 estudiantes = estudiantes.Where(e => e.FacultadId == query.FacultadId);
@@ -69,15 +74,16 @@ namespace MyApiUCI.Repository
             
             return await estudiantes.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
-
+        
+        //GetByID
         public async Task<Estudiante?> GetByIdAsync(int Id)
         {
-            return await _context.estudiante.FirstOrDefaultAsync(c => c.Id == Id &&c.Activo == true);
+            return await _context.Estudiante.FirstOrDefaultAsync(c => c.Id == Id &&c.Activo == true);
         }
 
         public async Task<Estudiante?> UpdateAsync(int id, Estudiante estudianteModel)
         {
-            var estudianteExistente = await _context.estudiante.FindAsync(id);
+            var estudianteExistente = await _context.Estudiante.FindAsync(id);
 
             if(estudianteExistente == null) return null;
 

@@ -49,19 +49,19 @@ namespace MyApiUCI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "8f4e6e6c-c497-4707-982f-5edcf373a6e2",
+                            Id = "2d49b3fe-7fc7-4f25-9d81-8fd48fd755f4",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "d2686132-5d3c-4b98-8149-1bfdf971c27d",
+                            Id = "be09c24b-3fdd-408a-8b58-3b24fcf0951f",
                             Name = "Estudiante",
                             NormalizedName = "ESTUDIANTE"
                         },
                         new
                         {
-                            Id = "dd3a3be0-9f62-4706-892b-d8ec1da65222",
+                            Id = "a5ef955d-a78e-4e67-b83c-7622dc05f55b",
                             Name = "Encargado",
                             NormalizedName = "ENCARGADO"
                         });
@@ -182,6 +182,7 @@ namespace MyApiUCI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("CarnetIdentidad")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -202,6 +203,7 @@ namespace MyApiUCI.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NombreCompleto")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("NormalizedEmail")
@@ -274,7 +276,7 @@ namespace MyApiUCI.Migrations
 
                     b.HasIndex("FacultadId");
 
-                    b.ToTable("carrera");
+                    b.ToTable("Carrera");
                 });
 
             modelBuilder.Entity("MyApiUCI.Models.Departamento", b =>
@@ -308,7 +310,7 @@ namespace MyApiUCI.Migrations
 
                     b.HasIndex("FacultadId");
 
-                    b.ToTable("departamento");
+                    b.ToTable("Departamento");
                 });
 
             modelBuilder.Entity("MyApiUCI.Models.Encargado", b =>
@@ -319,8 +321,9 @@ namespace MyApiUCI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool?>("Activo")
-                        .HasColumnType("boolean");
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
 
                     b.Property<int?>("DepartamentoId")
                         .HasColumnType("integer");
@@ -368,11 +371,13 @@ namespace MyApiUCI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarreraId");
+
                     b.HasIndex("FacultadId");
 
                     b.HasIndex("UsuarioId");
 
-                    b.ToTable("estudiante");
+                    b.ToTable("Estudiante");
                 });
 
             modelBuilder.Entity("MyApiUCI.Models.Facultad", b =>
@@ -400,7 +405,7 @@ namespace MyApiUCI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("facultad");
+                    b.ToTable("Facultad");
                 });
 
             modelBuilder.Entity("MyApiUCI.Models.Formulario", b =>
@@ -533,6 +538,12 @@ namespace MyApiUCI.Migrations
 
             modelBuilder.Entity("MyApiUCI.Models.Estudiante", b =>
                 {
+                    b.HasOne("MyApiUCI.Models.Carrera", "Carrera")
+                        .WithMany()
+                        .HasForeignKey("CarreraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MyApiUCI.Models.Facultad", "Facultad")
                         .WithMany("Estudiantes")
                         .HasForeignKey("FacultadId")
@@ -546,6 +557,8 @@ namespace MyApiUCI.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
+
+                    b.Navigation("Carrera");
 
                     b.Navigation("Facultad");
                 });

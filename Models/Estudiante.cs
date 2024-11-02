@@ -21,6 +21,7 @@ public partial class Estudiante
     public DateTime? FechaBaja { get; set;}
 
     public virtual Facultad? Facultad { get; set; }
+    public virtual Carrera? Carrera { get; set; }
 
     public virtual ICollection<Formulario> Formularios { get; set; } = new List<Formulario>();
     

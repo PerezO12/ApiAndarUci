@@ -21,14 +21,14 @@ namespace MyApiUCI.Repository
 
         public async Task<Carrera> CreateAsync(Carrera carreraModel)
         {
-            await _context.carrera.AddAsync(carreraModel);
+            await _context.Carrera.AddAsync(carreraModel);
             await _context.SaveChangesAsync();
             return carreraModel;
         }
 
         public async Task<Carrera?> DeleteAsync(int id)
         {
-            var carreraExist = await _context.carrera.FirstOrDefaultAsync(c => c.Id == id && c.Activo == true);
+            var carreraExist = await _context.Carrera.FirstOrDefaultAsync(c => c.Id == id && c.Activo == true);
             
             if(carreraExist == null)
             {
@@ -43,7 +43,7 @@ namespace MyApiUCI.Repository
 
         public async Task<bool> ExisteCarrera(int id)
         {
-            return await _context.carrera.AnyAsync(c => c.Id == id && c.Activo == true);
+            return await _context.Carrera.AnyAsync(c => c.Id == id && c.Activo == true);
         }
 
         public async Task<List<Carrera>> GetAllAsync(QueryObject query)
@@ -51,7 +51,7 @@ namespace MyApiUCI.Repository
             /* return await _context.carrera
                 .Where(c => c.Activo == true)
                 .ToListAsync(); */
-            var carreras = _context.carrera.Where(c => c.Activo == true).AsQueryable();
+            var carreras = _context.Carrera.Where(c => c.Activo == true).AsQueryable();
             
             //Validacion de busquedas
             if(query.ListaId.Any())
@@ -87,13 +87,13 @@ namespace MyApiUCI.Repository
 
         public async Task<Carrera?> GetByIdAsync(int id)
         {
-            return await _context.carrera
+            return await _context.Carrera
                 .FirstOrDefaultAsync(c => c.Id == id && c.Activo == true);
         }
 
         public async Task<Carrera?> PatchAsync(int id, PatchCarreraDto carreraDto)
         {
-            var carreraModel = await _context.carrera
+            var carreraModel = await _context.Carrera
                                 .FirstOrDefaultAsync( c => c.Id == id && c.Activo == true);
             if(carreraModel == null)
             {
@@ -108,7 +108,7 @@ namespace MyApiUCI.Repository
 
         public async Task<Carrera?> UpdateAsync(int id, Carrera carreraModel)
         {
-            var carreraExist = await _context.carrera
+            var carreraExist = await _context.Carrera
                                 .FirstOrDefaultAsync( c => c.Id == id && c.Activo == true);
             if(carreraExist == null)
             {

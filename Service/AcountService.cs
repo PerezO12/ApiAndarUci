@@ -70,7 +70,7 @@ namespace MyApiUCI.Service
             }
 
 
-            var existeDepartamento = await _context.departamento.FindAsync(registerDto.DepartamentoId);
+            var existeDepartamento = await _context.Departamento.FindAsync(registerDto.DepartamentoId);
             if(existeDepartamento == null) return (IdentityResult.Failed(new IdentityError { Description = "Departamento no existe"}), null);
 
             // Crear el usuario
@@ -101,7 +101,7 @@ namespace MyApiUCI.Service
                 FirmaDigital = firmaDigitalHash
             };
             try{
-                await _context.encargado.AddAsync(encargado);
+                await _context.Encargado.AddAsync(encargado);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)

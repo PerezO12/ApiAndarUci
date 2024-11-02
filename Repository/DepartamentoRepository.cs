@@ -21,14 +21,14 @@ namespace MyApiUCI.Repository
         }
         public async Task<Departamento> CreateAsync(Departamento departamentoModel)
         {
-            await _context.departamento.AddAsync(departamentoModel);
+            await _context.Departamento.AddAsync(departamentoModel);
             await _context.SaveChangesAsync();
             return departamentoModel;
         }
 
         public async Task<Departamento?> DeleteAsync(int id)
         {
-            var departamentoModel = await _context.departamento.FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
+            var departamentoModel = await _context.Departamento.FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
             
             if(departamentoModel == null)
             {
@@ -45,7 +45,7 @@ namespace MyApiUCI.Repository
                 .Where(d => d.Activo == true)
                 .ToListAsync(); //solo mostrara los activos */
 
-            var departamentos = _context.departamento.Where(d => d.Activo == true).AsQueryable();
+            var departamentos = _context.Departamento.Where(d => d.Activo == true).AsQueryable();
             //validaciones de busquesdas
             if(!string.IsNullOrWhiteSpace(query.Nombre))
             {
@@ -76,13 +76,13 @@ namespace MyApiUCI.Repository
 
         public async Task<Departamento?> GetByIdAsync(int id)
         {
-            return await _context.departamento
+            return await _context.Departamento
                 .FirstOrDefaultAsync( d => d.Id == id && d.Activo == true); //lo mismo
         }
 
         public async Task<Departamento?> PatchAsync(int id, PatchDepartamentoDto departamentoDto)
         {
-            var departamentModel = await _context.departamento
+            var departamentModel = await _context.Departamento
                                     .FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
             if(departamentModel == null)
             {
@@ -95,7 +95,7 @@ namespace MyApiUCI.Repository
 
         public async Task<Departamento?> UpdateAsync(int id, Departamento departamentoModel)
         {
-           var existingDepartament = await _context.departamento.FindAsync(id);
+           var existingDepartament = await _context.Departamento.FindAsync(id);
            if(existingDepartament == null)
            {
             return null;

@@ -12,11 +12,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
     }   
 
-    public DbSet<Facultad> facultad { get; set; } 
-    public DbSet<Departamento> departamento { get; set; }   
-    public DbSet<Carrera> carrera { get; set; } 
-    public DbSet<Estudiante> estudiante {get; set; }
-    public DbSet<Encargado> encargado {get; set; }
+    public DbSet<Facultad> Facultad { get; set; } 
+    public DbSet<Carrera> Carrera { get; set; } 
+    public DbSet<Estudiante> Estudiante {get; set; }
+    public DbSet<Encargado> Encargado {get; set; }
+    public DbSet<Departamento> Departamento { get; set; }   
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

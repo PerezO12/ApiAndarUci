@@ -18,14 +18,14 @@ namespace MyApiUCI.Repository
 
         public async Task<Facultad> CreateAsync(Facultad facultadModel)
         {
-            await _context.facultad.AddAsync(facultadModel);
+            await _context.Facultad.AddAsync(facultadModel);
             await _context.SaveChangesAsync();
             return facultadModel;
         }
 
         public async Task<Facultad?> DeleteAsync(int id)
         {
-            var facultadModel = await _context.facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
+            var facultadModel = await _context.Facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
             
             if(facultadModel == null)
             {
@@ -38,12 +38,12 @@ namespace MyApiUCI.Repository
 
         public async Task<bool> FacultyExists(int id)
         {
-            return await _context.facultad.AnyAsync(f => f.Id == id && f.Activo == true);
+            return await _context.Facultad.AnyAsync(f => f.Id == id && f.Activo == true);
         }
 
         public async Task<List<Facultad>> GetAllAsync(QueryObject query)
         {
-            var facultades = _context.facultad.Where(f => f.Activo == true).AsQueryable();
+            var facultades = _context.Facultad.Where(f => f.Activo == true).AsQueryable();
 
             if (query.ListaId.Any())
             {
@@ -76,13 +76,13 @@ namespace MyApiUCI.Repository
 
         public async Task<Facultad?> GetByIdAsync(int id)
         {
-            return await _context.facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
+            return await _context.Facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
             //return await _context.facultad.FindAsync(id);
         }
 
         public async Task<Facultad?> UpdateAsync(int id, Facultad facultadModel)
         {
-            var existingFacultad = await _context.facultad.FindAsync(id);
+            var existingFacultad = await _context.Facultad.FindAsync(id);
 
             if(existingFacultad == null)
             {
