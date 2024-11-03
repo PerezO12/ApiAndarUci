@@ -67,21 +67,21 @@ namespace MyApiUCI.Repository
                 carreras = carreras.Where( c => c.FacultadId == query.FacultadId);
             }
             //Orndea
-            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
             {
-                if(query.SortBy.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    carreras = query.IsDescending ? carreras.OrderByDescending(d => d.Nombre) : carreras.OrderBy(d => d.Nombre);
+                    carreras = query.Descender ? carreras.OrderByDescending(d => d.Nombre) : carreras.OrderBy(d => d.Nombre);
                 }
-                else if(query.SortBy.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
+                else if(query.OrdernarPor.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
                 {
-                    carreras = query.IsDescending ? carreras.OrderByDescending(d => d.FacultadId) : carreras.OrderBy( d => d.FacultadId);
+                    carreras = query.Descender ? carreras.OrderByDescending(d => d.FacultadId) : carreras.OrderBy( d => d.FacultadId);
                 }
             }
             //Paginacion
-            var skipNumber = ( query.PageNumber - 1) * query.PageSize;
+            var skipNumber = ( query.NumeroPagina - 1) * query.TamañoPagina;
             
-            return await carreras.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            return await carreras.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
 
         }
 

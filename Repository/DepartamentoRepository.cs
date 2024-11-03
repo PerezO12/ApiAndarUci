@@ -57,21 +57,21 @@ namespace MyApiUCI.Repository
             }
 
             //Ordenamiento
-            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
             {
-                if(query.SortBy.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    departamentos = query.IsDescending ? departamentos.OrderByDescending(d => d.Nombre) : departamentos.OrderBy(d => d.Nombre);
+                    departamentos = query.Descender ? departamentos.OrderByDescending(d => d.Nombre) : departamentos.OrderBy(d => d.Nombre);
                 }
-                else if(query.SortBy.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
+                else if(query.OrdernarPor.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
                 {
-                    departamentos = query.IsDescending ? departamentos.OrderByDescending(d => d.FacultadId) : departamentos.OrderBy( d => d.FacultadId);
+                    departamentos = query.Descender ? departamentos.OrderByDescending(d => d.FacultadId) : departamentos.OrderBy( d => d.FacultadId);
                 }
             }
             //Paginacion
-            var skipNumber = ( query.PageNumber - 1) * query.PageSize;
+            var skipNumber = ( query.NumeroPagina - 1) * query.TamañoPagina;
             
-            return await departamentos.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            return await departamentos.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
 
         public async Task<Departamento?> GetByIdAsync(int id)

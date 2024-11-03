@@ -44,7 +44,7 @@ namespace MyApiUCI.Repository
         {
 
             var estudiantes = _context.Estudiante.Where(e => e.Activo == true).AsQueryable();
-
+            
             if (query.ListaId.Any())
             {
                 estudiantes = estudiantes.Where(e => query.ListaId.Contains(e.Id));
@@ -59,20 +59,20 @@ namespace MyApiUCI.Repository
                 estudiantes = estudiantes.Where(e => e.CarreraId == query.CarreraId);
             }
             //Ordenamiento
-            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
             {
-                if(query.SortBy.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    estudiantes = query.IsDescending ? estudiantes.OrderByDescending(d => d.CarreraId) : estudiantes.OrderBy(d => d.CarreraId);
+                    estudiantes = query.Descender ? estudiantes.OrderByDescending(d => d.CarreraId) : estudiantes.OrderBy(d => d.CarreraId);
                 }
-                else if(query.SortBy.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
+                else if(query.OrdernarPor.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
                 {
-                    estudiantes = query.IsDescending ? estudiantes.OrderByDescending(d => d.FacultadId) : estudiantes.OrderBy( d => d.FacultadId);
+                    estudiantes = query.Descender ? estudiantes.OrderByDescending(d => d.FacultadId) : estudiantes.OrderBy( d => d.FacultadId);
                 }
             }
-            var skipNumber = ( query.PageNumber - 1 ) * query.PageSize;
+            var skipNumber = ( query.NumeroPagina - 1 ) * query.TamañoPagina;
             
-            return await estudiantes.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            return await estudiantes.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
         
         //GetByID

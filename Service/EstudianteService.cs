@@ -100,6 +100,16 @@ namespace MyApiUCI.Service
                     })
                 .ToList();
             
+            if(query.Nombre != null)
+            {
+                estudiantesDatosCombinados = estudiantesDatosCombinados
+                    .Where( e => e.NombreCompleto
+                        .ToLower()
+                        .Contains(query.Nombre.ToLower()))
+                    .ToList();
+            }
+            
+            
             return estudiantesDatosCombinados;
         }   
     }

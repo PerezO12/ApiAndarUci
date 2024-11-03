@@ -56,22 +56,22 @@ namespace MyApiUCI.Repository
             }
 
             // Ordenar
-            if (!string.IsNullOrWhiteSpace(query.SortBy))
+            if (!string.IsNullOrWhiteSpace(query.OrdernarPor))
             {
-                if (query.SortBy.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                if (query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    facultades = query.IsDescending ? facultades.OrderByDescending(f => f.Nombre) : facultades.OrderBy(f => f.Nombre);
+                    facultades = query.Descender ? facultades.OrderByDescending(f => f.Nombre) : facultades.OrderBy(f => f.Nombre);
                 }
-                else if (query.SortBy.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                else if (query.OrdernarPor.Equals("Id", StringComparison.OrdinalIgnoreCase))
                 {
-                    facultades = query.IsDescending ? facultades.OrderByDescending(f => f.Id) : facultades.OrderBy(f => f.Id);
+                    facultades = query.Descender ? facultades.OrderByDescending(f => f.Id) : facultades.OrderBy(f => f.Id);
                 }
             }
 
             // Paginación
-            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+            var skipNumber = (query.NumeroPagina - 1) * query.TamañoPagina;
 
-            return await facultades.Skip(skipNumber).Take(query.PageSize).ToListAsync();
+            return await facultades.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
 
         public async Task<Facultad?> GetByIdAsync(int id)

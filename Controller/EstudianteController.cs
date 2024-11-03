@@ -27,12 +27,12 @@ namespace MyApiUCI.Controller
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         { 
-            if (query.PageNumber <= 0)
+            if (query.NumeroPagina <= 0)
             {
                 return BadRequest("El número de página debe ser mayor que cero.");
             }
 
-            if (query.PageSize <= 0)
+            if (query.TamañoPagina <= 0)
             {
                 return BadRequest("El tamaño de la página debe ser mayor que cero.");
             }

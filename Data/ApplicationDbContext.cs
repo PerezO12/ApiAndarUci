@@ -14,9 +14,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
 
     public DbSet<Facultad> Facultad { get; set; } 
     public DbSet<Carrera> Carrera { get; set; } 
-    public DbSet<Estudiante> Estudiante {get; set; }
-    public DbSet<Encargado> Encargado {get; set; }
+    public DbSet<Estudiante> Estudiante { get; set; }
+    public DbSet<Encargado> Encargado { get; set; }
     public DbSet<Departamento> Departamento { get; set; }   
+    public DbSet<Formulario> Formulario { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
