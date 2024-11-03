@@ -43,7 +43,7 @@ namespace MyApiUCI.Service
 
         public async Task<NewUserDto?> Login(LoginDto loginDto)
         {
-            var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName.ToLower() == loginDto.UserName.ToLower());
+            var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.UserName.ToLower());
             if(user == null) return null;
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);

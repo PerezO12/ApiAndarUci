@@ -22,7 +22,7 @@ namespace MyApiUCI.Service
         {
             _config = config;
             _userManager = userManager;
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
+            _key =  new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
         }
 
         public async Task<string> CreateTokenAsync(AppUser user)

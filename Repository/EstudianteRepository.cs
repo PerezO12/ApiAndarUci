@@ -61,7 +61,7 @@ namespace MyApiUCI.Repository
             //Ordenamiento
             if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
             {
-                if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                if(query.OrdernarPor.Equals("Carrera", StringComparison.OrdinalIgnoreCase))
                 {
                     estudiantes = query.Descender ? estudiantes.OrderByDescending(d => d.CarreraId) : estudiantes.OrderBy(d => d.CarreraId);
                 }

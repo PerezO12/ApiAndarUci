@@ -90,6 +90,7 @@ namespace MyApiUCI.Service
                     facultad => facultad.Id,
                     (combinado, facultad) => new EstudianteDto
                     {
+                        Id = combinado.Estudiante.Id,
                         NombreCompleto = combinado.Usuario.NombreCompleto,
                         CarnetIdentidad = combinado.Usuario.CarnetIdentidad,
                         UserName = combinado.Usuario.UserName,
@@ -103,9 +104,7 @@ namespace MyApiUCI.Service
             if(query.Nombre != null)
             {
                 estudiantesDatosCombinados = estudiantesDatosCombinados
-                    .Where( e => e.NombreCompleto
-                        .ToLower()
-                        .Contains(query.Nombre.ToLower()))
+                    .Where( e => e.NombreCompleto != null && e.NombreCompleto.Contains(query.Nombre, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
             

@@ -17,6 +17,7 @@ public partial class Estudiante
 
     public int FacultadId { get; set; }
 
+    [Column("activo")]
     public bool Activo { get; set; } = true;
     public DateTime? FechaBaja { get; set;}
 

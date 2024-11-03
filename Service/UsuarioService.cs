@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Repository
+namespace MyApiUCI.Service
 {
-    public class UserRepository
+    public class UsuarioService
     {
         
     }

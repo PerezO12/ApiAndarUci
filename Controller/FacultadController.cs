@@ -8,7 +8,7 @@ using MyApiUCI.Helpers;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[Controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class FacultadController : ControllerBase
     {

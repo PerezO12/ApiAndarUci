@@ -12,6 +12,6 @@ namespace MyApiUCI.Interfaces
     {
         public Task<(IdentityResult, NewEstudianteDto?)> RegisterEstudiante(RegisterEstudianteDto registerDto);
         public Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargado(RegisterEncargadoDto registerDto); 
-        public Task<NewUserDto> Login(LoginDto loginDto);
+        public Task<NewUserDto?> Login(LoginDto loginDto);
     }
 }

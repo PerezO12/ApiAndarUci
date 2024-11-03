@@ -104,6 +104,7 @@ builder.Services.AddScoped<IFacultadRepository, FacultadRepository>();
 builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 builder.Services.AddScoped<ICarreraRepository, CarreraRepository>();
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 //Servicios
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
