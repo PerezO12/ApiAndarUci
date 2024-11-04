@@ -99,6 +99,17 @@ builder.Services.AddAuthentication(options => {
     };
 });
 
+//Politicas de seguridad
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOEncargadoPolicy", policy => policy.RequireRole("Admin", "Encargado"));
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("EncargadoPolicy", policy => policy.RequireRole("Encargado"));
+    options.AddPolicy("EstudiantePolicy", policy => policy.RequireRole("Estudiante"));
+});
+
+
+
 //Repositorios
 builder.Services.AddScoped<IFacultadRepository, FacultadRepository>();
 builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();

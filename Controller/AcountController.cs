@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Cuentas;
 using MyApiUCI.Interfaces;
@@ -11,17 +12,13 @@ namespace MyApiUCI.Controller
     public class AcountController : ControllerBase
     {
         private readonly IAcountService _acountService;
-        private readonly ApplicationDbContext _context;
-        private readonly ITokenService _tokenService;
 
         public AcountController(IAcountService acountService, ApplicationDbContext context, ITokenService tokenService)
         {
             _acountService = acountService;
-            _tokenService = tokenService;
-            _context = context;
         }
 
-
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("register/estudiante")]
         public async Task<IActionResult> RegisterEstudiante([FromBody] RegisterEstudianteDto registerDto)
         {
@@ -47,7 +44,7 @@ namespace MyApiUCI.Controller
             }
         }
 
-
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("register/encargado")]
         public async Task<IActionResult> RegisterEncargado([FromBody] RegisterEncargadoDto registerDto)
         {
@@ -76,7 +73,7 @@ namespace MyApiUCI.Controller
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            if(!ModelState.IsValid) return BadRequest("Password/Usuario incorrecto");
+            if(!ModelState.IsValid) return BadRequest("Password/Usuario incorrecto");//NO HACe falta
 
             var user = await  _acountService.Login(loginDto);
             

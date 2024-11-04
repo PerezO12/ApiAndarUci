@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Carrera;
 using MyApiUCI.Helpers;
@@ -42,6 +43,7 @@ namespace MyApiUCI.Controller
             return Ok(carrera.toCarreraDto());
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCarreraDto carreraDto)
         {
@@ -54,7 +56,7 @@ namespace MyApiUCI.Controller
             return CreatedAtAction(nameof(GetByID), new{Id = carreraModel.Id}, carreraModel.toCarreraDto());
 
         }
-
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id ,[FromBody] UpdateCarreraDto carreraDto)
         {
@@ -69,7 +71,7 @@ namespace MyApiUCI.Controller
             return Ok(carreraModel.toCarreraDto());
             
         }
-        
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -78,6 +80,7 @@ namespace MyApiUCI.Controller
             
             return Ok(carreraModel.toCarreraDto());
         }
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdatePatch([FromRoute] int id, [FromBody] PatchCarreraDto carreraDto)
         {

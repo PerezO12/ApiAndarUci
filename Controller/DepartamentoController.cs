@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Departamento;
 using MyApiUCI.Helpers;
@@ -50,6 +51,7 @@ namespace MyApiUCI.Controller
 
 
         //Post
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create( [FromBody]CreateDepartamentoDto departamentoDto)
         {

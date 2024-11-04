@@ -4,6 +4,7 @@ using MyApiUCI.Mappers;
 using MyApiUCI.Dtos.Facultad;
 using MyApiUCI.Dtos.Departamento;
 using MyApiUCI.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace MyApiUCI.Controller
@@ -38,6 +39,8 @@ namespace MyApiUCI.Controller
             }
             return Ok(facultadModel.toFacultadDto()); //convertir a dto
         }
+
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Created(FacultadCreateDto facultadDto)
         {
@@ -49,6 +52,7 @@ namespace MyApiUCI.Controller
             return CreatedAtAction(nameof(GetById), new { id = facultadModel.Id }, facultadModel.toFacultadDto());
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id,[FromBody]FacultadUpdateDto facultadDto)
@@ -63,7 +67,8 @@ namespace MyApiUCI.Controller
 
             return Ok(facultadModel.toFacultadDto());
         }
-
+        
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> Delete([FromRoute]int id) {

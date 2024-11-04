@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using MyApiUCI.Helpers;
@@ -21,6 +22,7 @@ namespace MyApiUCI.Controller
             _usuarioRepo = usuarioRepo;
         }
         
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectUsuario query)
         {
