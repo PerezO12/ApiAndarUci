@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace MyApiUCI.Service
             _facultadRepo = facultadRepo;
         }
 
-        public async Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObject query)
+        public async Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query)
         {
             //consulta basic
             var estudiantesModel = await _estudianteRepo.GetAllAsync(query);
@@ -48,21 +49,6 @@ namespace MyApiUCI.Service
             
             var carreras = await _carreraRepo.GetAllAsync(new QueryObject { ListaId = carreraIds});
             var facultades = await _facultadRepo.GetAllAsync(new QueryObject { ListaId = carreraIds});
-    //*******************************************
-            Console.WriteLine("IDs de estudiantes: " + string.Join(", ", estudiantesIds));
-            Console.WriteLine("IDs de facultades: " + string.Join(", ", facultadesIds));
-            Console.WriteLine("IDs de carreras: " + string.Join(", ", carreraIds));
-
-            foreach (var usuario in usuariosEstudiantes)
-                Console.WriteLine($"Usuario obtenido: {usuario.Id} - {usuario.NombreCompleto}");
-
-            foreach (var carrera in carreras)
-                Console.WriteLine($"Carrera obtenida: {carrera.Id} - {carrera.Nombre}");
-
-            foreach (var facultad in facultades)
-                Console.WriteLine($"Facultad obtenida: {facultad.Id} - {facultad.Nombre}");
-
-    //*******************************************
             //combinacion datos
             var estudiantesDatosCombinados  = estudiantesModel
                 .Join(
@@ -91,6 +77,7 @@ namespace MyApiUCI.Service
                     (combinado, facultad) => new EstudianteDto
                     {
                         Id = combinado.Estudiante.Id,
+                        UsuarioId = combinado.Usuario.Id,
                         NombreCompleto = combinado.Usuario.NombreCompleto,
                         CarnetIdentidad = combinado.Usuario.CarnetIdentidad,
                         UserName = combinado.Usuario.UserName,

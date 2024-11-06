@@ -18,7 +18,7 @@ namespace MyApiUCI.Controller
             _acountService = acountService;
         }
 
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpPost("register/estudiante")]
         public async Task<IActionResult> RegisterEstudiante([FromBody] RegisterEstudianteDto registerDto)
         {
@@ -44,7 +44,7 @@ namespace MyApiUCI.Controller
             }
         }
 
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpPost("register/encargado")]
         public async Task<IActionResult> RegisterEncargado([FromBody] RegisterEncargadoDto registerDto)
         {

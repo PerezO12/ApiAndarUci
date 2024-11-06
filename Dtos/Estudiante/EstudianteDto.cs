@@ -5,15 +5,17 @@ using System.Threading.Tasks;
 
 namespace MyApiUCI.Dtos.Estudiante
 {
-    public class EstudianteDto
-    {
-        public int Id { get; set; }
-        public string? NombreCompleto { get; set; }
-        public string? CarnetIdentidad { get; set; }
-        public string? UserName { get; set; }
-        public string? Email { get; set; }
-        public string? NumeroTelefono { get; set;}
-        public string? Carrera { get; set; }
-        public string? Facultad { get; set; }
-    }
+public class EstudianteDto
+{
+    public int Id { get; set; }
+
+    public string NombreCompleto { get; set; } = string.Empty; 
+    public string CarnetIdentidad { get; set; } = string.Empty; 
+    public string UserName { get; set; } = string.Empty; 
+    public string UsuarioId { get; set; } = string.Empty; 
+    public string Email { get; set; } = string.Empty; 
+    public string NumeroTelefono { get; set; } = string.Empty;
+    public string Carrera { get; set; } = string.Empty; 
+    public string Facultad { get; set; } = string.Empty;
+}
 }

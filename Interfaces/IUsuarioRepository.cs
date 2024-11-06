@@ -10,10 +10,10 @@ namespace MyApiUCI.Interfaces
     public interface IUsuarioRepository
     {
         public Task<List<AppUser>> GetAllAsync(QueryObjectUsuario query);
-        public Task<AppUser?> GetByIdAsync(int id);
+        public Task<AppUser?> GetByIdAsync(string id);
         public Task<AppUser> CreateAsync(AppUser appUser);
-        public Task<AppUser?> UpdateAsync(int id, AppUser appUser);
-        public Task<AppUser?> DeleteAsync(int id);
+        public Task<AppUser?> UpdateAsync(string id, AppUser appUser);
+        public Task<AppUser?> DeleteAsync(string id);
         //public Task<AppUser?> PatchAsync(int id, )
     }
 }

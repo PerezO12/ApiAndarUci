@@ -12,7 +12,7 @@ public partial class Encargado
 
    [ForeignKey("AppUser")]
     public string UsuarioId { get; set; } = null!;
-    public int? DepartamentoId { get; set; }
+    public int DepartamentoId { get; set; }
 
     public byte[] FirmaDigital { get; set; } = null!;
 

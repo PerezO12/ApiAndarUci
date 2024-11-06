@@ -23,7 +23,7 @@ namespace MyApiUCI.Repository
             throw new NotImplementedException();
         }
 
-        public Task<AppUser?> DeleteAsync(int id)
+        public Task<AppUser?> DeleteAsync(string id)
         {
             throw new NotImplementedException();
         }
@@ -88,12 +88,13 @@ namespace MyApiUCI.Repository
             return await usuarios.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
 
-        public Task<AppUser?> GetByIdAsync(int id)
+        public async Task<AppUser?> GetByIdAsync(string id)
         {
-            throw new NotImplementedException();
+           var user = await _userManager.FindByIdAsync(id);
+           return user;
         }
 
-        public Task<AppUser?> UpdateAsync(int id, AppUser appUser)
+        public Task<AppUser?> UpdateAsync(string id, AppUser appUser)
         {
             throw new NotImplementedException();
         }

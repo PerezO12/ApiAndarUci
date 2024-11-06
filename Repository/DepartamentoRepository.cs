@@ -47,6 +47,10 @@ namespace MyApiUCI.Repository
 
             var departamentos = _context.Departamento.Where(d => d.Activo == true).AsQueryable();
             //validaciones de busquesdas
+            if(query.ListaId.Any())
+            {
+                departamentos = departamentos.Where(d => query.ListaId.Contains(d.Id));                
+            }
             if(!string.IsNullOrWhiteSpace(query.Nombre))
             {
                 departamentos = departamentos.Where(d => d.Nombre.Contains(query.Nombre, StringComparison.OrdinalIgnoreCase));

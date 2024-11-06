@@ -3,31 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Dtos.Estudiante;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
-using MyApiUCI.Models;
-using MyApiUCI.Repository;
 
 namespace MyApiUCI.Controller
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class EstudianteController : ControllerBase
+    public class EncargadoController : ControllerBase
     {
-        public readonly IEstudianteService _estudianteService;
-
-        public EstudianteController(IEstudianteService estudianteService)
+        private readonly IEncargadoService _encargadoService;
+        public EncargadoController(IEncargadoService encargadoService)
         {
-            _estudianteService = estudianteService;
+            _encargadoService = encargadoService;
         }
 
         //[Authorize(Policy = "AdminPolicy")]
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] QueryObjectEstudiante query)
+        public async Task<IActionResult> GetAll([FromQuery] QueryObjectEncargado query)
         { 
             if (query.NumeroPagina <= 0)
             {
@@ -38,8 +32,9 @@ namespace MyApiUCI.Controller
             {
                 return BadRequest("El tamaño de la página debe ser mayor que cero.");
             }
-           var estudiantes = await _estudianteService.GetEstudiantesWithDetailsAsync(query);
-           return Ok(estudiantes);
+           var encargados = await _encargadoService.GetAllEncargadosWithDetailsAsync(query);
+           
+           return Ok(encargados);
         }
     }
 }

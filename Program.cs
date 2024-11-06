@@ -115,11 +115,24 @@ builder.Services.AddScoped<IFacultadRepository, FacultadRepository>();
 builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 builder.Services.AddScoped<ICarreraRepository, CarreraRepository>();
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
+builder.Services.AddScoped<IEncargadoRepository, EncargadoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
 //Servicios
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
+builder.Services.AddScoped<IEncargadoService, EncargadoService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAcountService, AcountService>();
+builder.Services.AddScoped<IFormularioService, FormularioService>();
+
+//
+builder.Services.AddControllers().AddJsonOptions(options =>
+{//Usa referencias de objetos en lugar de seguir serializando de forma infinita
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+    //para ignorar datos en null
+    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
+
 
 var app = builder.Build();
 

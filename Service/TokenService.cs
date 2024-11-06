@@ -29,6 +29,7 @@ namespace MyApiUCI.Service
         {
             var claims = new List<Claim>
             {
+                new Claim("UsuarioId", user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id) // ID del usuario

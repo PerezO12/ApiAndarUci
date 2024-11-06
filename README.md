@@ -45,3 +45,4 @@ Este es un proyecto desarrollado en **ASP.NET Core** que utiliza **Entity Framew
 
 Este proyecto utiliza **JWT Bearer** para manejar la autenticación y **ASP.NET Core Identity** para la gestión de roles y permisos de usuario. Solo ciertos endpoints están disponibles para usuarios autenticados y roles específicos, como administradores, encargados y estudiantes.
 
+

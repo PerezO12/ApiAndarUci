@@ -43,7 +43,7 @@ namespace MyApiUCI.Controller
             return Ok(carrera.toCarreraDto());
         }
 
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCarreraDto carreraDto)
         {
@@ -56,7 +56,7 @@ namespace MyApiUCI.Controller
             return CreatedAtAction(nameof(GetByID), new{Id = carreraModel.Id}, carreraModel.toCarreraDto());
 
         }
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id ,[FromBody] UpdateCarreraDto carreraDto)
         {
@@ -71,7 +71,7 @@ namespace MyApiUCI.Controller
             return Ok(carreraModel.toCarreraDto());
             
         }
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -80,7 +80,7 @@ namespace MyApiUCI.Controller
             
             return Ok(carreraModel.toCarreraDto());
         }
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdatePatch([FromRoute] int id, [FromBody] PatchCarreraDto carreraDto)
         {

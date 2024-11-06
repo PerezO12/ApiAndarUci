@@ -49,19 +49,19 @@ namespace MyApiUCI.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2d49b3fe-7fc7-4f25-9d81-8fd48fd755f4",
+                            Id = "6b02ab6a-9eaf-432e-8b58-3a4ced89f561",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "be09c24b-3fdd-408a-8b58-3b24fcf0951f",
+                            Id = "15e2d334-9d08-44d3-84e3-1bb750b166a1",
                             Name = "Estudiante",
                             NormalizedName = "ESTUDIANTE"
                         },
                         new
                         {
-                            Id = "a5ef955d-a78e-4e67-b83c-7622dc05f55b",
+                            Id = "e84bd451-471c-45ca-84e5-e8f16d52211f",
                             Name = "Encargado",
                             NormalizedName = "ENCARGADO"
                         });
@@ -180,6 +180,10 @@ namespace MyApiUCI.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
 
                     b.Property<string>("CarnetIdentidad")
                         .IsRequired()
@@ -354,7 +358,8 @@ namespace MyApiUCI.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Activo")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("activo");
 
                     b.Property<int>("CarreraId")
                         .HasColumnType("integer");
@@ -416,14 +421,14 @@ namespace MyApiUCI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("DepartamentoId")
+                    b.Property<bool>("Activo")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("DepartamentoId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("EstudianteId")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime?>("FechaEnvio")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("FechaFirmado")
                         .HasColumnType("timestamp with time zone");
@@ -434,14 +439,25 @@ namespace MyApiUCI.Migrations
                     b.Property<byte[]>("FirmaEncargado")
                         .HasColumnType("bytea");
 
-                    b.Property<bool?>("Firmado")
+                    b.Property<bool>("Firmado")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Motivo")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DepartamentoId");
 
-                    b.HasIndex("EstudianteId", "DepartamentoId")
+                    b.HasIndex("EstudianteId");
+
+                    b.HasIndex("UsuarioId", "DepartamentoId")
                         .IsUnique()
                         .HasDatabaseName("IX_Formulario_Estudiante_Departamento");
 
@@ -567,7 +583,9 @@ namespace MyApiUCI.Migrations
                 {
                     b.HasOne("MyApiUCI.Models.Departamento", "Departamento")
                         .WithMany("Formularios")
-                        .HasForeignKey("DepartamentoId");
+                        .HasForeignKey("DepartamentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyApiUCI.Models.Estudiante", "Estudiante")
                         .WithMany("Formularios")

@@ -51,7 +51,7 @@ namespace MyApiUCI.Controller
 
 
         //Post
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create( [FromBody]CreateDepartamentoDto departamentoDto)
         {

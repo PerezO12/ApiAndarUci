@@ -22,7 +22,7 @@ namespace MyApiUCI.Controller
             _usuarioRepo = usuarioRepo;
         }
         
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectUsuario query)
         {

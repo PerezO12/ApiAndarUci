@@ -9,6 +9,6 @@ namespace MyApiUCI.Interfaces
 {
     public interface IEstudianteService
     {
-        public Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObject query);
+        public Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query);
     }
 }

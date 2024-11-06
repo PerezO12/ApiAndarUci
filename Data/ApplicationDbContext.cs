@@ -23,9 +23,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         base.OnModelCreating(builder);
 
-        // Definir la restricción de unicidad para EstudianteId y DepartamentoId en la tabla Formulario
+        // Definir la restricción de unicidad para UsuarioId y DepartamentoId en la tabla Formulario
         builder.Entity<Formulario>()
-            .HasIndex(f => new { f.EstudianteId, f.DepartamentoId })
+            .HasIndex(f => new { f.UsuarioId, f.DepartamentoId })
             .IsUnique()
             .HasDatabaseName("IX_Formulario_Estudiante_Departamento");
 

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Extensions;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
@@ -40,14 +41,24 @@ namespace MyApiUCI.Repository
         }
         //Falta terminar, unirlos con el usuario
         /*  */
-        public async Task<List<Estudiante>> GetAllAsync(QueryObject query)
+        public async Task<List<Estudiante>> GetAllAsync(QueryObjectEstudiante query)
         {
 
             var estudiantes = _context.Estudiante.Where(e => e.Activo == true).AsQueryable();
             
+            if(query.UsuarioId != null)
+            {
+                estudiantes = estudiantes.Where(e => e.UsuarioId == query.UsuarioId);
+                return await estudiantes.ToListAsync();
+            }
+
             if (query.ListaId.Any())
             {
                 estudiantes = estudiantes.Where(e => query.ListaId.Contains(e.Id));
+            }
+            if(query.ListaUserId.Any())
+            {
+                estudiantes = estudiantes.Where(e => query.ListaUserId.Contains(e.UsuarioId));
             }
 
             if(query.FacultadId.HasValue)
