@@ -8,9 +8,9 @@ namespace MyApiUCI.Helpers
     public class QueryObjectEncargado
     {
         public string? Nombre { get; set; } = null; //para buscar por
-        public string? UsuarioId { get; set; } = null;
-//        public int? FacultadId { get; set; } = null; //para buscar por
         public string? DepartamentoNombre { get; set; } = null;
+        public string? UsuarioId { get; set; } = null;
+        public string? CarnetIdentidad {get; set;} = null;
         public int? DepartamentoId { get; set; } = null;
         public List<int> ListaId {get; set; }= new List<int>();
         public List<int> ListaDepartamentoId {get; set; }= new List<int>();

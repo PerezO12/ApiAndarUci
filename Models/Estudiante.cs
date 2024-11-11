@@ -9,20 +9,21 @@ public partial class Estudiante
 {
     [Key]
     public int Id { get; set; }
-
-   [ForeignKey("AppUser")]
+    [Required]
+    [ForeignKey("AppUser")]
     public string UsuarioId { get; set; } = null!;
 
+    [Required]
     public int CarreraId { get; set; }
-
+    [Required]
     public int FacultadId { get; set; }
 
     [Column("activo")]
     public bool Activo { get; set; } = true;
-    public DateTime? FechaBaja { get; set;}
+    public DateTime? FechaBaja { get; set;} = null;
 
-    public virtual Facultad? Facultad { get; set; }
-    public virtual Carrera? Carrera { get; set; }
+    public virtual Facultad Facultad { get; set; }  = null!;
+    public virtual Carrera Carrera { get; set; }  = null!;
 
     public virtual ICollection<Formulario> Formularios { get; set; } = new List<Formulario>();
     

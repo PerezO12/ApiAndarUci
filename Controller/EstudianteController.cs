@@ -41,5 +41,13 @@ namespace MyApiUCI.Controller
            var estudiantes = await _estudianteService.GetEstudiantesWithDetailsAsync(query);
            return Ok(estudiantes);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute]int id) {
+            var estudiante = await _estudianteService.GetByIdWithDetailsAsync(id);
+            if(estudiante == null) return NotFound("El estudiante no existe");
+            
+            return Ok(estudiante);
+        }
     }
 }

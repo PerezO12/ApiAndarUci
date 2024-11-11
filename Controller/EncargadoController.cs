@@ -14,10 +14,8 @@ namespace MyApiUCI.Controller
     public class EncargadoController : ControllerBase
     {
         private readonly IEncargadoService _encargadoService;
-        private readonly IEncargadoRepository _encargadoRepo;
-        public EncargadoController(IEncargadoService encargadoService, IEncargadoRepository encargadoRepo)
+        public EncargadoController(IEncargadoService encargadoService)
         {
-            _encargadoRepo = encargadoRepo;
             _encargadoService = encargadoService;
         }
 
@@ -36,6 +34,14 @@ namespace MyApiUCI.Controller
             }
            var encargados = await _encargadoService.GetAllEncargadosWithDetailsAsync(query);
            return Ok(encargados);
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById([FromRoute] int id)
+        {
+            var encargadoDto = await _encargadoService.GetByIdEncargadoWithDetailsAsync(id);
+            if(encargadoDto == null) return NotFound("No existe el encargado");
+
+            return Ok(encargadoDto);
         }
     }
 }

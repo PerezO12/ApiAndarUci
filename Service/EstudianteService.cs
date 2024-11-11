@@ -15,88 +15,45 @@ namespace MyApiUCI.Service
     public class EstudianteService : IEstudianteService
     {
         private readonly IEstudianteRepository _estudianteRepo;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ICarreraRepository _carreraRepo;
-        private readonly IFacultadRepository _facultadRepo;
-
-        public EstudianteService(
-            IEstudianteRepository estudianteRepository,
-            UserManager<AppUser> user,
-            ICarreraRepository carreraRepo,
-            IFacultadRepository facultadRepo
-            )
+        public EstudianteService(IEstudianteRepository estudianteRepository)
         {
             _estudianteRepo = estudianteRepository;
-            _userManager = user;
-            _carreraRepo  = carreraRepo;
-            _facultadRepo = facultadRepo;
+        }
+
+        public async Task<EstudianteDto?> GetByIdWithDetailsAsync(int id)
+        {
+            var estudiante = await _estudianteRepo.GetByIdAsync(id);
+            if(estudiante == null) return null;
+            return new EstudianteDto{
+                Id = estudiante.Id,
+                UsuarioId = estudiante.UsuarioId,
+                NombreCompleto = estudiante.AppUser.NombreCompleto,
+                CarnetIdentidad = estudiante.AppUser.CarnetIdentidad,
+                NombreUsuario = estudiante.AppUser.UserName,
+                Email = estudiante.AppUser.Email,
+                NumeroTelefono = estudiante.AppUser.PhoneNumber,
+                NombreCarrera = estudiante.Carrera.Nombre,
+                NombreFacultad = estudiante.Facultad.Nombre
+            };
         }
 
         public async Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query)
         {
             //consulta basic
-            var estudiantesModel = await _estudianteRepo.GetAllAsync(query);
-
-            //IDS de las entidades 
-            var estudiantesIds = estudiantesModel.Select( e => e.UsuarioId).ToList();
-            var facultadesIds = estudiantesModel.Select( e => e.FacultadId).Distinct().ToList();
-            var carreraIds = estudiantesModel.Select( e => e.CarreraId).Distinct().ToList();
-
-            //consultas
-            var usuariosEstudiantes = await _userManager.Users
-                .Where(u => estudiantesIds.Contains(u.Id))
-                .ToListAsync();
+            var estudiantes = await _estudianteRepo.GetAllAsync(query);
+            var estudiantesDto = estudiantes.Select( e => new EstudianteDto{
+                Id = e.Id,
+                UsuarioId = e.UsuarioId,
+                NombreCompleto = e.AppUser.NombreCompleto,
+                CarnetIdentidad = e.AppUser.CarnetIdentidad,
+                NombreUsuario = e.AppUser.UserName,
+                Email = e.AppUser.Email,
+                NumeroTelefono = e.AppUser.PhoneNumber,
+                NombreCarrera = e.Carrera.Nombre,
+                NombreFacultad = e.Facultad.Nombre
+            }).ToList();
             
-            var carreras = await _carreraRepo.GetAllAsync(new QueryObject { ListaId = carreraIds});
-            var facultades = await _facultadRepo.GetAllAsync(new QueryObject { ListaId = carreraIds});
-            //combinacion datos
-            var estudiantesDatosCombinados  = estudiantesModel
-                .Join(
-                    usuariosEstudiantes,
-                    estudiante => estudiante.UsuarioId,
-                    usuario => usuario.Id,
-                    (estudiante, usuario) => new 
-                    { 
-                        Estudiante = estudiante,
-                        Usuario = usuario
-                    })
-                .Join(
-                    carreras,
-                    combinado => combinado.Estudiante.CarreraId,
-                    carrera => carrera.Id,
-                    (combinado, carrera) => new 
-                    { 
-                        combinado.Estudiante,
-                        combinado.Usuario,
-                        Carrera = carrera
-                    })
-                .Join(
-                    facultades,
-                    combinado => combinado.Estudiante.FacultadId,
-                    facultad => facultad.Id,
-                    (combinado, facultad) => new EstudianteDto
-                    {
-                        Id = combinado.Estudiante.Id,
-                        UsuarioId = combinado.Usuario.Id,
-                        NombreCompleto = combinado.Usuario.NombreCompleto,
-                        CarnetIdentidad = combinado.Usuario.CarnetIdentidad,
-                        UserName = combinado.Usuario.UserName,
-                        Email = combinado.Usuario.Email,
-                        NumeroTelefono = combinado.Usuario.PhoneNumber,
-                        Carrera = combinado.Carrera.Nombre,
-                        Facultad = facultad.Nombre
-                    })
-                .ToList();
-            
-            if(query.Nombre != null)
-            {
-                estudiantesDatosCombinados = estudiantesDatosCombinados
-                    .Where( e => e.NombreCompleto != null && e.NombreCompleto.Contains(query.Nombre, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            }
-            
-            
-            return estudiantesDatosCombinados;
+            return estudiantesDto;
         }   
     }
 }

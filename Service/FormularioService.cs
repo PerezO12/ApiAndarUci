@@ -79,12 +79,12 @@ namespace MyApiUCI.Service
                     (combinado, encargado) => new FormularioDto
                     {
                             NombreCompleto = combinado.Estudiante.NombreCompleto,              
-                            NombreUsuario = combinado.Estudiante.UserName,      
+                            NombreUsuario = combinado.Estudiante.NombreUsuario,      
                             CarnetIdentidad = combinado.Estudiante.CarnetIdentidad,       
                             Email = combinado.Estudiante.Email,             
                             NumeroTelefono = combinado.Estudiante.NumeroTelefono, 
-                            NombreCarrera = combinado.Estudiante.Carrera,             
-                            NombreFacultad = combinado.Estudiante.Facultad,          
+                            NombreCarrera = combinado.Estudiante.NombreCarrera,             
+                            NombreFacultad = combinado.Estudiante.NombreFacultad,          
                             firmado = combinado.Formulario.Firmado,
                             NombreDepartamento = encargado.DepartamentoNombre,         
                             NombreEncargado = encargado.NombreCompleto,          
@@ -118,11 +118,11 @@ namespace MyApiUCI.Service
 
             var formularioDto =  new FormularioDto{
                 NombreCompleto = estudiante.NombreCompleto,
-                NombreUsuario = estudiante.UserName,
+                NombreUsuario = estudiante.NombreUsuario,
                 CarnetIdentidad = estudiante.CarnetIdentidad,
                 Email = estudiante.Email,
-                NombreCarrera = estudiante.Carrera,
-                NombreFacultad = estudiante.Facultad,
+                NombreCarrera = estudiante.NombreCarrera,
+                NombreFacultad = estudiante.NombreFacultad,
                 NombreDepartamento = nombreDepartamento,
                 Fechacreacion = formulario.Fechacreacion
             };

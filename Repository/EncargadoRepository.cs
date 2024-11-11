@@ -44,6 +44,18 @@ namespace MyApiUCI.Repository
                 .Include(e => e.Departamento)
                 .AsQueryable();
             //Busquedas
+            if(query.Nombre != null)//BUSCAR POR NOMBRE Encargado
+            {
+                encargados = encargados.Where(e => e.AppUser.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
+            }
+            if(query.DepartamentoNombre != null)//buscar Nombre departamento
+            {
+                encargados = encargados.Where(e => e.Departamento.Nombre.ToLower().Contains(query.DepartamentoNombre.ToLower()));
+            }
+            if(query.CarnetIdentidad != null)//Carnet Identidad
+            {
+                encargados = encargados.Where(e => e.AppUser.CarnetIdentidad.Contains(query.CarnetIdentidad));
+            }
             if(query.UsuarioId != null)//Usuario Id
             {
                 encargados = encargados.Where(e => e.UsuarioId == query.UsuarioId);
@@ -65,14 +77,6 @@ namespace MyApiUCI.Repository
             {
                 encargados = encargados.Where(e => query.ListaUserId.Contains(e.UsuarioId));
             }
-            if(query.Nombre != null)//BUSCAR POR NOMBRE Encargado
-            {
-                encargados = encargados.Where(e => e.AppUser.NombreCompleto.Contains(query.Nombre));
-            }
-            if(query.DepartamentoNombre != null)//buscar Nombre departamento
-            {
-                encargados = encargados.Where(e => e.Departamento.Nombre.Contains(query.DepartamentoNombre));
-            }
 
             //Ordenamiento
             if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
@@ -90,9 +94,13 @@ namespace MyApiUCI.Repository
             return await encargados.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
 
-        public async Task<Encargado?> GetByIdAsync(int id)
+        public async Task<Encargado?> GetByIdAsync(int Id)
         {
-            return await _context.Encargado.FirstOrDefaultAsync(c => c.Id == id && c.Activo == true);
+            return await _context.Encargado
+                .Where(c => c.Id == Id && c.Activo == true)
+                .Include(e => e.AppUser)
+                .Include(e => e.Departamento)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Encargado?> UpdateAsync(int id, Encargado encargadoModel)

@@ -30,11 +30,29 @@ namespace MyApiUCI.Service
                 DepartamentoId = e.Departamento.Id,
                 NombreCompleto = e.AppUser.NombreCompleto,
                 CarnetIdentidad = e.AppUser.CarnetIdentidad,
-                UserName = e.AppUser.UserName,
+                NombreUsuario = e.AppUser.UserName,
                 Email = e.AppUser.Email,
                 NumeroTelefono = e.AppUser.PhoneNumber
             }).ToList();
             return encargadosDto;
+        }
+
+        public async Task<EncargadoDto?> GetByIdEncargadoWithDetailsAsync(int id)
+        {
+            var encargado = await _encargadoRepo.GetByIdAsync(id);
+            if(encargado == null) return null;
+
+            return new EncargadoDto{
+                Id = encargado.Id,
+                UsuarioId = encargado.UsuarioId,
+                DepartamentoNombre = encargado.Departamento.Nombre,
+                DepartamentoId = encargado.Departamento.Id,
+                NombreCompleto = encargado.AppUser.NombreCompleto,
+                CarnetIdentidad = encargado.AppUser.CarnetIdentidad,
+                NombreUsuario = encargado.AppUser.UserName,
+                Email = encargado.AppUser.Email,
+                NumeroTelefono = encargado.AppUser.PhoneNumber
+            };
         }
     }
 }

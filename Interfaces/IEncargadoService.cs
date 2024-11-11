@@ -10,5 +10,6 @@ namespace MyApiUCI.Interfaces
     public interface IEncargadoService
     {
         public Task<List<EncargadoDto>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query);
+        public Task<EncargadoDto?> GetByIdEncargadoWithDetailsAsync(int id);
     }
 }
