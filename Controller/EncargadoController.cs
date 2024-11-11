@@ -14,8 +14,10 @@ namespace MyApiUCI.Controller
     public class EncargadoController : ControllerBase
     {
         private readonly IEncargadoService _encargadoService;
-        public EncargadoController(IEncargadoService encargadoService)
+        private readonly IEncargadoRepository _encargadoRepo;
+        public EncargadoController(IEncargadoService encargadoService, IEncargadoRepository encargadoRepo)
         {
+            _encargadoRepo = encargadoRepo;
             _encargadoService = encargadoService;
         }
 
@@ -33,7 +35,6 @@ namespace MyApiUCI.Controller
                 return BadRequest("El tamaño de la página debe ser mayor que cero.");
             }
            var encargados = await _encargadoService.GetAllEncargadosWithDetailsAsync(query);
-           
            return Ok(encargados);
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MyApiUCI.Dtos.Encargado;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
@@ -37,49 +38,55 @@ namespace MyApiUCI.Repository
 
         public async Task<List<Encargado>> GetAllAsync(QueryObjectEncargado query)
         {
-            var encargados = _context.Encargado.Where(e => e.Activo == true).AsQueryable();
-            
-            if(query.UsuarioId != null)
+            var encargados = _context.Encargado
+                .Where(e => e.Activo == true)
+                .Include(e => e.AppUser)
+                .Include(e => e.Departamento)
+                .AsQueryable();
+            //Busquedas
+            if(query.UsuarioId != null)//Usuario Id
             {
                 encargados = encargados.Where(e => e.UsuarioId == query.UsuarioId);
                 return await encargados.ToListAsync();
-            }
-
-            if (query.ListaId.Any())
+            } 
+            if (query.ListaId.Any())//buscar por lista de id de encargados
             {
                 encargados = encargados.Where(e => query.ListaId.Contains(e.Id));
             }
-            if(query.ListaDepartamentoId.Any())
+            if (query.DepartamentoId != null)//buscar por lista de id de encargados
+            {
+                encargados = encargados.Where(e => e.Departamento.Id.Equals(query.DepartamentoId));
+            }
+            if(query.ListaDepartamentoId.Any())//Buscar por id de departamento
             {
                 encargados = encargados.Where(e => query.ListaDepartamentoId.Contains(e.DepartamentoId));
             }
-            if(query.ListaUserId.Any())
+            if(query.ListaUserId.Any())//buscar por lista de id de usuarios
             {
                 encargados = encargados.Where(e => query.ListaUserId.Contains(e.UsuarioId));
             }
-
-            /* if(query.FacultadId.HasValue)
+            if(query.Nombre != null)//BUSCAR POR NOMBRE Encargado
             {
-                encargados = encargados.Where(e => e.FacultadId == query.FacultadId);
-            } */
-            if(query.DepartamentoId.HasValue)
-            {
-                encargados = encargados.Where(e => e.DepartamentoId == query.DepartamentoId);
+                encargados = encargados.Where(e => e.AppUser.NombreCompleto.Contains(query.Nombre));
             }
-            //Ordenamiento
-/*             if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
+            if(query.DepartamentoNombre != null)//buscar Nombre departamento
             {
-                if(query.OrdernarPor.Equals("Carrera", StringComparison.OrdinalIgnoreCase))
+                encargados = encargados.Where(e => e.Departamento.Nombre.Contains(query.DepartamentoNombre));
+            }
+
+            //Ordenamiento
+            if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
+            {
+                if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    encargados = query.Descender ? encargados.OrderByDescending(d => d.CarreraId) : encargados.OrderBy(d => d.CarreraId);
+                    encargados = query.Descender ? encargados.OrderByDescending(e => e.AppUser.NombreCompleto) : encargados.OrderBy(e => e.AppUser.NombreCompleto);
                 }
-                else if(query.OrdernarPor.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
+                else if(query.OrdernarPor.Equals("Departamento", StringComparison.OrdinalIgnoreCase))
                 {
-                    encargados = query.Descender ? encargados.OrderByDescending(d => d.FacultadId) : encargados.OrderBy( d => d.FacultadId);
+                    encargados = query.Descender ? encargados.OrderByDescending(e => e.Departamento.Nombre) : encargados.OrderBy(e => e.Departamento.Nombre);
                 }
-            } */
-            var skipNumber = ( query.NumeroPagina - 1 ) * query.TamañoPagina;
-            
+            } 
+            var skipNumber = ( query.NumeroPagina - 1 ) * query.TamañoPagina;    
             return await encargados.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
 
