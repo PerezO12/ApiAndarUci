@@ -99,16 +99,16 @@ namespace MyApiUCI.Repository
 
         public async Task<Departamento?> UpdateAsync(int id, Departamento departamentoModel)
         {
-           var existingDepartament = await _context.Departamento.FindAsync(id);
-           if(existingDepartament == null)
+           var existeDepartamento = await _context.Departamento.FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
+           if(existeDepartamento == null)
            {
             return null;
            }
-           existingDepartament.Nombre = departamentoModel.Nombre;
-           existingDepartament.FacultadId = departamentoModel.FacultadId;
+           existeDepartamento.Nombre = departamentoModel.Nombre;
+           existeDepartamento.FacultadId = departamentoModel.FacultadId;
 
             await _context.SaveChangesAsync();
-            return existingDepartament;
+            return existeDepartamento;
         }
     }
 }

@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Cuentas
+namespace ApiUCI.Dtos.Cuentas
 {
-    public class NewUserDto
+    public class UserPerfilDto
     {
         public string id { get; set; } = null!;
         public string NombreCompleto { get; set; } = null!;
-        public string? NombreUsuario { get; set;} 
-        public IList<string> Rol { get; set; } = new List<string>();
+        public string? NombreUsuario { get; set;}
+        public IList<string>? Rol { get; set; } = null!;
         public string? Email { get; set; }
-        public string? Token { get; set; }
     }
 }

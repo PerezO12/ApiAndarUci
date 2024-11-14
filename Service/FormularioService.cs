@@ -17,17 +17,17 @@ namespace MyApiUCI.Service
     {
         private readonly IFormularioRepository _formularioRepo;
         private readonly IEstudianteService _estudianteService;
-        private readonly IEstudianteRepository _estudianteRepo;
+     //   private readonly IEstudianteRepository _estudianteRepo;
         private readonly IDepartamentoRepository _departamentoRepo;
-        private readonly IFacultadRepository _facuRepo;
+       // private readonly IFacultadRepository _facuRepo;
         private readonly IDepartamentoRepository _depaRepo;
-        private readonly UserManager<AppUser> _userManager;
+  //      private readonly UserManager<AppUser> _userManager;
         private readonly IEncargadoService _encargadoService;
         public FormularioService( 
             IFormularioRepository formularioRepo, 
             IEstudianteRepository estudianteRepo,
             IDepartamentoRepository departamentoRepo,
-            IFacultadRepository facuRepo,
+  //          IFacultadRepository facuRepo,
             IDepartamentoRepository depaRepo,
             IEstudianteService estudianteService,
             IEncargadoService encargadoService,
@@ -37,10 +37,10 @@ namespace MyApiUCI.Service
 
             _formularioRepo = formularioRepo;
             _estudianteService = estudianteService;
-            _estudianteRepo = estudianteRepo;
+      //      _estudianteRepo = estudianteRepo;
             _departamentoRepo = departamentoRepo;
-            _userManager = userManager;
-            _facuRepo = facuRepo;
+       //     _userManager = userManager;
+    //        _facuRepo = facuRepo;
             _depaRepo = depaRepo;
             _encargadoService = encargadoService;
         }
@@ -111,7 +111,8 @@ namespace MyApiUCI.Service
                 
             var estudiante = estudiantes.FirstOrDefault();//es una lista q solod evuelve un elemento
             if(!estudiantes.Any()) return null;
-
+            if(estudiante == null ) return null;
+            
             var departamento = await _departamentoRepo.GetByIdAsync(formulario.DepartamentoId);
 
             string nombreDepartamento = departamento?.Nombre ?? "Departamento no encontrado";

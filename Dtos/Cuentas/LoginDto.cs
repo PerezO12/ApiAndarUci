@@ -9,7 +9,7 @@ namespace MyApiUCI.Dtos.Cuentas
     public class LoginDto
     {
         [Required]
-        public string UserName { get; set; } = null!;
+        public string Nombre { get; set; } = null!;
         [Required]
         public string Password { get; set;} = null!;
     }

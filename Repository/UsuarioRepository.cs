@@ -23,6 +23,7 @@ namespace MyApiUCI.Repository
             throw new NotImplementedException();
         }
 
+//PENSAR LA LOGICA LUEGO XQ UN ESTUDIANTE ES UN USUARIO NO SE SI BORRAR EL ESTUDIANTE TMB
         public Task<AppUser?> DeleteAsync(string id)
         {
             throw new NotImplementedException();
@@ -30,15 +31,17 @@ namespace MyApiUCI.Repository
 
         public async Task<List<AppUser>> GetAllAsync(QueryObjectUsuario query)
         {
-            var usuarios = _userManager.Users.Where(e => e.Activo == true).AsQueryable();
+            var usuarios = _userManager.Users.AsQueryable();
 
+            if(query.SoloActivos){
+                usuarios = usuarios.Where(e => e.Activo == true);
+            }
             //FILTROS
             if(query.CarnetIdentidad != null)
             {
                 usuarios = usuarios.Where( u => 
                     u.CarnetIdentidad.ToLower().Contains(query.CarnetIdentidad.ToLower()));
             }
-          
             if(query.Nombre != null)
             {
                 usuarios = usuarios.Where( u => u.NombreCompleto != null && 

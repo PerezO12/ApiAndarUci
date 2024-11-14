@@ -8,6 +8,7 @@ namespace MyApiUCI.Helpers
     public class QueryObjectUsuario
     {
         //BUSQUEDAS
+        public bool SoloActivos {get; set;} = true;
         public string? Nombre { get; set; } = null; //para buscar por
         public string? NombreUsuario { get; set; } = null;
         public string? Email { get; set; } = null;

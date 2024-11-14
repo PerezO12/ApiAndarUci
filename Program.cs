@@ -1,3 +1,5 @@
+using ApiUCI.Interfaces;
+using ApiUCI.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,28 +11,38 @@ using MyApiUCI.Models;
 using MyApiUCI.Repository;
 using MyApiUCI.Service;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-//add controladores
+// Add controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//esot es temporal cambiar y arreglar despues 
+
+// Configuración de la base de datos
+var connectionString = builder.Configuration.GetConnectionString("PostgreSQLConnection");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(connectionString)
+);
+
+// TODO: LOGS... ESTOY PROBANDO
+builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
+builder.Services.AddDbContext<ApplicationDbContext>();
+
+// TODO: CAMBIAR CORS DESPUES
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost5173",
-        policy => policy.WithOrigins("http://localhost:5173")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+    options.AddPolicy("AllowAllOrigins", builder =>
+    {
+        builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 });
 
-//******************************
-
-//Configuracion del swagger para integrarlo con el JWT
+// Configuración de Swagger para integrarlo con el JWT
 builder.Services.AddSwaggerGen(option =>
 {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
@@ -50,26 +62,20 @@ builder.Services.AddSwaggerGen(option =>
             {
                 Reference = new OpenApiReference
                 {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
             },
-            new string[]{}
+            new string[] { }
         }
     });
 });
-//aqui termina*************************
 
 
 
-//conf a la basedatos
-var connectionString = builder.Configuration.GetConnectionString("PostgreSQLConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString)
-);
-
-//Configuracion de identity, con validaciones de seguridad de  password d los usuarios
-builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
+// Configuración de Identity con validaciones de seguridad de password de los usuarios
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
@@ -77,29 +83,31 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-//Schemnas del JWT con Bear
-builder.Services.AddAuthentication(options => {
+// Configuración del JWT Bearer
+builder.Services.AddAuthentication(options =>
+{
     options.DefaultAuthenticateScheme =
     options.DefaultChallengeScheme =
     options.DefaultForbidScheme =
     options.DefaultScheme =
     options.DefaultSignInScheme =
     options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options => {
+}).AddJwtBearer(options =>
+{
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer =  builder.Configuration["JWT:Issuer"],
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["JWT:Audience"],
+        ValidIssuer = builder.Configuration["JWT:Issuer"],
+        ValidateAudience = false,
+        // ValidAudience = builder.Configuration["JWT:Audience"],
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"])
+            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!)
         )
     };
 });
 
-//Politicas de seguridad
+// Políticas de seguridad
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOEncargadoPolicy", policy => policy.RequireRole("Admin", "Encargado"));
@@ -108,9 +116,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("EstudiantePolicy", policy => policy.RequireRole("Estudiante"));
 });
 
-
-
-//Repositorios
+// Repositorios
 builder.Services.AddScoped<IFacultadRepository, FacultadRepository>();
 builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 builder.Services.AddScoped<ICarreraRepository, CarreraRepository>();
@@ -118,25 +124,27 @@ builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 builder.Services.AddScoped<IEncargadoRepository, EncargadoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
-//Servicios
+
+// Servicios
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 builder.Services.AddScoped<IEncargadoService, EncargadoService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAcountService, AcountService>();
 builder.Services.AddScoped<IFormularioService, FormularioService>();
+builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
-//
+// Configuración de JsonOptions
 builder.Services.AddControllers().AddJsonOptions(options =>
-{//Usa referencias de objetos en lugar de seguir serializando de forma infinita
+{
+    // Usa referencias de objetos en lugar de seguir serializando de forma infinita
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-    //para ignorar datos en null
+    // Para ignorar datos en null
     options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
 
-
 var app = builder.Build();
 
-//Cambiar codigo, momentaneo
+// Cambiar código, momentáneo
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -149,29 +157,26 @@ using (var scope = app.Services.CreateScope())
         else
         {
             Console.WriteLine("No se pudo conectar a la base de datos.");
+            Environment.FailFast("Fallo al conectar a la base de datos, la aplicación no puede continuar.");
         }
     }
     catch (Exception ex)
     {
         Console.WriteLine($"Error al conectar a la base de datos: {ex.Message}");
+        Environment.FailFast("Error crítico al conectar a la base de datos, la aplicación no puede continuar.");
     }
 }
 
-
-
-// Configure the HTTP request pipeline.
-
+// Configure the HTTP request pipeline
 app.UseSwagger();
 app.UseSwaggerUI();
 
-//Cambiar luego
-app.UseCors("AllowLocalhost5173");
-
+// Cambiar luego
+app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 
-//mapeo controladores
+// Mapeo controladores
 app.MapControllers();
 
 app.Run();
-

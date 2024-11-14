@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using ApiUCI.Dtos.Cuentas;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Dtos.Cuentas;
@@ -14,20 +15,20 @@ namespace MyApiUCI.Service
 {
     public class AcountService : IAcountService
     {
+        private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
         private readonly IFacultadRepository _facuRepo;
         private readonly ICarreraRepository _carreraRepo;
         private readonly IEstudianteRepository _estudianteRepo;
-        private readonly SignInManager<AppUser> _signInManager;
         private readonly ApplicationDbContext _context;
         public AcountService(
             UserManager<AppUser> userManager,
+            SignInManager<AppUser> signInManager,
             ITokenService tokenService,
             IFacultadRepository facuRepo,
             ICarreraRepository carreraRepo,
             IEstudianteRepository estudianteRepo,
-            SignInManager<AppUser> signInManager,
             ApplicationDbContext context
             
             )
@@ -43,26 +44,48 @@ namespace MyApiUCI.Service
 
         public async Task<NewUserDto?> Login(LoginDto loginDto)
         {
-            var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.UserName.ToLower());
+            var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.Nombre.ToLower());
             if(user == null) return null;
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
             if(!result.Succeeded) return null;
+            var rol = await _userManager.GetRolesAsync(user);
+            if(rol == null) return null;
 
-            
             return new NewUserDto
-                {
-                    UserName = user.UserName,
+                {   
+                    id = user.Id,
+                    NombreCompleto = user.NombreCompleto,
+                    NombreUsuario = user.UserName,
                     Email = user.Email,
+                    Rol = rol,
                     Token = await _tokenService.CreateTokenAsync(user)
                 }
 ;
         }
 
+        public async Task<UserPerfilDto?> ObtenerPerfil(string id)
+        {
+            var usuarioModel = await _userManager.FindByIdAsync(id);
+            if(usuarioModel == null) return null; 
+
+            var rol = await _userManager.GetRolesAsync(usuarioModel);
+            if(rol == null) return null;
+            
+            return new UserPerfilDto {
+                id = id,
+                NombreCompleto = usuarioModel.NombreCompleto,
+                NombreUsuario = usuarioModel.UserName,
+                Email = usuarioModel.Email,
+                Rol = rol
+            };
+
+        }
+
         public async Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargado(RegisterEncargadoDto registerDto)
         {
-            // Generar el hash SHA-256 de la firma digital cambiar esto mas adelante********
+            //TODO: Generar el hash SHA-256 de la firma digital cambiar esto mas adelante********
             byte[] firmaDigitalHash;
             using (var sha256 = SHA256.Create())
             {

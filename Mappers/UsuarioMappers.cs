@@ -17,9 +17,10 @@ namespace MyApiUCI.Mappers
                 Id = usuario.Id,
                 NombreCompleto = usuario.NombreCompleto,
                 CarnetIdentidad = usuario.CarnetIdentidad,
-                UserName = usuario.UserName,
+                Activo = usuario.Activo,
+                NombreUsuario = usuario.UserName,
                 Email = usuario.Email,
-                NumeroTelefono = usuario.PhoneNumber,
+                NumeroTelefono = usuario.PhoneNumber
             };
         }
     }

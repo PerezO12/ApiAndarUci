@@ -22,16 +22,16 @@ namespace MyApiUCI.Service
         {
             _config = config;
             _userManager = userManager;
-            _key =  new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
+            _key =  new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]!));
         }
 
         public async Task<string> CreateTokenAsync(AppUser user)
         {
             var claims = new List<Claim>
             {
-                new Claim("UsuarioId", user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName),
+                //new Claim("UsuarioId", user.Id),
+                //new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                //new Claim(JwtRegisteredClaimNames.GivenName, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id) // ID del usuario
             };
             var roles = await _userManager.GetRolesAsync(user);

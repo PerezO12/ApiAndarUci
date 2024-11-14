@@ -1,10 +1,11 @@
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Cuentas;
 using MyApiUCI.Interfaces;
-
+//Crear una ruta donde sea validar jwt y retornar datos del suaurio con ese jwt
 namespace MyApiUCI.Controller
 {
     [Route("api/account")]
@@ -12,6 +13,7 @@ namespace MyApiUCI.Controller
     public class AcountController : ControllerBase
     {
         private readonly IAcountService _acountService;
+
 
         public AcountController(IAcountService acountService, ApplicationDbContext context, ITokenService tokenService)
         {
@@ -71,16 +73,29 @@ namespace MyApiUCI.Controller
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            if(!ModelState.IsValid) return BadRequest("Password/Usuario incorrecto");//NO HACe falta
+            if(!ModelState.IsValid) return BadRequest("Contraseña/Usuario incorrecto");//NO HACe falta
 
             var user = await  _acountService.Login(loginDto);
             
-            if(user == null) return Unauthorized("Usuario o Password Incorrectos");
+            if(user == null) return Unauthorized("Usuario o Contraseña Incorrectos");
 
             return Ok(user);
             
+        }
+
+        [Authorize]
+        [HttpGet("obtener-perfil")]
+        public async Task<IActionResult> ObtenerPerfil()
+        {
+            //solo usuarios con token validospodran acceder
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if(userId == null) return BadRequest("Token no valido");
+
+            var usuarioDto = await _acountService.ObtenerPerfil(userId);
+            return Ok(usuarioDto);
         }
     }
 }
