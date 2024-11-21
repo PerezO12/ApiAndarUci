@@ -8,17 +8,16 @@ namespace MyApiUCI.Dtos.Formulario
     public class FormularioDto
     {
         //Datos del estudiante
-        public string NombreCompleto { get; set; } = null!;
-        public string? NombreUsuario { get; set; }
-        public string CarnetIdentidad { get; set; } = null!;
-        public string? Email { get; set; }
-        public string? NumeroTelefono { get; set; }
+        public int id { get; set; }
+        public string NombreCompletoEstudiante { get; set; } = null!;
+        public string? NombreUsuarioEstudiante { get; set; }
+        public string CarnetIdentidadEstudiante { get; set; } = null!;
+        public string? EmailEstudiante { get; set; }
         public string NombreCarrera { get; set; } = null!;
-        public string NombreFacultad { get; set; } = null!;
-
+        public string? NombreFacultad { get; set; }
         //Datos del encargado
         public string NombreDepartamento { get; set; } = null!;
-        public bool firmado { get; set;} = false;
+        public bool Firmado { get; set;} = false;
         public string NombreEncargado {get; set;}  = null!;
         //Datos del formulario
         public DateTime? FechaFirmado { get; set; }

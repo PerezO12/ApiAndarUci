@@ -12,7 +12,7 @@ namespace MyApiUCI.Mappers
         {
             encargadoExistente.UsuarioId = encargadoModelo.UsuarioId;
             encargadoExistente.DepartamentoId = encargadoModelo.DepartamentoId;
-            encargadoExistente.FirmaDigital = encargadoModelo.FirmaDigital;
+            encargadoExistente.LlavePublica = encargadoModelo.LlavePublica;
             encargadoExistente.Activo = encargadoModelo.Activo;
 
             return encargadoExistente;

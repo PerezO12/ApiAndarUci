@@ -53,22 +53,22 @@ namespace MyApiUCI.Repository
             //busqueda por nombre
             if(query.Nombre != null)
             {
-                estudiantes = estudiantes.Where(e => e.AppUser.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
+                estudiantes = estudiantes.Where(e => e.AppUser!.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
             }
             //busqueda por nombr carrera
             if(query.CarreraNombre != null)
             {
-                estudiantes = estudiantes.Where(e => e.Carrera.Nombre.ToLower().Contains(query.CarreraNombre.ToLower()));
+                estudiantes = estudiantes.Where(e => e.Carrera!.Nombre.ToLower().Contains(query.CarreraNombre.ToLower()));
             }
             //busqueda por nombre facultad
             if(query.FacultadNombre != null)
             {
-                estudiantes = estudiantes.Where(e => e.Facultad.Nombre.ToLower().Contains(query.FacultadNombre.ToLower()));
+                estudiantes = estudiantes.Where(e => e.Facultad!.Nombre.ToLower().Contains(query.FacultadNombre.ToLower()));
             }
             //busqueda por carnet identidad
             if(query.CarnetIdentidad != null)
             {
-                estudiantes = estudiantes.Where(e => e.AppUser.CarnetIdentidad.Contains(query.CarnetIdentidad));
+                estudiantes = estudiantes.Where(e => e.AppUser!.CarnetIdentidad.Contains(query.CarnetIdentidad));
             }
             //busqueda USUARIO ID
             if(query.UsuarioId != null) 
@@ -102,15 +102,15 @@ namespace MyApiUCI.Repository
             {
                 if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    estudiantes = query.Descender ? estudiantes.OrderByDescending(e => e.AppUser.NombreCompleto) : estudiantes.OrderBy(e => e.AppUser.NombreCompleto);
+                    estudiantes = query.Descender ? estudiantes.OrderByDescending(e => e.AppUser!.NombreCompleto) : estudiantes.OrderBy(e => e.AppUser!.NombreCompleto);
                 }
                 else if(query.OrdernarPor.Equals("Carrera", StringComparison.OrdinalIgnoreCase))
                 {
-                    estudiantes = query.Descender ? estudiantes.OrderByDescending(e => e.Carrera.Nombre) : estudiantes.OrderBy(e => e.Carrera.Nombre);
+                    estudiantes = query.Descender ? estudiantes.OrderByDescending(e => e.Carrera!.Nombre) : estudiantes.OrderBy(e => e.Carrera!.Nombre);
                 }
                 else if(query.OrdernarPor.Equals("Facultad", StringComparison.OrdinalIgnoreCase))
                 {
-                    estudiantes = query.Descender ? estudiantes.OrderByDescending(e => e.Facultad.Nombre) : estudiantes.OrderBy(e => e.Facultad.Nombre);
+                    estudiantes = query.Descender ? estudiantes.OrderByDescending(e => e.Facultad!.Nombre) : estudiantes.OrderBy(e => e.Facultad!.Nombre);
                 }
             }
             var skipNumber = ( query.NumeroPagina - 1 ) * query.TamañoPagina;
@@ -127,6 +127,11 @@ namespace MyApiUCI.Repository
                 .Include(e => e.Carrera)
                 .Include(e => e.Facultad)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Estudiante?> GetEstudianteByUserId(string usuarioId)
+        {
+            return await _context.Estudiante.FirstOrDefaultAsync(e => e.Activo == true && e.UsuarioId == usuarioId);
         }
 
         public async Task<Estudiante?> UpdateAsync(int id, Estudiante estudianteModel)

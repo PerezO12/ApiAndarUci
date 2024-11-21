@@ -27,14 +27,19 @@ namespace MyApiUCI.Service
             return new EstudianteDto{
                 Id = estudiante.Id,
                 UsuarioId = estudiante.UsuarioId,
-                NombreCompleto = estudiante.AppUser.NombreCompleto,
+                NombreCompleto = estudiante.AppUser!.NombreCompleto,
                 CarnetIdentidad = estudiante.AppUser.CarnetIdentidad,
                 NombreUsuario = estudiante.AppUser.UserName,
                 Email = estudiante.AppUser.Email,
                 NumeroTelefono = estudiante.AppUser.PhoneNumber,
-                NombreCarrera = estudiante.Carrera.Nombre,
-                NombreFacultad = estudiante.Facultad.Nombre
+                NombreCarrera = estudiante.Carrera!.Nombre,
+                NombreFacultad = estudiante.Facultad!.Nombre
             };
+        }
+
+        public async Task<Estudiante?> GetEstudianteByUserId(string userId)
+        {
+            return await _estudianteRepo.GetEstudianteByUserId(userId);
         }
 
         public async Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query)
@@ -44,13 +49,13 @@ namespace MyApiUCI.Service
             var estudiantesDto = estudiantes.Select( e => new EstudianteDto{
                 Id = e.Id,
                 UsuarioId = e.UsuarioId,
-                NombreCompleto = e.AppUser.NombreCompleto,
+                NombreCompleto = e.AppUser!.NombreCompleto,
                 CarnetIdentidad = e.AppUser.CarnetIdentidad,
                 NombreUsuario = e.AppUser.UserName,
                 Email = e.AppUser.Email,
                 NumeroTelefono = e.AppUser.PhoneNumber,
-                NombreCarrera = e.Carrera.Nombre,
-                NombreFacultad = e.Facultad.Nombre
+                NombreCarrera = e.Carrera!.Nombre,
+                NombreFacultad = e.Facultad!.Nombre
             }).ToList();
             
             return estudiantesDto;

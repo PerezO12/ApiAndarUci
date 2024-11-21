@@ -14,7 +14,6 @@ namespace MyApiUCI.Models
         public string NombreCompleto { get; set; } = null!;
         [Required]
         public string CarnetIdentidad { get; set; } = null!;
-        [Column("activo")]
         public bool Activo { get; set; } = true;
     }
 }

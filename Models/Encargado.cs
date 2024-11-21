@@ -9,19 +9,19 @@ public partial class Encargado
 {
     [Key]
     public int Id { get; set; }
-
-    [ForeignKey("AppUser")]
+    [Required]
     public string UsuarioId { get; set; } = null!;
 
     [Required]
     public int DepartamentoId { get; set; } 
 
-    public byte[] FirmaDigital { get; set; } = null!;
+    public byte[]? LlavePublica { get; set; }
 
-    [Column("activo")]
     public bool Activo { get; set; }  = true;
 
-    public virtual Departamento Departamento { get; set; } = null!;
+    [ForeignKey("DepartamentoId")]
+    public virtual Departamento? Departamento { get; set; }
 
-    public virtual AppUser AppUser { get; set;} = null!;
+    [ForeignKey("UsuarioId")]
+    public virtual AppUser? AppUser { get; set;} 
 }

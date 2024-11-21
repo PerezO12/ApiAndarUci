@@ -10,12 +10,12 @@ namespace MyApiUCI.Controller
 {
     [Route("api/account")]
     [ApiController]
-    public class AcountController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly IAcountService _acountService;
 
 
-        public AcountController(IAcountService acountService, ApplicationDbContext context, ITokenService tokenService)
+        public AccountController(IAcountService acountService, ApplicationDbContext context, ITokenService tokenService)
         {
             _acountService = acountService;
         }
@@ -71,7 +71,7 @@ namespace MyApiUCI.Controller
                 return StatusCode(500, new { message = "Error en el servidor", error = ex.Message });
             }
         }
-
+        
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {

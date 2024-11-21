@@ -46,15 +46,15 @@ namespace MyApiUCI.Repository
             //Busquedas
             if(query.Nombre != null)//BUSCAR POR NOMBRE Encargado
             {
-                encargados = encargados.Where(e => e.AppUser.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
+                encargados = encargados.Where(e => e.AppUser!.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
             }
             if(query.DepartamentoNombre != null)//buscar Nombre departamento
             {
-                encargados = encargados.Where(e => e.Departamento.Nombre.ToLower().Contains(query.DepartamentoNombre.ToLower()));
+                encargados = encargados.Where(e => e.Departamento!.Nombre.ToLower().Contains(query.DepartamentoNombre.ToLower()));
             }
             if(query.CarnetIdentidad != null)//Carnet Identidad
             {
-                encargados = encargados.Where(e => e.AppUser.CarnetIdentidad.Contains(query.CarnetIdentidad));
+                encargados = encargados.Where(e => e.AppUser!.CarnetIdentidad.Contains(query.CarnetIdentidad));
             }
             if(query.UsuarioId != null)//Usuario Id
             {
@@ -67,7 +67,7 @@ namespace MyApiUCI.Repository
             }
             if (query.DepartamentoId != null)//buscar por lista de id de encargados
             {
-                encargados = encargados.Where(e => e.Departamento.Id.Equals(query.DepartamentoId));
+                encargados = encargados.Where(e => e.Departamento!.Id.Equals(query.DepartamentoId));
             }
             if(query.ListaDepartamentoId.Any())//Buscar por id de departamento
             {
@@ -83,11 +83,11 @@ namespace MyApiUCI.Repository
             {
                 if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    encargados = query.Descender ? encargados.OrderByDescending(e => e.AppUser.NombreCompleto) : encargados.OrderBy(e => e.AppUser.NombreCompleto);
+                    encargados = query.Descender ? encargados.OrderByDescending(e => e.AppUser!.NombreCompleto) : encargados.OrderBy(e => e.AppUser!.NombreCompleto);
                 }
                 else if(query.OrdernarPor.Equals("Departamento", StringComparison.OrdinalIgnoreCase))
                 {
-                    encargados = query.Descender ? encargados.OrderByDescending(e => e.Departamento.Nombre) : encargados.OrderBy(e => e.Departamento.Nombre);
+                    encargados = query.Descender ? encargados.OrderByDescending(e => e.Departamento!.Nombre) : encargados.OrderBy(e => e.Departamento!.Nombre);
                 }
             } 
             var skipNumber = ( query.NumeroPagina - 1 ) * query.TamañoPagina;    
@@ -101,6 +101,16 @@ namespace MyApiUCI.Repository
                 .Include(e => e.AppUser)
                 .Include(e => e.Departamento)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId)
+        {
+            return await _context.Encargado.FirstOrDefaultAsync(e => e.Activo && e.DepartamentoId == departamentoId);
+        }
+
+        public async Task<Encargado?> GetEncargadoByUserIdAsync(string usuarioId)
+        {
+            return await _context.Encargado.FirstOrDefaultAsync(e => e.Activo == true && e.UsuarioId == usuarioId);
         }
 
         public async Task<Encargado?> UpdateAsync(int id, Encargado encargadoModel)

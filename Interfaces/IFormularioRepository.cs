@@ -9,10 +9,15 @@ namespace MyApiUCI.Interfaces
 {
     public interface IFormularioRepository
     {
-        Task<IEnumerable<Formulario>> GetAllAsync(QueryObjectFormulario query);
+        Task<List<Formulario>> GetAllAsync(QueryObjectFormulario query);
+        Task<List<FormularioEstudianteDto>> GetAllFormulariosByEstudiante(string userId);
+        Task<List<FormularioEncargadoDto>> GetAllFormulariosByEncargado(string userId);
         Task<Formulario> CreateAsync(Formulario formulario);
         Task<Formulario?> GetByIdAsync(int id);
-        Task<Formulario?> UpadatePatchAsync(UpdateFormularioDto formulario, int id);
+        Task<Formulario?> UpadatePatchAsync(int id, UpdateFormularioDto formulario);
+        Task<Formulario?> UpdateAsync(int id, Formulario formulario);
         Task<Formulario?> DeleteAsync(int id);
+        Task<Formulario?> FormByEstudianteDepartamentoAsync(int estudianteId, int DepartamentoId);
+
     }
 }

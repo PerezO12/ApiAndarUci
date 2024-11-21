@@ -11,6 +11,7 @@ namespace MyApiUCI.Interfaces
     public interface IDepartamentoRepository
     {
         public Task<List<Departamento>> GetAllAsync( QueryObject query );
+        public Task<List<Departamento>> GetAllByFacultadId(int id);
         public Task<Departamento?> GetByIdAsync(int id);
         public Task<Departamento> CreateAsync(Departamento departamentoModel);
         public Task<Departamento?> UpdateAsync(int id, Departamento departdepartamentoModelamento);

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using ApiUCI.Dtos.Cuentas;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +7,7 @@ using MyApiUCI.Models;
 
 namespace MyApiUCI.Service
 {
-    public class AcountService : IAcountService
+    public class AccountService : IAcountService
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
@@ -22,7 +16,7 @@ namespace MyApiUCI.Service
         private readonly ICarreraRepository _carreraRepo;
         private readonly IEstudianteRepository _estudianteRepo;
         private readonly ApplicationDbContext _context;
-        public AcountService(
+        public AccountService(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
             ITokenService tokenService,
@@ -52,7 +46,9 @@ namespace MyApiUCI.Service
             if(!result.Succeeded) return null;
             var rol = await _userManager.GetRolesAsync(user);
             if(rol == null) return null;
-
+            var token = await _tokenService.CreateTokenAsync(user);
+            // Guarda el token en la base de datos
+            await _userManager.SetAuthenticationTokenAsync(user, "JWT", "AccessToken", token);
             return new NewUserDto
                 {   
                     id = user.Id,
@@ -60,7 +56,7 @@ namespace MyApiUCI.Service
                     NombreUsuario = user.UserName,
                     Email = user.Email,
                     Rol = rol,
-                    Token = await _tokenService.CreateTokenAsync(user)
+                    Token = token
                 }
 ;
         }
@@ -69,7 +65,6 @@ namespace MyApiUCI.Service
         {
             var usuarioModel = await _userManager.FindByIdAsync(id);
             if(usuarioModel == null) return null; 
-
             var rol = await _userManager.GetRolesAsync(usuarioModel);
             if(rol == null) return null;
             
@@ -85,13 +80,6 @@ namespace MyApiUCI.Service
 
         public async Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargado(RegisterEncargadoDto registerDto)
         {
-            //TODO: Generar el hash SHA-256 de la firma digital cambiar esto mas adelante********
-            byte[] firmaDigitalHash;
-            using (var sha256 = SHA256.Create())
-            {
-                firmaDigitalHash = sha256.ComputeHash(Encoding.UTF8.GetBytes(registerDto.FirmaDigital));
-            }
-
 
             var existeDepartamento = await _context.Departamento.FindAsync(registerDto.DepartamentoId);
             if(existeDepartamento == null) return (IdentityResult.Failed(new IdentityError { Description = "Departamento no existe"}), null);
@@ -120,8 +108,7 @@ namespace MyApiUCI.Service
             var encargado = new Encargado
             {
                 UsuarioId = appUser.Id,
-                DepartamentoId = registerDto.DepartamentoId,
-                FirmaDigital = firmaDigitalHash
+                DepartamentoId = registerDto.DepartamentoId
             };
             try{
                 await _context.Encargado.AddAsync(encargado);

@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +20,16 @@ namespace MyApiUCI.Controller
     {
         private readonly IDepartamentoRepository _depaRepo;
         private readonly IFacultadRepository _facuRepo;
-        public DepartamentoController(IDepartamentoRepository depaRepo, IFacultadRepository facuRepo)
+        private readonly IEstudianteService _estudianteService;
+        public DepartamentoController(
+            IDepartamentoRepository depaRepo,
+            IFacultadRepository facuRepo,
+            IEstudianteService estudianteService
+            )
         {
             _depaRepo = depaRepo;
             _facuRepo = facuRepo;
+            _estudianteService = estudianteService;
         }
 
         //Get
@@ -112,7 +119,21 @@ namespace MyApiUCI.Controller
             return Ok(departamentoModel.toDepartamentDto());
         
         }
+        //estudiantes
+        [HttpGet("correspondientes")]
+        public async Task<IActionResult> GetAllDepartamentosCorrespondientes()
+        {
+            var userId = User.FindFirst("UsuarioId")?.Value;
+            if(userId == null) return BadRequest("Token no valido");
 
-        
+            var estudiante = await _estudianteService.GetEstudianteByUserId(userId);
+            if(estudiante == null) return BadRequest("El estudiante no existe");
+
+            var departamentos = await _depaRepo.GetAllByFacultadId(estudiante.FacultadId);
+
+            if(departamentos == null) return NotFound("No hay departamentos correspondientes");
+
+            return Ok(departamentos);
+        }
     }
 }

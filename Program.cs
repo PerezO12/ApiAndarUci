@@ -1,4 +1,5 @@
 using ApiUCI.Interfaces;
+using ApiUCI.Middleware;
 using ApiUCI.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -98,14 +99,15 @@ builder.Services.AddAuthentication(options =>
     {
         ValidateIssuer = true,
         ValidIssuer = builder.Configuration["JWT:Issuer"],
-        ValidateAudience = false,
-        // ValidAudience = builder.Configuration["JWT:Audience"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:Audience"],
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!)
         )
     };
 });
+
 
 // Políticas de seguridad
 builder.Services.AddAuthorization(options =>
@@ -129,7 +131,7 @@ builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 builder.Services.AddScoped<IEncargadoService, EncargadoService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAcountService, AcountService>();
+builder.Services.AddScoped<IAcountService, AccountService>();
 builder.Services.AddScoped<IFormularioService, FormularioService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
@@ -173,9 +175,15 @@ app.UseSwaggerUI();
 
 // Cambiar luego
 app.UseCors("AllowAllOrigins");
+//middlewares personalisados
 
 app.UseHttpsRedirection();
 
+//identity
+//app.UseAuthentication();
+
+// Tu middleware personalizado de validación de token
+app.UseMiddleware<TokenValidationMiddleware>();
 // Mapeo controladores
 app.MapControllers();
 

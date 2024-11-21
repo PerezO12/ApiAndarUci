@@ -11,6 +11,7 @@ namespace MyApiUCI.Helpers
         public string? UsuarioId { get; set; } = null;
         public string? NombreEstudiante { get; set; } = null;
         public int? DepartamentoId { get;set; } = null;
+        public string? DepartamentoNombre { get; set; }
         public List<int> ListaId {get; set; }= new List<int>();
         //Ordenar Por
         public string? OrdernarPor { get; set; } = null; //Para ordenar

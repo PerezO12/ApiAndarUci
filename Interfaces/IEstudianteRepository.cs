@@ -11,6 +11,7 @@ namespace MyApiUCI.Interfaces
     {
         public Task<List<Estudiante>> GetAllAsync(QueryObjectEstudiante query);
         public Task<Estudiante?> GetByIdAsync(int id);
+        public Task<Estudiante?> GetEstudianteByUserId(string id);
         public Task<Estudiante> CreateAsync(Estudiante estudianteModel);
         public Task<Estudiante?> UpdateAsync(int id, Estudiante estudianteModel);
         public Task<Estudiante?> DeleteAsync(int id);

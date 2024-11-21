@@ -65,26 +65,46 @@ namespace MyApiUCI.Repository
             }
         }
 
-        public async Task<IEnumerable<Formulario>> GetAllAsync(QueryObjectFormulario query)
+        public async Task<Formulario?> FormByEstudianteDepartamentoAsync(int estudianteId, int DepartamentoId)
+        {
+            var formulario = await _context.Formulario.FirstOrDefaultAsync(f => f.Activo == true && f.EstudianteId == estudianteId && f.DepartamentoId == DepartamentoId);
+        
+            return formulario;
+        }
+
+        //Este solo sera utilizado x el administrador de la applicacion x lo q no importa  q tenga una gran carga
+        public async Task<List<Formulario>> GetAllAsync(QueryObjectFormulario query)
         {
             try
             {
                 _logger.LogInformation("Obteniendo todos los formularios con los parámetros proporcionados.");
-                var formularios = _context.Formulario.Where(f => f.Activo == true).AsQueryable();
+                var formularios = _context.Formulario
+                    .Where(f => f.Activo == true)
+                    .Include(f => f.Estudiante)
+                        .ThenInclude(e => e!.Carrera)
+                    .Include(f => f.Estudiante!.AppUser)
+                    .Include(f => f.Departamento)
+                    .Include(f => f.Departamento!.Facultad)
+                    .Include(f => f.Encargado)
+                    .Include(f => f.Encargado!.AppUser)
+                    .AsQueryable();
 
-                if (query.UsuarioId != null)
+                if (query.UsuarioId != null) //Buscar por un id de usuario
                 {
-                    formularios = formularios.Where(f => f.UsuarioId == query.UsuarioId);
+                    formularios = formularios.Where(f => f.Estudiante!.UsuarioId == query.UsuarioId);
                 }
-                if (query.ListaId.Any())
+                if (query.ListaId.Any()) // buscar por una lista de id de formularios
                 {
                     formularios = formularios.Where(f => query.ListaId.Contains(f.Id));
                 }
-                if (query.DepartamentoId.HasValue)
+                //todo: Implemetar busqueda por nombre de estudiante y otras
+                 if (query.DepartamentoId.HasValue)
                 {
                     formularios = formularios.Where(f => f.DepartamentoId == query.DepartamentoId);
-                }
-
+                } 
+                //TODO:AGREGAR ORDENAMIENTO
+                formularios = formularios.OrderBy(f => f.Id);
+                
                 var skipNumber = (query.NumeroPagina - 1) * query.TamañoPagina;
                 var result = await formularios.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
                 _logger.LogInformation("Se han obtenido {Count} formularios.", result.Count);
@@ -97,12 +117,58 @@ namespace MyApiUCI.Repository
             }
         }
 
+        public async Task<List<FormularioEncargadoDto>> GetAllFormulariosByEncargado(string userId)
+        {
+            var formularios = await _context.Formulario
+                .Where(e => e.Activo == true && e.Encargado!.AppUser!.Id == userId)
+                .Select(e => new FormularioEncargadoDto{
+                    Id = e.Id,
+                    NombreCompletoEstudiante = e.Estudiante!.AppUser!.NombreCompleto,
+                    NombreCarrera = e.Estudiante!.Carrera!.Nombre,
+                    Motivo = e.Motivo,
+                    Fechacreacion = e.Fechacreacion
+                }).ToListAsync();
+                
+            return formularios;
+        }
+
+        public async Task<List<FormularioEstudianteDto>> GetAllFormulariosByEstudiante(string userId)
+        {
+
+             var formularios = await _context.Formulario
+                .Where(e => e.Activo == true && e.Estudiante!.AppUser!.Id == userId)
+                .Select(e => new FormularioEstudianteDto
+                {
+                    Id = e.Id,
+                    NombreEncargado = e.Encargado!.AppUser!.NombreCompleto,
+                    NombreDepartamento= e.Departamento!.Nombre,
+                    Motivo = e.Motivo,
+                    Firmado = e.Firmado,
+                    FechaFirmado = e.FechaFirmado,
+                    Fechacreacion = e.Fechacreacion
+                })
+                .ToListAsync();
+
+
+            return formularios;
+        }
+
         public async Task<Formulario?> GetByIdAsync(int id)
         {
             try
             {
                 _logger.LogInformation("Obteniendo formulario con Id {Id}.", id);
-                var formulario = await _context.Formulario.FindAsync(id); //poner solo activos
+                var formulario = await _context.Formulario
+                    .Where(f => f.Id == id && f.Activo == true)
+                    .Include(f => f.Estudiante)
+                        .ThenInclude(e => e!.Carrera)
+                    .Include(f => f.Estudiante!.AppUser)
+                    .Include(f => f.Departamento)
+                    .Include(f => f.Departamento!.Facultad)
+                    .Include(f => f.Encargado)
+                    .Include(f => f.Encargado!.AppUser)
+                    .FirstOrDefaultAsync();
+                    
                 if (formulario == null)
                 {
                     _logger.LogWarning("Formulario con Id {Id} no encontrado.", id);
@@ -116,7 +182,7 @@ namespace MyApiUCI.Repository
             }
         }
 
-        public async Task<Formulario?> UpadatePatchAsync(UpdateFormularioDto formulario, int id)
+        public async Task<Formulario?> UpadatePatchAsync(int id, UpdateFormularioDto formulario)
         {
             try
             {
@@ -127,9 +193,8 @@ namespace MyApiUCI.Repository
                     _logger.LogWarning("Formulario con Id {Id} no encontrado o ya está desactivado.", id);
                     return null;
                 }
+                formularioExistente.Motivo = formulario.Motivo ?? formularioExistente.Motivo;
 
-                //mapeo
-                formularioExistente.toPatchFormulario(formulario);
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Formulario con Id {Id} actualizado con éxito.", id);
                 return formularioExistente;
@@ -139,6 +204,17 @@ namespace MyApiUCI.Repository
                 _logger.LogError($"Error al actualizar el formulario con Id {id}: {ex.Message}", ex);
                 throw; // Re-lanzar la excepción
             }
+        }
+
+        public async Task<Formulario?> UpdateAsync(int id, Formulario formulario)
+        {
+            var formularioExistente = await _context.Formulario.FindAsync(id);
+            if(formularioExistente == null) return null;
+
+            _context.Entry(formularioExistente).CurrentValues.SetValues(formulario); 
+
+            await _context.SaveChangesAsync();
+            return formularioExistente;
         }
     }
 }

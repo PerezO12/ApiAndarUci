@@ -12,6 +12,8 @@ namespace MyApiUCI.Interfaces
     {
         Task<List<Encargado>> GetAllAsync(QueryObjectEncargado query);
         Task<Encargado?> GetByIdAsync(int id);
+        Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId);
+        Task<Encargado?> GetEncargadoByUserIdAsync(string userId);
         Task<Encargado> CreateAsync(Encargado encargadoModel);
         Task<Encargado?> UpdateAsync(int id, Encargado encargadoModel);
         Task<Encargado?> DeleteAsync(int id);

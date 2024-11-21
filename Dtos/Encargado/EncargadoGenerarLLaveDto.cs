@@ -4,14 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Dtos.Formulario
+
+namespace ApiUCI.Dtos.Encargado
 {
-    public class UpdateFormularioDto
+    public class EncargadoGenerarLLaveDto
     {
         [Required]
-        [MaxLength(800)]
-        [MinLength(5)]
-        public string Motivo { get; set; } = null!;
-
+        public string Password { get; set; } = null! ;
     }
 }

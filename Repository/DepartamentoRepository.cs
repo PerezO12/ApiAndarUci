@@ -78,6 +78,11 @@ namespace MyApiUCI.Repository
             return await departamentos.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
         }
 
+        public async Task<List<Departamento>> GetAllByFacultadId(int id)
+        {
+            return await _context.Departamento.Where(d => d.Activo && d.FacultadId == id).ToListAsync();
+        }
+
         public async Task<Departamento?> GetByIdAsync(int id)
         {
             return await _context.Departamento
@@ -110,5 +115,6 @@ namespace MyApiUCI.Repository
             await _context.SaveChangesAsync();
             return existeDepartamento;
         }
+        
     }
 }
