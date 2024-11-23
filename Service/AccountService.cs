@@ -1,3 +1,4 @@
+using ApiUCI.Dtos;
 using ApiUCI.Dtos.Cuentas;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,23 @@ namespace MyApiUCI.Service
             _context = context;
         }
 
+        public async Task<IdentityResult> CambiarPasswordAsync(string userId, CambiarPasswordDto cuentaDto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user == null)
+            {
+                return (IdentityResult.Failed(new IdentityError { Description = "El usuario no existe"}));
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, cuentaDto.PasswordActual, cuentaDto.PasswordNueva );
+            
+            if(result.Succeeded)
+            {
+                return (IdentityResult.Success);
+            }
+            return (IdentityResult.Failed(result.Errors.ToArray()));
+        }
+
         public async Task<NewUserDto?> Login(LoginDto loginDto)
         {
             var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.Nombre.ToLower());
@@ -55,30 +73,29 @@ namespace MyApiUCI.Service
                     NombreCompleto = user.NombreCompleto,
                     NombreUsuario = user.UserName,
                     Email = user.Email,
-                    Rol = rol,
+                    Rol = rol[0],
                     Token = token
                 }
 ;
         }
 
-        public async Task<UserPerfilDto?> ObtenerPerfil(string id)
+        public async Task<UserPerfilDto?> ObtenerPerfilAsync(string id)
         {
             var usuarioModel = await _userManager.FindByIdAsync(id);
             if(usuarioModel == null) return null; 
             var rol = await _userManager.GetRolesAsync(usuarioModel);
-            if(rol == null) return null;
-            
+            if(rol == null) return null;    
             return new UserPerfilDto {
                 id = id,
                 NombreCompleto = usuarioModel.NombreCompleto,
                 NombreUsuario = usuarioModel.UserName,
                 Email = usuarioModel.Email,
-                Rol = rol
+                Rol = rol[0]
             };
 
         }
 
-        public async Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargado(RegisterEncargadoDto registerDto)
+        public async Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargadoAsync(RegisterEncargadoDto registerDto)
         {
 
             var existeDepartamento = await _context.Departamento.FindAsync(registerDto.DepartamentoId);
@@ -133,7 +150,7 @@ namespace MyApiUCI.Service
         }
 
         //Estudiantes
-        public async Task<(IdentityResult, NewEstudianteDto?)> RegisterEstudiante(RegisterEstudianteDto registerDto)
+        public async Task<(IdentityResult, NewEstudianteDto?)> RegisterEstudianteAsync(RegisterEstudianteDto registerDto)
         {
             // Verificar si la facultad existe
             var existeFacultad = await _facuRepo.GetByIdAsync(registerDto.FacultadId);

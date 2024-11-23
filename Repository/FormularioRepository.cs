@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiUCI.Dtos.Formulario;
+using ApiUCI.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Dtos.Formulario;
 using MyApiUCI.Helpers;
@@ -117,9 +118,9 @@ namespace MyApiUCI.Repository
             }
         }
 
-        public async Task<List<FormularioEncargadoDto>> GetAllFormulariosByEncargado(string userId)
+        public async Task<List<FormularioEncargadoDto>> GetAllFormulariosByEncargado(string userId, QueryObjectFormularioEncargado query)
         {
-            var formularios = await _context.Formulario
+            var formularios =  _context.Formulario
                 .Where(e => e.Activo == true && e.Encargado!.AppUser!.Id == userId)
                 .Select(e => new FormularioEncargadoDto{
                     Id = e.Id,
@@ -127,15 +128,46 @@ namespace MyApiUCI.Repository
                     NombreCarrera = e.Estudiante!.Carrera!.Nombre,
                     Motivo = e.Motivo,
                     Fechacreacion = e.Fechacreacion
-                }).ToListAsync();
+                }).AsQueryable();
+            if(query.Nombre != null) //Buscar por nombre
+            {
+                formularios = formularios
+                    .Where(f => f.NombreCompletoEstudiante.ToLower().Contains(query.Nombre.ToLower()));
+            }
+            if(query.Carrera != null) //Buscar por carreara nombre
+            {
+                formularios = formularios
+                    .Where(f => f.NombreCarrera.ToLower().Contains(query.Carrera.ToLower()));
+            }
+            //Ordenar por
+            if(!string.IsNullOrWhiteSpace(query.OrdenarPor))
+            {
+                if (query.OrdenarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                {
+                    formularios = query.Descender ? formularios.OrderByDescending(f => f.NombreCompletoEstudiante) : formularios.OrderBy(f => f.NombreCompletoEstudiante);
+                }
+                else if (query.OrdenarPor.Equals("Carrera", StringComparison.OrdinalIgnoreCase))
+                {
+                    formularios = query.Descender ? formularios.OrderByDescending(f => f.NombreCarrera) : formularios.OrderBy(f => f.NombreCarrera);
+                }
+                else if (query.OrdenarPor.Equals("Fecha", StringComparison.OrdinalIgnoreCase))
+                {
+                    formularios = query.Descender ? formularios.OrderByDescending(f => f.Fechacreacion) : formularios.OrderBy(f => f.Fechacreacion);
+                }
                 
-            return formularios;
+            // Paginación
+            var skipNumber = (query.NumeroPagina - 1) * query.TamañoPagina;
+
+            return await formularios.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
+            }
+
+            return await formularios.ToListAsync();;
         }
 
-        public async Task<List<FormularioEstudianteDto>> GetAllFormulariosByEstudiante(string userId)
+        public async Task<List<FormularioEstudianteDto>> GetAllFormulariosByEstudiante(string userId, QueryObjectFormularioEstudiantes query)
         {
 
-             var formularios = await _context.Formulario
+             var formularios = _context.Formulario
                 .Where(e => e.Activo == true && e.Estudiante!.AppUser!.Id == userId)
                 .Select(e => new FormularioEstudianteDto
                 {
@@ -147,10 +179,15 @@ namespace MyApiUCI.Repository
                     FechaFirmado = e.FechaFirmado,
                     Fechacreacion = e.Fechacreacion
                 })
-                .ToListAsync();
+                .AsQueryable();
 
-
-            return formularios;
+            if(query.Encargado != null) {
+                formularios = formularios.Where(f => f.NombreEncargado.ToLower().Contains(query.Encargado.ToLower()));
+            }
+            if(query.Departamento != null) {
+                formularios = formularios.Where(f => f.NombreDepartamento.ToLower().Contains(query.Departamento.ToLower()));
+            }
+            return await formularios.ToListAsync();
         }
 
         public async Task<Formulario?> GetByIdAsync(int id)
@@ -180,6 +217,27 @@ namespace MyApiUCI.Repository
                 _logger.LogError($"Error al obtener el formulario con Id {id}: {ex.Message}", ex);
                 throw; // Re-lanzar la excepción
             }
+        }
+
+        public async Task<FormularioEncargadoDto?> GetFormEstudianteByIdForEncargadoAsync(int encargadoId, int formularioId)
+        {
+            var formulario = await _context.Formulario
+                .Where(f => f.Id == formularioId && f.Activo == true)
+                .Select(f => new FormularioEncargadoDto
+                {
+                    Id = f.Id,
+                    NombreCompletoEstudiante = f.Estudiante!.AppUser!.NombreCompleto,
+                    NombreUsuario = f.Estudiante.AppUser.UserName,
+                    Email = f.Estudiante.AppUser.Email,
+                    CarnetIdentidad = f.Estudiante.AppUser.CarnetIdentidad,
+                    NumeroTelefono = f.Estudiante.AppUser.PhoneNumber,
+                    NombreCarrera = f.Estudiante.Carrera!.Nombre,
+                    Motivo = f.Motivo,
+                    Fechacreacion = f.Fechacreacion
+                }).FirstOrDefaultAsync();
+                
+
+            return formulario;
         }
 
         public async Task<Formulario?> UpadatePatchAsync(int id, UpdateFormularioDto formulario)

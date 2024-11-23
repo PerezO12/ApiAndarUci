@@ -1,6 +1,7 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ApiUCI.Dtos.Cuentas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Cuentas;
@@ -33,7 +34,7 @@ namespace MyApiUCI.Controller
             try
             {
                 // Llamar al servicio para registrar al usuario
-                var (resultRegister, newEstudianteDto) = await _acountService.RegisterEstudiante(registerDto);
+                var (resultRegister, newEstudianteDto) = await _acountService.RegisterEstudianteAsync(registerDto);
                 
                 if (!resultRegister.Succeeded) return BadRequest(resultRegister.Errors);
 
@@ -59,7 +60,7 @@ namespace MyApiUCI.Controller
             try
             {
                 // Llamar al servicio para registrar al usuario
-                var (resultRegister, newEncargadoDto) = await _acountService.RegisterEncargado(registerDto);
+                var (resultRegister, newEncargadoDto) = await _acountService.RegisterEncargadoAsync(registerDto);
                 
                 if (!resultRegister.Succeeded) return BadRequest(resultRegister.Errors);
 
@@ -94,8 +95,33 @@ namespace MyApiUCI.Controller
 
             if(userId == null) return BadRequest("Token no valido");
 
-            var usuarioDto = await _acountService.ObtenerPerfil(userId);
+            var usuarioDto = await _acountService.ObtenerPerfilAsync(userId);
             return Ok(usuarioDto);
+        }
+        [HttpPost("cambiar-password")]
+        public async Task<IActionResult> CambiarPassword([FromBody] CambiarPasswordDto cuentadDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var userId = User.FindFirst("UsuarioId")?.Value;
+            if(userId == null) return BadRequest("Token no vlido");
+
+            try
+            {
+                // Llamar al servicio para registrar al usuario
+                var resultado = await _acountService.CambiarPasswordAsync(userId, cuentadDto );
+                
+                if (!resultado.Succeeded) return BadRequest(resultado.Errors);
+
+                return Ok("La contraseña fue cambiada exitosamente");
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error en el servidor", error = ex.Message });
+            }
         }
     }
 }

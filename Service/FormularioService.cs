@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ApiUCI.Dtos;
 using ApiUCI.Dtos.Formulario;
 using ApiUCI.Helpers;
+using ApiUCI.Helpers.Querys;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Dtos.Estudiante;
@@ -78,17 +79,64 @@ namespace MyApiUCI.Service
             var existeFormulario = await _formularioRepo.FormByEstudianteDepartamentoAsync(estudiante.Id, formularioDto.DepartamentoId);
             if(existeFormulario != null) {
                  return new ResultadoDto{
-                    msg = "Formulario ya existe",
+                    msg = "El formulario ya existe.",
                     TipoError = "BadRequest",
                     Error = true
                 };
             };
             var formulario = await _formularioRepo.CreateAsync(formularioDto.toFormularioFromCreate(estudiante, encargado));
             return new ResultadoDto{
-                    msg = "Resultado creado correctamente",
+                    msg = "Resultado creado correctamente.",
                     TipoError = "Ok",
                     Error = false
                 };;
+        }
+
+        public async Task<ResultadoDto> DeleteFormularioEstudianteAsync(string userId, int formularioId)
+        {
+            try
+            {
+                var estudiante = await  _estudianteService.GetEstudianteByUserId(userId);
+                if(estudiante == null) {
+                    return new ResultadoDto{
+                        msg = "El estudiante no existe",
+                        TipoError = "BadRequest",
+                        Error = true
+                    };
+                }
+                var formulario = await _formularioRepo.GetByIdAsync(formularioId);
+                if(formulario == null) {
+                    return new ResultadoDto{
+                        msg = "El formulario no existe",
+                        TipoError = "BadRequest",
+                        Error = true
+                    };
+                }
+                if(formulario.EstudianteId != estudiante.Id)
+                {
+                    return new ResultadoDto{
+                        msg = "Acción no valida",
+                        TipoError = "Unauthorized",
+                        Error = true
+                    };
+                }
+                await _formularioRepo.DeleteAsync(formularioId);
+                return new ResultadoDto{
+                        msg = "Formulario eliminado correctamente",
+                        TipoError = "Ok",
+                        Error = false
+                    };
+
+            }            
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return new ResultadoDto{
+                        msg = ex.Message,
+                        TipoError = "StatusCode500",
+                        Error = true
+                    }; 
+            }
         }
 
         public async Task<ResultadoDto> FirmarFormularioAsync(string userIdEncargado, int id, FormularioFirmarDto formularioDto)
@@ -199,16 +247,16 @@ namespace MyApiUCI.Service
         }
  
 
-        public async Task<List<FormularioEncargadoDto>> GetAllFormulariosEncargadosAsync(string usuarioId)
+        public async Task<List<FormularioEncargadoDto>> GetAllFormulariosEncargadosAsync(string usuarioId, QueryObjectFormularioEncargado query)
         {
-            var formulariosEncargados = await _formularioRepo.GetAllFormulariosByEncargado(usuarioId);
+            var formulariosEncargados = await _formularioRepo.GetAllFormulariosByEncargado(usuarioId, query);
 
             return formulariosEncargados;
         }
 
-        public async Task<List<FormularioEstudianteDto>> GetAllFormulariosEstudiantesAsync(string usuarioId)
+        public async Task<List<FormularioEstudianteDto>> GetAllFormulariosEstudiantesAsync(string usuarioId, QueryObjectFormularioEstudiantes query)
         {
-            var formulariosEstudiante = await _formularioRepo.GetAllFormulariosByEstudiante(usuarioId);
+            var formulariosEstudiante = await _formularioRepo.GetAllFormulariosByEstudiante(usuarioId, query);
 /*             var formulariosDto = formulariosEstudiante.Select(e => new FormularioEstudianteDto{
                 NombreEncargado = e.Encargado.AppUser.NombreCompleto,
                 NombreDepartamento= e.Departamento.Nombre,
@@ -245,6 +293,16 @@ namespace MyApiUCI.Service
             return formulariosWhitDetails;
 
      }
+
+        public async Task<FormularioEncargadoDto?> GetFormEstudianteByIdForEncargadoAsync(string userId, int formularioId)
+        {
+            var encargado = await _encargadoService.GetEncaradoByUserId(userId);
+            if(encargado == null) return null;
+
+            var formulario = await _formularioRepo.GetFormEstudianteByIdForEncargadoAsync(encargado.Id, formularioId);
+            if(formulario == null) return null;
+            return formulario;
+        }
 
         public async Task<FormularioDto?> GetFormularioWithDetailsAsync(int id)
         {

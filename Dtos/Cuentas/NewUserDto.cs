@@ -10,7 +10,7 @@ namespace MyApiUCI.Dtos.Cuentas
         public string id { get; set; } = null!;
         public string NombreCompleto { get; set; } = null!;
         public string? NombreUsuario { get; set;} 
-        public IList<string> Rol { get; set; } = new List<string>();
+        public string Rol { get; set; } = null!;
         public string? Email { get; set; }
         public string? Token { get; set; }
     }

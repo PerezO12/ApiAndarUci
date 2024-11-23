@@ -27,7 +27,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
         builder.Entity<Formulario>()
             .HasIndex(f => new { f.EstudianteId, f.DepartamentoId })
             .IsUnique()
-            .HasDatabaseName("IX_Formulario_Estudiante_Departamento");
+            .HasDatabaseName("IX_Formulario_Estudiante_Departamento_Activo");
 
         List<IdentityRole> roles = new List<IdentityRole>
         {

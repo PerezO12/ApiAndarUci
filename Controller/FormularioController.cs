@@ -14,6 +14,7 @@ using MyApiUCI.Mappers;
 using ApiUCI.Dtos.Formulario;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ApiUCI.Dtos;
+using ApiUCI.Helpers.Querys;
 
 namespace MyApiUCI.Controller
 {
@@ -79,7 +80,7 @@ namespace MyApiUCI.Controller
         
         [Authorize(Policy = "EstudiantePolicy")]
         [HttpGet("estudiantes")]
-        public async Task<IActionResult> GetFormulariosEstudiante(){
+        public async Task<IActionResult> GetFormulariosEstudiante([FromQuery] QueryObjectFormularioEstudiantes query){
             var usuarioId = User.FindFirst("UsuarioId")?.Value;
             if(usuarioId == null) 
             {
@@ -88,7 +89,7 @@ namespace MyApiUCI.Controller
             }
             _logger.LogInformation("Usuario autenticado con Id: {UsuarioId}", usuarioId);
 
-            var formularios = await _formularioService.GetAllFormulariosEstudiantesAsync(usuarioId);
+            var formularios = await _formularioService.GetAllFormulariosEstudiantesAsync(usuarioId, query);
 
             if(formularios == null) {
                 _logger.LogInformation("El usuario no tiene formularios");
@@ -101,7 +102,7 @@ namespace MyApiUCI.Controller
 
         [Authorize(Policy = "EncargadoPolicy")]
         [HttpGet("encargados")]
-        public async Task<IActionResult> GetAllFormulariosByEncargado()
+        public async Task<IActionResult> GetAllFormulariosByEncargado([FromQuery] QueryObjectFormularioEncargado query)
         {
             var usuarioId = User.FindFirst("UsuarioId")?.Value;
             if( usuarioId == null )
@@ -111,7 +112,7 @@ namespace MyApiUCI.Controller
             }
             _logger.LogInformation("Usuario autenticado con Id: {UsuarioId}", usuarioId);
 
-            var formularios = await _formularioService.GetAllFormulariosEncargadosAsync(usuarioId);
+            var formularios = await _formularioService.GetAllFormulariosEncargadosAsync(usuarioId, query);
 
             if(formularios == null) {
                 _logger.LogInformation("El usuario no tiene formularios");
@@ -119,6 +120,19 @@ namespace MyApiUCI.Controller
             }
 
             return Ok(formularios);
+        }
+
+        [Authorize(Policy = "EncargadoPolicy")]
+        [HttpGet("encargados/{id}")]
+        public async Task<IActionResult> GetFormularioEstudianteWhitDetails([FromRoute] int id)
+        {
+            var userId = User.FindFirst("UsuarioId")?.Value;
+            if(userId == null) return BadRequest("Token no valido");
+
+            var formulario = await _formularioService.GetFormEstudianteByIdForEncargadoAsync(userId, id);
+            if(formulario == null) return BadRequest("No existe el formulario");
+            
+            return Ok(formulario);
         }
 
         [HttpPost]
@@ -181,16 +195,13 @@ namespace MyApiUCI.Controller
             var formulario = await _formularioService.UpdatePatchFormularioAsync(usuarioId, id, formularioDto);
         
             if(formulario.Error) {
-                if(formulario.TipoError.Contains("NotFound")) {
-                    return NotFound(new {msg = formulario.msg});
-                }
-                if(formulario.TipoError.Contains("BadRequest")) {
-                    return BadRequest(new {msg = formulario.msg});
-                }
-                if(formulario.TipoError.Contains("Unauthorized")) {
-                    return Unauthorized(new {msg = formulario.msg});
-                }
-                return StatusCode(500, new {admin = "Falta validar esta acción, Reportar el error", msg = formulario.msg });
+                return formulario.TipoError switch
+                {
+                    "NotFound" => NotFound(new { msg = formulario.msg }),
+                    "BadRequest" => BadRequest(new { msg = formulario.msg }),
+                    "Unauthorized" => Unauthorized(new { msg = formulario.msg }),
+                    _ => StatusCode(500, new { admin = "Falta validar esta acción. Reportar el error", msg = formulario.msg })
+                };
             }     
 
             return Ok(new{ msg = "Formulario actualizado correctamente"     });
@@ -225,6 +236,29 @@ namespace MyApiUCI.Controller
                 _logger.LogError($"Error al crear el formulario: {ex.Message}", ex);
                 return StatusCode(500, $"Error interno al actualizar el formulario: {ex.Message}");
             }
+        }
+    
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFormularioEstudiante([FromRoute]int id)
+        {
+            var userId = User.FindFirst("UsuarioId")?.Value;
+            
+            if(userId == null ) return BadRequest("Token no valido");
+
+            var resultado = await _formularioService.DeleteFormularioEstudianteAsync(userId, id);
+        
+            if(resultado.Error)
+            {
+                return resultado.TipoError switch
+                {
+                    "NotFound" => NotFound(new { msg = resultado.msg }),
+                    "BadRequest" => BadRequest(new { msg = resultado.msg }),
+                    "Unauthorized" => Unauthorized(new { msg = resultado.msg }),
+                    _ => StatusCode(500, new { admin = "Falta validar esta acción. Reportar el error", msg = resultado.msg })
+                };
+            }
+
+            return Ok(new { msg = resultado.msg });
         }
     }
 }

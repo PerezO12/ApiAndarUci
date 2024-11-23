@@ -30,8 +30,5 @@ namespace MyApiUCI.Dtos.Cuentas
         [Required]
         public int DepartamentoId { get; set; }
 
-        [Required]
-        public string FirmaDigital  { get; set; } = null!;
-
     }
 }
