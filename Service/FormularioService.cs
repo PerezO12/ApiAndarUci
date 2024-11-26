@@ -199,7 +199,7 @@ namespace MyApiUCI.Service
                 // Firmar el hash con la llave privada
                 var documentoFirmado = rsa.SignHash(hasDocumento, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 
-                var verificador = new VerificarFirmadoDigital();
+                var verificador = new FirmaDigital();
                 //comprobamos si su firma coincide con la correspondiente publica
                 bool esCorrespondiente = verificador.VerificarFirmaFormulario(contenidoJson, documentoFirmado, hasDocumento, encargado.LlavePublica );
 

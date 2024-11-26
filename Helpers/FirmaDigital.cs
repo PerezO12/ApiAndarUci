@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ApiUCI.Helpers
 {
-    public class VerificarFirmadoDigital
+    public class FirmaDigital
     {
         public bool VerificarFirmaFormulario(string contenidoJson, byte[] firmaDigital, byte[] hashDocumento, byte[] llavePublicaBytes)
         {
@@ -32,6 +32,7 @@ namespace ApiUCI.Helpers
                 Console.WriteLine(ex.Message);
                 return false;
             }
-    }
+            
+        }
     }
 }

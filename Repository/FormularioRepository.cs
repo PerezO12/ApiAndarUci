@@ -125,10 +125,12 @@ namespace MyApiUCI.Repository
                 .Select(e => new FormularioEncargadoDto{
                     Id = e.Id,
                     NombreCompletoEstudiante = e.Estudiante!.AppUser!.NombreCompleto,
+                    Firmado = e.Firmado,
                     NombreCarrera = e.Estudiante!.Carrera!.Nombre,
                     Motivo = e.Motivo,
                     Fechacreacion = e.Fechacreacion
                 }).AsQueryable();
+            formularios = formularios.Where(f => f.Firmado == query.Firmados);
             if(query.Nombre != null) //Buscar por nombre
             {
                 formularios = formularios
@@ -181,8 +183,8 @@ namespace MyApiUCI.Repository
                 })
                 .AsQueryable();
 
-            if(query.Encargado != null) {
-                formularios = formularios.Where(f => f.NombreEncargado.ToLower().Contains(query.Encargado.ToLower()));
+            if(query.Nombre != null) {
+                formularios = formularios.Where(f => f.NombreEncargado.ToLower().Contains(query.Nombre.ToLower()));
             }
             if(query.Departamento != null) {
                 formularios = formularios.Where(f => f.NombreDepartamento.ToLower().Contains(query.Departamento.ToLower()));

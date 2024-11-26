@@ -1,16 +1,17 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using System.Security.Cryptography;
-using System.Threading.Tasks;
+
 using ApiUCI.Dtos.Encargado;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
+
 using MyApiUCI.Dtos.Encargado;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
-using MyApiUCI.Migrations;
+using System.Text;
+using Microsoft.AspNetCore.Mvc;
+using System.IO;
+using System.IO.Compression;
 using MyApiUCI.Models;
+using ApiUCI.Helpers;
 
 namespace MyApiUCI.Service
 {
@@ -61,19 +62,21 @@ namespace MyApiUCI.Service
             var encargados = await encargadosTask;
             var encargado = encargados.FirstOrDefault();
 
-            if(encargado == null) return null; 
+            if(encargado == null) return (null); 
 
             //TODO:si viene alguna firma digital publica la comproabmos y guardamos, falta hacer
             using var rsaGenerado = RSA.Create(2048);
-            byte[] llavePublica = rsaGenerado.ExportSubjectPublicKeyInfo();
+
+            encargado.LlavePublica = rsaGenerado.ExportSubjectPublicKeyInfo();
+            await _encargadoRepo.UpdateAsync(encargado.Id, encargado);
+
+            string llavePublica = Convert.ToBase64String(encargado.LlavePublica);
             string llavePrivada = Convert.ToBase64String(rsaGenerado.ExportPkcs8PrivateKey());
 
-            encargado.LlavePublica = llavePublica;
-            await _encargadoRepo.UpdateAsync(encargado.Id, encargado);
-            return new EncargadoFirmaDto{
+            return (new EncargadoFirmaDto{
                 LlavePrivada = llavePrivada,
-                LlavePublica = Convert.ToBase64String(llavePublica)
-            };
+                LlavePublica = llavePublica
+            });
         }
 
         public async Task<List<EncargadoDto>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query)

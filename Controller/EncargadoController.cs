@@ -92,7 +92,7 @@ namespace MyApiUCI.Controller
 
             var llaves = await _encargadoService.GenerarFirmaDigitalAsync(usuarioId);
             
-            if(llaves == null) return BadRequest("Llave publica no valida");
+            if(llaves == null) return StatusCode(500, "Contactar al administrador");
 
             return Ok(llaves);
         }

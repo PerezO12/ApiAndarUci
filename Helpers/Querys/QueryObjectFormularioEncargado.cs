@@ -11,6 +11,7 @@ namespace ApiUCI.Helpers.Querys
 
         public string? Nombre { get; set; } = null;
         public string? Carrera { get; set; } = null;
+        public bool Firmados { get; set; } = false;
         //Ordenar Por
         public string? OrdenarPor { get; set; } = "Fecha"; //Para ordenar
         public bool Descender { get; set; } = false; 

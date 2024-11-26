@@ -7,7 +7,7 @@ namespace ApiUCI.Helpers.Querys
 {
     public class QueryObjectFormularioEstudiantes
     {
-        public string? Encargado { get; set; }
+        public string? Nombre { get; set; }
         public string? Departamento { get; set; }
     }
 }

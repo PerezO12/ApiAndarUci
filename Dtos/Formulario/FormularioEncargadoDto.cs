@@ -16,5 +16,6 @@ namespace ApiUCI.Dtos.Formulario
         public string NombreCarrera { get; set; } = null!;
         public string Motivo { get; set; } = null!;
         public DateTime Fechacreacion { get; set; }
+        public bool Firmado { get; set; } 
     }
 }
