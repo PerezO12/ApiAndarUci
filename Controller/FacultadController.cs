@@ -5,6 +5,7 @@ using MyApiUCI.Dtos.Facultad;
 using MyApiUCI.Dtos.Departamento;
 using MyApiUCI.Helpers;
 using Microsoft.AspNetCore.Authorization;
+using ApiUCI.Helpers.Querys;
 
 
 namespace MyApiUCI.Controller
@@ -20,7 +21,7 @@ namespace MyApiUCI.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
+        public async Task<IActionResult> GetAll([FromQuery] QueryObjectFacultad query)
         {
             var facultad = await _facultadRepo.GetAllAsync(query);
             var facultadDto = facultad.Select( f => f.toFacultadDto());

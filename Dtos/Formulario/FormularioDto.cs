@@ -9,7 +9,7 @@ namespace MyApiUCI.Dtos.Formulario
     {
         //Datos del estudiante
         public int id { get; set; }
-        public string NombreCompletoEstudiante { get; set; } = null!;
+        public string NombreEstudiante { get; set; } = null!;
         public string? NombreUsuarioEstudiante { get; set; }
         public string CarnetIdentidadEstudiante { get; set; } = null!;
         public string? EmailEstudiante { get; set; }

@@ -7,11 +7,15 @@ namespace MyApiUCI.Dtos.Cuentas
 {
     public class NewEstudianteDto
     {
-        public string? UserName { get; set;} 
-        public string? Email { get; set; }
-        public string? NombreCompleto { get; set; }
+        public string Id { get; set; } = null!;
+        public string NombreUsuario { get; set;} = null!; 
+        public string CarnetIdentidad { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string NombreCompleto { get; set; } = null!;
+        public List<string> Roles { get; set; } = new List<string>();
         public string? Carrera { get; set; }
         public string? Facultad {get; set;}
         public string? Token { get; set; }
+        public bool Activo { get; set;}
     }
 }

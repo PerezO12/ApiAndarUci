@@ -9,7 +9,7 @@ namespace MyApiUCI.Dtos.Departamento
     {
         public int Id { get; set; } //borar luego
         public string Nombre { get; set; } = null!;
-
-        public int FacultadId { get; set; }
+        public string? Facultad { get; set; }
+        public DateTime? FechaCreacion { get; set; }
     }
 }

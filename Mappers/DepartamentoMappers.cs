@@ -14,7 +14,8 @@ namespace MyApiUCI.Mappers
             return new DepartamentoDto{
                 Id = departamentoModel.Id, //Borrar
                 Nombre = departamentoModel.Nombre,
-                FacultadId = departamentoModel.FacultadId
+                Facultad = departamentoModel.Facultad?.Nombre,
+                FechaCreacion = departamentoModel?.Fechacreacion
             };
         }
         public static Departamento toDepartamentoFromCreate(this CreateDepartamentoDto departamentoDto)

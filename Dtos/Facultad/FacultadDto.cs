@@ -9,5 +9,6 @@ namespace MyApiUCI.Dtos.Facultad
     {
         public int Id { get; set; } //borrar
         public string Nombre { get; set; } = string.Empty;
+        public DateTime? FechaCreacion {get ; set; }
     }
 }

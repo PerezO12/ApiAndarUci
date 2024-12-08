@@ -8,7 +8,7 @@ using MyApiUCI.Models;
 
 namespace MyApiUCI.Service
 {
-    public class AccountService : IAcountService
+    public class AccountService : IAccountService
     {
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
@@ -16,6 +16,7 @@ namespace MyApiUCI.Service
         private readonly IFacultadRepository _facuRepo;
         private readonly ICarreraRepository _carreraRepo;
         private readonly IEstudianteRepository _estudianteRepo;
+        private readonly IEncargadoRepository _encargadoRepo;
         private readonly ApplicationDbContext _context;
         public AccountService(
             UserManager<AppUser> userManager,
@@ -24,8 +25,8 @@ namespace MyApiUCI.Service
             IFacultadRepository facuRepo,
             ICarreraRepository carreraRepo,
             IEstudianteRepository estudianteRepo,
+            IEncargadoRepository encargadoRepo,
             ApplicationDbContext context
-            
             )
         {
             _userManager = userManager;
@@ -34,6 +35,7 @@ namespace MyApiUCI.Service
             _facuRepo = facuRepo;
             _carreraRepo = carreraRepo;
             _estudianteRepo = estudianteRepo;
+            _encargadoRepo = encargadoRepo;
             _context = context;
         }
 
@@ -100,11 +102,13 @@ namespace MyApiUCI.Service
 
             var existeDepartamento = await _context.Departamento.FindAsync(registerDto.DepartamentoId);
             if(existeDepartamento == null) return (IdentityResult.Failed(new IdentityError { Description = "Departamento no existe"}), null);
-
+            //comprobar q  no haya un encargado en el departamento ya q solo puede haber un encargado
+            var existeEncargadoEnDepartmaneto = await _encargadoRepo.ExisteEncargadoByDepartamentoIdAsync(registerDto.DepartamentoId);
+            if(existeEncargadoEnDepartmaneto) return (IdentityResult.Failed(new IdentityError { Description = "Ya existe un encargado en el departamento"}), null);
             // Crear el usuario
             var appUser = new AppUser
             {
-                UserName = registerDto.UserName,
+                UserName = registerDto.nombreUsuario,
                 Email = registerDto.Email,
                 NombreCompleto = registerDto.NombreCompleto,
                 CarnetIdentidad = registerDto.CarnetIdentidad
@@ -136,14 +140,18 @@ namespace MyApiUCI.Service
                 await _userManager.DeleteAsync(appUser);
                 throw new Exception("Error al guardar el encargado: " + ex.Message);
             }
-                       // Crear y devolver el DTO
+            var roles =  new List<string>();
+            roles.Add("Encargado");
             var newEncargadoDto = new NewEncargadoDto
             {
-                UserName = appUser.UserName,
+                Id = appUser.Id,
+                Activo = appUser.Activo,
+                CarnetIdentidad = appUser.CarnetIdentidad,
+                NombreUsuario = appUser.UserName,
                 Email = appUser.Email,
                 NombreCompleto = appUser.NombreCompleto,
                 Departamento = existeDepartamento.Nombre,
-                Token = await _tokenService.CreateTokenAsync(appUser)
+                Roles = roles
             };
 
             return (IdentityResult.Success, newEncargadoDto);
@@ -163,7 +171,7 @@ namespace MyApiUCI.Service
             // Crear el usuario
             var appUser = new AppUser
             {
-                UserName = registerDto.UserName,
+                UserName = registerDto.nombreUsuario,
                 Email = registerDto.Email,
                 NombreCompleto = registerDto.NombreCompleto,
                 CarnetIdentidad = registerDto.CarnetIdentidad
@@ -199,18 +207,60 @@ namespace MyApiUCI.Service
                 await _userManager.DeleteAsync(appUser);
                 throw new Exception("Error al guardar el estudiante: " + ex.Message);
             }
-            
+            var roles =  new List<string>();
+            roles.Add("Estudiante");
+
             var newEstudianteDto = new NewEstudianteDto
             {
-                UserName = appUser.UserName,
+                Id = appUser.Id,
+                Activo = appUser.Activo,
+                CarnetIdentidad = appUser.CarnetIdentidad,
+                NombreUsuario = appUser.UserName!,
                 Email = appUser.Email,
-                Carrera = existeCarrera.Nombre,
                 NombreCompleto = appUser.NombreCompleto,
-                Facultad = existeFacultad.Nombre,
-                Token = await _tokenService.CreateTokenAsync(appUser)
+                Roles = roles
             };
 
             return (IdentityResult.Success, newEstudianteDto);
+        }
+
+        public async Task<(IdentityResult, NewAdminDto?)> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto)
+        {
+            var appUser = new AppUser
+            {
+                UserName = registroDto.NombreUsuario,
+                Email = registroDto.Email,
+                NombreCompleto = registroDto.NombreCompleto,
+                CarnetIdentidad = registroDto.CarnetIdentidad
+            };
+            var createUserResult = await _userManager.CreateAsync(appUser, registroDto.Password);
+            //validacion d la creacion
+            if (!createUserResult.Succeeded)
+            {
+                return (IdentityResult.Failed(createUserResult.Errors.ToArray()), null);
+            }
+            
+            var roleResult = await _userManager.AddToRoleAsync(appUser, "Admin");
+
+            if (!roleResult.Succeeded)
+            {
+                return (IdentityResult.Failed(roleResult.Errors.ToArray()), null);
+            } 
+            var roles =  new List<string>();
+            roles.Add("Admin");
+
+            var newAdminDto = new NewAdminDto
+            {
+                Id = appUser.Id,
+                Activo = appUser.Activo,
+                CarnetIdentidad = appUser.CarnetIdentidad,
+                NombreUsuario = appUser.UserName!,
+                Email = appUser.Email,
+                NombreCompleto = appUser.NombreCompleto,
+                Roles = roles 
+            };
+
+            return (IdentityResult.Success, newAdminDto);
         }
     }
 }

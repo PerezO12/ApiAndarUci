@@ -23,5 +23,6 @@ namespace MyApiUCI.Interfaces
     
         Task<ResultadoDto> FirmarFormularioAsync(string userId, int id, FormularioFirmarDto formularioDto);
         Task<ResultadoDto> DeleteFormularioEstudianteAsync(string userId, int formularioId);
+        Task<ResultadoDto> DeleteFormularioAdmin(int formularioId);
     }
 }

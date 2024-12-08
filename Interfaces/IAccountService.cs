@@ -10,10 +10,11 @@ using MyApiUCI.Models;
 
 namespace MyApiUCI.Interfaces
 {
-    public interface IAcountService
+    public interface IAccountService
     {
         public Task<(IdentityResult, NewEstudianteDto?)> RegisterEstudianteAsync(RegisterEstudianteDto registerDto);
-        public Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargadoAsync(RegisterEncargadoDto registerDto); 
+        public Task<(IdentityResult, NewEncargadoDto?)> RegisterEncargadoAsync(RegisterEncargadoDto registerDto);
+        public Task<(IdentityResult, NewAdminDto?)> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto); 
         public Task<NewUserDto?> Login(LoginDto loginDto);
         public Task<IdentityResult> CambiarPasswordAsync(string userId,  CambiarPasswordDto cuentaDto);
         //public Task<IdentityResult> RestablecerPasswordAsync(string UserName,  CambiarPasswordDto cuentaDto);

@@ -74,38 +74,63 @@ namespace MyApiUCI.Repository
         }
 
         //Este solo sera utilizado x el administrador de la applicacion x lo q no importa  q tenga una gran carga
-        public async Task<List<Formulario>> GetAllAsync(QueryObjectFormulario query)
+        public async Task<List<FormularioDto>> GetAllAsync(QueryObjectFormulario query)
         {
             try
             {
                 _logger.LogInformation("Obteniendo todos los formularios con los parámetros proporcionados.");
                 var formularios = _context.Formulario
-                    .Where(f => f.Activo == true)
-                    .Include(f => f.Estudiante)
-                        .ThenInclude(e => e!.Carrera)
-                    .Include(f => f.Estudiante!.AppUser)
-                    .Include(f => f.Departamento)
-                    .Include(f => f.Departamento!.Facultad)
-                    .Include(f => f.Encargado)
-                    .Include(f => f.Encargado!.AppUser)
+                    .Where(f => f.Activo == true && f.Firmado ==query.Firmado)
+                    .Select(f => new FormularioDto{
+                        id = f.Id,
+                        NombreEstudiante = f.Estudiante!.AppUser!.NombreCompleto!,
+                        NombreCarrera = f.Estudiante.Carrera!.Nombre,
+                        NombreDepartamento = f.Departamento!.Nombre,
+                        Firmado = f.Firmado,
+                        NombreEncargado = f.Encargado!.AppUser!.NombreCompleto!,
+                        Fechacreacion = f.Fechacreacion,
+                        FechaFirmado = f.FechaFirmado
+                    })
                     .AsQueryable();
+                //busquedas por
+                if (query.Estudiante != null) //Buscar por nombre estudiante
+                {
+                    formularios = formularios.Where(f => f.NombreEstudiante == query.Estudiante);
+                }
+                if (query.Encargado != null) //Buscar por nombre encargado
+                {
+                    formularios = formularios.Where(f => f.NombreEncargado == query.Encargado);
+                }
+                if (query.Carrera != null)//Buscar por nombre Carrera
+                {
+                    formularios = formularios.Where(f => f.NombreCarrera == query.Carrera);
+                }
+                if (query.Departamento != null) //Buscar por nombre departamento
+                {
+                    formularios = formularios.Where(f => f.NombreDepartamento == query.Departamento);
+                }
+                //Ordenar Por
+                if(!string.IsNullOrWhiteSpace(query.OrdenarPor))
+                {
+                    if (query.OrdenarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
+                    {
+                        formularios = query.Descender ? formularios.OrderByDescending(f => f.NombreEstudiante) : formularios.OrderBy(f => f.NombreEstudiante);
+                    }
+                    else if (query.OrdenarPor.Equals("Encargado", StringComparison.OrdinalIgnoreCase))
+                    {
+                        formularios = query.Descender ? formularios.OrderByDescending(f => f.NombreEncargado) : formularios.OrderBy(f => f.NombreEncargado);
+                    }
+                    else if (query.OrdenarPor.Equals("Carrera", StringComparison.OrdinalIgnoreCase))
+                    {
+                        formularios = query.Descender ? formularios.OrderByDescending(f => f.NombreCarrera) : formularios.OrderBy(f => f.NombreCarrera);
+                    }
+                    else if (query.OrdenarPor.Equals("Fecha", StringComparison.OrdinalIgnoreCase))
+                    {
+                        formularios = query.Descender ? formularios.OrderByDescending(f => f.Fechacreacion) : formularios.OrderBy(f => f.Fechacreacion);
+                    }
 
-                if (query.UsuarioId != null) //Buscar por un id de usuario
-                {
-                    formularios = formularios.Where(f => f.Estudiante!.UsuarioId == query.UsuarioId);
+                    
                 }
-                if (query.ListaId.Any()) // buscar por una lista de id de formularios
-                {
-                    formularios = formularios.Where(f => query.ListaId.Contains(f.Id));
-                }
-                //todo: Implemetar busqueda por nombre de estudiante y otras
-                 if (query.DepartamentoId.HasValue)
-                {
-                    formularios = formularios.Where(f => f.DepartamentoId == query.DepartamentoId);
-                } 
-                //TODO:AGREGAR ORDENAMIENTO
-                formularios = formularios.OrderBy(f => f.Id);
-                
                 var skipNumber = (query.NumeroPagina - 1) * query.TamañoPagina;
                 var result = await formularios.Skip(skipNumber).Take(query.TamañoPagina).ToListAsync();
                 _logger.LogInformation("Se han obtenido {Count} formularios.", result.Count);
@@ -124,7 +149,7 @@ namespace MyApiUCI.Repository
                 .Where(e => e.Activo == true && e.Encargado!.AppUser!.Id == userId)
                 .Select(e => new FormularioEncargadoDto{
                     Id = e.Id,
-                    NombreCompletoEstudiante = e.Estudiante!.AppUser!.NombreCompleto,
+                    NombreCompletoEstudiante = e.Estudiante!.AppUser!.NombreCompleto!,
                     Firmado = e.Firmado,
                     NombreCarrera = e.Estudiante!.Carrera!.Nombre,
                     Motivo = e.Motivo,
@@ -174,7 +199,7 @@ namespace MyApiUCI.Repository
                 .Select(e => new FormularioEstudianteDto
                 {
                     Id = e.Id,
-                    NombreEncargado = e.Encargado!.AppUser!.NombreCompleto,
+                    NombreEncargado = e.Encargado!.AppUser!.NombreCompleto!,
                     NombreDepartamento= e.Departamento!.Nombre,
                     Motivo = e.Motivo,
                     Firmado = e.Firmado,
@@ -228,7 +253,7 @@ namespace MyApiUCI.Repository
                 .Select(f => new FormularioEncargadoDto
                 {
                     Id = f.Id,
-                    NombreCompletoEstudiante = f.Estudiante!.AppUser!.NombreCompleto,
+                    NombreCompletoEstudiante = f.Estudiante!.AppUser!.NombreCompleto!,
                     NombreUsuario = f.Estudiante.AppUser.UserName,
                     Email = f.Estudiante.AppUser.Email,
                     CarnetIdentidad = f.Estudiante.AppUser.CarnetIdentidad,

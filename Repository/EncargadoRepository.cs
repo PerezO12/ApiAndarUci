@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Dtos.Encargado;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Dtos.Encargado;
 using MyApiUCI.Helpers;
@@ -28,6 +29,17 @@ namespace MyApiUCI.Repository
         public async Task<Encargado?> DeleteAsync(int id)
         {
             var encargadoModel = await _context.Encargado.FindAsync(id);
+            if(encargadoModel == null) return null;
+
+            encargadoModel.Activo = false;
+
+            await _context.SaveChangesAsync();
+            return encargadoModel;
+        }
+
+        public async Task<Encargado?> DeleteByUserIdAsync(string userId)
+        {
+            var encargadoModel = await _context.Encargado.FirstOrDefaultAsync(e => e.UsuarioId == userId);
             if(encargadoModel == null) return null;
 
             encargadoModel.Activo = false;
@@ -103,23 +115,48 @@ namespace MyApiUCI.Repository
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<Encargado?> GetByUserIdAsync(string id)
+        {
+            return await _context.Encargado
+                .Where(c => c.UsuarioId == id && c.Activo == true)
+                .Include(e => e.AppUser)
+                .Include(e => e.Departamento)
+                    .ThenInclude(f => f!.Facultad)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId)
         {
             return await _context.Encargado.FirstOrDefaultAsync(e => e.Activo && e.DepartamentoId == departamentoId);
         }
-
+        public async Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId)
+        {
+           return await _context.Encargado.AnyAsync(e => e.DepartamentoId == departamentoId && e.Activo == true);
+        }
+ 
         public async Task<Encargado?> GetEncargadoByUserIdAsync(string usuarioId)
         {
             return await _context.Encargado.FirstOrDefaultAsync(e => e.Activo == true && e.UsuarioId == usuarioId);
         }
 
-        public async Task<Encargado?> UpdateAsync(int id, Encargado encargadoModel)
+        public async Task<Encargado?> UpdateAsync(int id, EncargadoUpdateDto encargadoUpdateDto)
         {
             var encargadoExiste = await _context.Encargado.FindAsync(id);
 
             if(encargadoExiste == null) return null;
 
-            encargadoExiste.UpdateEncargado(encargadoModel);
+            encargadoExiste.UpdateEncargado(encargadoUpdateDto);
+            await _context.SaveChangesAsync();
+
+            return encargadoExiste;
+        }
+        public async Task<Encargado?> UpdateEncargadoByUserIdAsync(string usuarioId, EncargadoUpdateDto encargadoUpdateDto)
+        {
+            var encargadoExiste = await _context.Encargado.FirstOrDefaultAsync(e => e.UsuarioId == usuarioId);
+
+            if(encargadoExiste == null) return null;
+
+            encargadoExiste.UpdateEncargado(encargadoUpdateDto);
             await _context.SaveChangesAsync();
 
             return encargadoExiste;

@@ -10,7 +10,7 @@ namespace MyApiUCI.Interfaces
 {
     public interface ICarreraRepository
     {
-        public Task<List<Carrera>> GetAllAsync(QueryObject query);
+        public Task<List<Carrera>> GetAllAsync(QueryObjectCarrera query);
         public Task<Carrera?> GetByIdAsync( int id ); 
         public Task<Carrera> CreateAsync( Carrera carreraModel );
         public Task<Carrera?> UpdateAsync( int id, Carrera carreraModel );

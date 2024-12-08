@@ -204,7 +204,7 @@ namespace MyApiUCI.Controller
                 };
             }     
 
-            return Ok(new{ msg = "Formulario actualizado correctamente"     });
+            return Ok(new{ msg = "Formulario actualizado correctamente"});
         }
 
         //solo encargado
@@ -242,7 +242,6 @@ namespace MyApiUCI.Controller
         public async Task<IActionResult> DeleteFormularioEstudiante([FromRoute]int id)
         {
             var userId = User.FindFirst("UsuarioId")?.Value;
-            
             if(userId == null ) return BadRequest("Token no valido");
 
             var resultado = await _formularioService.DeleteFormularioEstudianteAsync(userId, id);
@@ -260,5 +259,18 @@ namespace MyApiUCI.Controller
 
             return Ok(new { msg = resultado.msg });
         }
+        //agregar prote
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpDelete("admin/{id}")]
+        public async Task<IActionResult> DeleteFormularioAdmin([FromRoute] int id)
+        {
+            var resultado = await _formularioService.DeleteFormularioAdmin(id);
+            if(resultado.Error){
+                return BadRequest(new{ msg= resultado.msg} );
+            }
+            return Ok(new { msg = resultado.msg });
+        }
+
+
     }
 }

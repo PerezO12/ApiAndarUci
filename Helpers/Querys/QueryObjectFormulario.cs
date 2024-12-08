@@ -8,13 +8,13 @@ namespace MyApiUCI.Helpers
     public class QueryObjectFormulario
     {
         //buscar por
-        public string? UsuarioId { get; set; } = null;
-        public string? NombreEstudiante { get; set; } = null;
-        public int? DepartamentoId { get;set; } = null;
-        public string? DepartamentoNombre { get; set; }
-        public List<int> ListaId {get; set; }= new List<int>();
+        public string? Estudiante { get; set; } = null;
+        public string? Encargado { get; set; } = null;
+        public string? Carrera { get; set; } = null;
+        public string? Departamento { get; set; }
+        public bool Firmado { get; set; } = false;
         //Ordenar Por
-        public string? OrdernarPor { get; set; } = null; //Para ordenar
+        public string? OrdenarPor { get; set; } = "Fecha"; //Para ordenar
         public bool Descender { get; set; } = false; 
         public int NumeroPagina { get; set; } = 1; //Paginainicial por defecto 1
         public int TamañoPagina { get; set; } = 10; //Cantidad d elementos a retornar 

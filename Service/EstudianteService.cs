@@ -41,6 +41,23 @@ namespace MyApiUCI.Service
         {
             return await _estudianteRepo.GetEstudianteByUserId(userId);
         }
+        public async Task<EstudianteDto?> GetEstudianteWithByUserId(string userId)
+        {
+            var estudiante = await _estudianteRepo.GetEstudianteByUserId(userId);
+            if(estudiante == null) return null;
+            return new EstudianteDto{
+                Id = estudiante.Id,
+                UsuarioId = estudiante.UsuarioId,
+                NombreCompleto = estudiante.AppUser!.NombreCompleto,
+                CarnetIdentidad = estudiante.AppUser.CarnetIdentidad,
+                NombreUsuario = estudiante.AppUser.UserName,
+                Email = estudiante.AppUser.Email,
+                NumeroTelefono = estudiante.AppUser.PhoneNumber,
+                NombreCarrera = estudiante.Carrera!.Nombre,
+                NombreFacultad = estudiante.Facultad!.Nombre
+            };
+        }
+
 
         public async Task<List<EstudianteDto>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query)
         {
@@ -59,6 +76,7 @@ namespace MyApiUCI.Service
             }).ToList();
             
             return estudiantesDto;
-        }   
+        }
+
     }
 }

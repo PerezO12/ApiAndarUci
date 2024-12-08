@@ -16,7 +16,9 @@ namespace MyApiUCI.Mappers
             {
                 Id = carrera.Id,
                 Nombre = carrera.Nombre,
-                FacultadId = carrera.FacultadId
+                Facultad = carrera.Facultad!.Nombre,
+                FechaCreacion = carrera.Fechacreacion
+                
             };
         }
         public static Carrera toCarreraFromUpdate(this UpdateCarreraDto carreraDto)

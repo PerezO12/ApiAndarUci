@@ -14,7 +14,8 @@ namespace MyApiUCI.Mappers
             return new FacultadDto
             {
                 Id = facultadModel.Id, //Borrar
-                Nombre = facultadModel.Nombre
+                Nombre = facultadModel.Nombre,
+                FechaCreacion = facultadModel.FechaCreacion
             };
         }
         public static Facultad toFacultadFromCreate(this FacultadCreateDto facultadDto)

@@ -15,6 +15,7 @@ namespace MyApiUCI.Dtos.Encargado
         public string? Email { get; set; } = string.Empty; 
         public string? NumeroTelefono { get; set; } = string.Empty;
         public string DepartamentoNombre { get; set; } = string.Empty;
+        public string? FacultadNombre { get; set; }
         public int? DepartamentoId {get; set;} 
         //ver si agrego la firma digital o no
     }

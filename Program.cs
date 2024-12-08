@@ -1,9 +1,9 @@
+using ApiUCI.Data;
 using ApiUCI.Interfaces;
 using ApiUCI.Middleware;
 using ApiUCI.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -28,10 +28,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString)
 );
 
-// TODO: LOGS... ESTOY PROBANDO
-builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
-builder.Services.AddDbContext<ApplicationDbContext>();
-
 // TODO: CAMBIAR CORS DESPUES
 builder.Services.AddCors(options =>
 {
@@ -46,7 +42,7 @@ builder.Services.AddCors(options =>
 // Configuración de Swagger para integrarlo con el JWT
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Andar", Version = "v1" });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -80,7 +76,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 7;
+    options.Password.RequiredLength = 8;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -124,14 +120,13 @@ builder.Services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
 builder.Services.AddScoped<ICarreraRepository, CarreraRepository>();
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 builder.Services.AddScoped<IEncargadoRepository, EncargadoRepository>();
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
 
 // Servicios
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 builder.Services.AddScoped<IEncargadoService, EncargadoService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAcountService, AccountService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFormularioService, FormularioService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
@@ -146,45 +141,43 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var app = builder.Build();
 
-// Cambiar código, momentáneo
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var services = scope.ServiceProvider;
+    var configuration = services.GetRequiredService<IConfiguration>();
     try
     {
-        if (await dbContext.Database.CanConnectAsync())
-        {
-            Console.WriteLine("Conexión exitosa a la base de datos.");
-        }
-        else
-        {
-            Console.WriteLine("No se pudo conectar a la base de datos.");
-            Environment.FailFast("Fallo al conectar a la base de datos, la aplicación no puede continuar.");
-        }
+        await SeedData.InitializeAsync(services, configuration);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Error al conectar a la base de datos: {ex.Message}");
-        Environment.FailFast("Error crítico al conectar a la base de datos, la aplicación no puede continuar.");
+        // Manejo de errores (log o salida en consola)
+        Console.WriteLine($"Error en la creación del usuario Admin: {ex.Message}");
     }
 }
 
-// Configure the HTTP request pipeline
-app.UseSwagger();
-app.UseSwaggerUI();
 
-// Cambiar luego
+
+// Configure the HTTP request pipeline
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Middleware de CORS (antes de la autenticación)
 app.UseCors("AllowAllOrigins");
-//middlewares personalisados
 
 app.UseHttpsRedirection();
 
-//identity
-//app.UseAuthentication();
+// Middleware de autenticación y autorización
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Tu middleware personalizado de validación de token
+// Middleware personalizado (asegúrate de colocarlo después de UseAuthentication y antes de MapControllers)
 app.UseMiddleware<TokenValidationMiddleware>();
-// Mapeo controladores
+
+// Mapeo de controladores
 app.MapControllers();
 
 app.Run();

@@ -10,7 +10,7 @@ namespace MyApiUCI.Dtos.Cuentas
     public class RegisterEstudianteDto
     {
         [Required]
-        public string? UserName { get; set; }
+        public string? nombreUsuario { get; set; }
         
         [Required]
         [EmailAddress]
@@ -24,7 +24,7 @@ namespace MyApiUCI.Dtos.Cuentas
         public string NombreCompleto { get; set; } = null!;
 
         [Required]
-        [StringLength(11, MinimumLength = 11, ErrorMessage = "El Carnet de Identidad debe tener exactamente 11 caracteres.")]
+        [StringLength(11, MinimumLength = 11, ErrorMessage = "El Carnet de Identidad debe tener exactamente 11 números.")]
         [RegularExpression("^[0-9]*$", ErrorMessage = "El Carnet de Identidad solo debe contener números.")]
         public string CarnetIdentidad { get; set; } = null!;
 

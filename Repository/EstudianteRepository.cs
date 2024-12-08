@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Dtos.Estudiante;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
+using MyApiUCI.Dtos.Estudiante;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
@@ -24,20 +26,55 @@ namespace MyApiUCI.Repository
 
         public async Task<Estudiante> CreateAsync(Estudiante estudianteModel)
         {
-            await _context.Estudiante.AddAsync(estudianteModel);
-            await _context.SaveChangesAsync();
-            return estudianteModel;
+            try
+            {
+                await _context.Estudiante.AddAsync(estudianteModel);
+                await _context.SaveChangesAsync();
+                return estudianteModel;
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
         }
 
         public async Task<Estudiante?> DeleteAsync(int id)
         {
-            var estudianteModel = await _context.Estudiante.FindAsync(id);
-            if(estudianteModel == null) return null;
+            try
+            {
+                var estudianteModel = await _context.Estudiante.FindAsync(id);
+                if(estudianteModel == null) return null;
 
-            estudianteModel.Activo = false;
+                estudianteModel.Activo = false;
 
-            await _context.SaveChangesAsync();
-            return estudianteModel;
+                await _context.SaveChangesAsync();
+                return estudianteModel;
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
+        }
+        public async Task<Estudiante?> DeleteByUserIdAsync(string userId)
+        {
+            try
+            {
+                var estudianteModel = await _context.Estudiante.FirstOrDefaultAsync( e => e.UsuarioId == userId);
+                if(estudianteModel == null) return null;
+
+                estudianteModel.Activo = false;
+
+                await _context.SaveChangesAsync();
+                return estudianteModel;
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
+        
         }
 
         public async Task<List<Estudiante>> GetAllAsync(QueryObjectEstudiante query)
@@ -131,16 +168,31 @@ namespace MyApiUCI.Repository
 
         public async Task<Estudiante?> GetEstudianteByUserId(string usuarioId)
         {
-            return await _context.Estudiante.FirstOrDefaultAsync(e => e.Activo == true && e.UsuarioId == usuarioId);
+            return await _context.Estudiante
+                .Where(c => c.UsuarioId == usuarioId && c.Activo == true)
+                .Include(e => e.AppUser)
+                .Include(e => e.Carrera)
+                .Include(e => e.Facultad)
+                .FirstOrDefaultAsync();
+        
         }
 
-        public async Task<Estudiante?> UpdateAsync(int id, Estudiante estudianteModel)
+        public async Task<Estudiante?> UpdateAsync(int id, EstudianteUpdateDto estudianteUpdateDto)
         {
             var estudianteExistente = await _context.Estudiante.FindAsync(id);
 
             if(estudianteExistente == null) return null;
 
-            estudianteExistente.UpdateEstudiante(estudianteModel);
+            estudianteExistente.UpdateEstudiante(estudianteUpdateDto);
+            await _context.SaveChangesAsync();
+            return estudianteExistente;
+        }
+        public async Task<Estudiante?> UpdateEstudianteByUserIdAsync(string id, EstudianteUpdateDto estudianteUpdateDto)
+        {
+            var estudianteExistente = await _context.Estudiante.FirstOrDefaultAsync(e => e.UsuarioId == id);
+            if(estudianteExistente == null) return null;
+
+            estudianteExistente.UpdateEstudiante(estudianteUpdateDto);
             await _context.SaveChangesAsync();
             return estudianteExistente;
         }

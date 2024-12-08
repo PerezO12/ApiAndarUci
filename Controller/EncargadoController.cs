@@ -26,7 +26,7 @@ namespace MyApiUCI.Controller
             _userManager = userManager;
         }
 
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectEncargado query)
         { 
@@ -42,6 +42,7 @@ namespace MyApiUCI.Controller
            var encargados = await _encargadoService.GetAllEncargadosWithDetailsAsync(query);
            return Ok(encargados);
         }
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
@@ -51,50 +52,73 @@ namespace MyApiUCI.Controller
             return Ok(encargadoDto);
         }
 
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpGet("usuario/{id}")]
+        public async Task<IActionResult> GetByUserId([FromRoute] string id)
+        {
+            var encargado = await _encargadoService.GetByUserIdWithUserId(id);
+            if(encargado == null) return NotFound(new {msg = "El encargado no existe"});
+
+            return Ok(encargado);
+        }
+
         //Generar sus llaves publicas llaves privadas solo acceder encargados
         [HttpPost("cambiar-llave")]
         public async Task<IActionResult> CambiarLlavePublica([FromBody] EncargadoCambiarLlaveDto encargado) {
-            if(!ModelState.IsValid) return  BadRequest("No valido");
-            
-            var usuarioId = User.FindFirst("UsuarioId")?.Value;
-            if (usuarioId == null)
+            if(!ModelState.IsValid) return  BadRequest(new {msg="No valido"});
+            try
             {
-                return BadRequest("Token no valido.");
+                var usuarioId = User.FindFirst("UsuarioId")?.Value;
+                if (usuarioId == null)
+                {
+                    return BadRequest(new {msg="Token no valido."});
+                }
+                var usuario = await _userManager.FindByIdAsync(usuarioId);
+                if(usuario == null ) return NotFound(new {msg="Usuario no existe"}); 
+
+                var result = await _signInManager.CheckPasswordSignInAsync(usuario, encargado.Password, false);
+                if(!result.Succeeded) return NotFound(new {msg="Usuario/Password incorrectos"});
+
+                var llaves = await _encargadoService.CambiarLlavePublicalAsync(usuarioId, encargado);
+                
+                if(llaves == null) return BadRequest(new {msg="Llave publica no valida"});
+                
+                return Ok(llaves);
             }
-            var usuario = await _userManager.FindByIdAsync(usuarioId);
-            if(usuario == null ) return NotFound("Usuario no existe"); 
-
-            var result = await _signInManager.CheckPasswordSignInAsync(usuario, encargado.Password, false);
-            if(!result.Succeeded) return NotFound("Usuario/Password incorrectos");
-
-            var llaves = await _encargadoService.CambiarLlavePublicalAsync(usuarioId, encargado);
-            
-            if(llaves == null) return BadRequest("Llave publica no valida");
-            
-            return Ok(llaves);
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                return StatusCode(500, "Contactar al administrador");
+            }
         }
 
         [HttpPost("generar-llaves")]
         public async Task<IActionResult> GenerarLlaves([FromBody] EncargadoGenerarLLaveDto encargado) {
-            if(!ModelState.IsValid) return  BadRequest("No valido");
+            if(!ModelState.IsValid) return  BadRequest(new {msg="No valido"});
             
-            
-            var usuarioId = User.FindFirst("UsuarioId")?.Value;
-            if (usuarioId == null)
-            {
-                return BadRequest("Token no valido.");
+            try{
+                var usuarioId = User.FindFirst("UsuarioId")?.Value;
+                if (usuarioId == null)
+                {
+                    return BadRequest(new {msg="Token no valido."});
+                }
+                var usuario = await _userManager.FindByIdAsync(usuarioId);
+                if(usuario == null ) return NotFound(new {msg="Usuario no existe"}); 
+
+                var result = await _signInManager.CheckPasswordSignInAsync(usuario, encargado.Password, false);
+                if(!result.Succeeded) return NotFound(new {msg="Usuario/Password incorrectos"});
+
+                var llaves = await _encargadoService.GenerarFirmaDigitalAsync(usuarioId);
+                
+                if(llaves == null) return StatusCode(500, "Contactar al administrador");
+
+                return Ok(llaves);
             }
-            var usuario = await _userManager.FindByIdAsync(usuarioId);
-            if(usuario == null ) return NotFound("Usuario no existe"); 
-
-            var result = await _signInManager.CheckPasswordSignInAsync(usuario, encargado.Password, false);
-            if(!result.Succeeded) return NotFound("Usuario/Password incorrectos");
-
-            var llaves = await _encargadoService.GenerarFirmaDigitalAsync(usuarioId);
-            
-            if(llaves == null) return StatusCode(500, "Contactar al administrador");
-
-            return Ok(llaves);
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                return StatusCode(500, new {msg= "Contactar al administrador"});
+            }
         }
     }
 }

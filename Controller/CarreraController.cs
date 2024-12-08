@@ -25,72 +25,114 @@ namespace MyApiUCI.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
+        public async Task<IActionResult> GetAll([FromQuery] QueryObjectCarrera query)
         {
-            var carreraModel = await _carreraRepo.GetAllAsync(query);
-            var carreraDto = carreraModel.Select( c => c.toCarreraDto());
+            try
+            {
+                var carreraModel = await _carreraRepo.GetAllAsync(query);
+                var carreraDto = carreraModel.Select( c => c.toCarreraDto());
 
-            return Ok(carreraDto);
+                return Ok(carreraDto);
+            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                return StatusCode(500, new { msg = "Error al obtener las Carreras, contacte al administrador" });
+            }
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByID([FromRoute] int id)
         {
-            var carrera = await _carreraRepo.GetByIdAsync(id);
-            
-            if(carrera == null) return NotFound("Carrera no existe");
+            try
+            {
+                var carrera = await _carreraRepo.GetByIdAsync(id);
+                
+                if(carrera == null) return NotFound("Carrera no existe");
 
 
-            return Ok(carrera.toCarreraDto());
+                return Ok(carrera.toCarreraDto());
+            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                return StatusCode(500, new { msg = "Error al obtener la carrera, informe al administrador" });
+            }
         }
 
         //[Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCarreraDto carreraDto)
         {
-            if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
+            try
+            {
+                if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
 
-            if( !await _facuRepo.FacultyExists(carreraDto.FacultadId)) return NotFound("Facultad no existe");
+                if( !await _facuRepo.FacultyExists(carreraDto.FacultadId)) return NotFound("Facultad no existe");
 
-            var carreraModel = await _carreraRepo.CreateAsync(carreraDto.toCarreraFromCreate());
+                var carreraModel = await _carreraRepo.CreateAsync(carreraDto.toCarreraFromCreate());
 
-            return CreatedAtAction(nameof(GetByID), new{Id = carreraModel.Id}, carreraModel.toCarreraDto());
+                return CreatedAtAction(nameof(GetByID), new{Id = carreraModel.Id}, carreraModel.toCarreraDto());
+            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                return StatusCode(500, new { msg = "Error al crear la carrera, informe al administrador" });
+            }
 
         }
         //[Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id ,[FromBody] UpdateCarreraDto carreraDto)
         {
-            if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
-            
-            if( !await _facuRepo.FacultyExists(carreraDto.FacultadId)) return NotFound("Facultad no existe");
+            try
+            {
+                if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
+                
+                if( !await _facuRepo.FacultyExists(carreraDto.FacultadId)) return NotFound("Facultad no existe");
 
-            var carreraModel = await _carreraRepo.UpdateAsync(id, carreraDto.toCarreraFromUpdate());
-            
-            if(carreraModel == null) return NotFound("Esta carrera no existe");
-
-            return Ok(carreraModel.toCarreraDto());
+                var carreraModel = await _carreraRepo.UpdateAsync(id, carreraDto.toCarreraFromUpdate());
+                
+                if(carreraModel == null) return NotFound("Esta carrera no existe");
+                
+                return Ok(carreraModel.toCarreraDto());
+            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                return StatusCode(500, new { msg = "Error al actualizar la carrera, informe al administrador" });
+            }
             
         }
         //[Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var carreraModel = await _carreraRepo.DeleteAsync(id);
-            if(carreraModel == null) return NotFound("La carrera no existe");
-            
-            return Ok(carreraModel.toCarreraDto());
+            try
+            {
+                var carreraModel = await _carreraRepo.DeleteAsync(id);
+                if(carreraModel == null) return NotFound("La carrera no existe");
+                
+                return Ok(carreraModel.toCarreraDto());
+            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                return StatusCode(500, new { msg = "Error al borrar la carrera, informe al administrador" });
+            }
         }
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdatePatch([FromRoute] int id, [FromBody] PatchCarreraDto carreraDto)
         {
-            if(!ModelState.IsValid) return BadRequest("El modelo no es válido");
+            try
+            {
+                if(!ModelState.IsValid) return BadRequest("El modelo no es válido");
 
-            var carrera = await _carreraRepo.PatchAsync(id, carreraDto);
-            
-            if(carrera == null) return NotFound("La carrera no existe");
-            
-            return Ok(carrera.toCarreraDto());
+                var carrera = await _carreraRepo.PatchAsync(id, carreraDto);
+                
+                if(carrera == null) return NotFound("La carrera no existe");
+                
+                return Ok(carrera.toCarreraDto());
+            }
+            catch(Exception ex) {
+                Console.Write(ex.Message);
+                return StatusCode(500, new { msg = "Error al actualizar la carrera, informe al administrador" });
+            }
         }
     }
 }

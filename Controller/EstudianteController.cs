@@ -49,5 +49,13 @@ namespace MyApiUCI.Controller
             
             return Ok(estudiante);
         }
+        [HttpGet("usuario/{id}")]
+        public async Task<IActionResult> GetByUserId([FromRoute] string id)
+        {
+            var estudiante = await _estudianteService.GetEstudianteWithByUserId(id);
+            if(estudiante == null) return NotFound(new {msg = "El estudiante no existe"});
+
+            return Ok(estudiante);
+        }
     }
 }

@@ -1,13 +1,22 @@
 {
-  "ConnectionStrings": {
-    "PostgreSQLConnection" : "Tu cadena de coneccion"
-  },
-
   "Logging": {
     "LogLevel": {
       "Default": "Information",
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "AllowedHosts": "*"
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "PostgreSQLConnection" : ""
+  },
+  "JWT": {
+    "Issuer": "",
+    "Audience": "",
+    "SigningKey": ""
+  },
+  "AdminSettings": {
+    "AdminEmail": "",
+    "AdminUsername": "",
+    "AdminPassword": ""
+  }
 }

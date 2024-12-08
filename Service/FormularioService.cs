@@ -92,6 +92,24 @@ namespace MyApiUCI.Service
                 };;
         }
 
+        public async Task<ResultadoDto> DeleteFormularioAdmin(int formularioId)
+        {
+            var formulario = await _formularioRepo.GetByIdAsync(formularioId);
+                if(formulario == null) {
+                    return new ResultadoDto{
+                        msg = "El formulario no existe",
+                        TipoError = "BadRequest",
+                        Error = true
+                    };
+                }
+            await _formularioRepo.DeleteAsync(formularioId);
+            return new ResultadoDto{
+                msg = "Formulario eliminado exitosamente",
+                TipoError = "Ok",
+                Error = false
+            };
+        }
+
         public async Task<ResultadoDto> DeleteFormularioEstudianteAsync(string userId, int formularioId)
         {
             try
@@ -122,7 +140,7 @@ namespace MyApiUCI.Service
                 }
                 await _formularioRepo.DeleteAsync(formularioId);
                 return new ResultadoDto{
-                        msg = "Formulario eliminado correctamente",
+                        msg = "Formulario eliminado exitosamente",
                         TipoError = "Ok",
                         Error = false
                     };
@@ -270,27 +288,11 @@ namespace MyApiUCI.Service
 
         public async Task<List<FormularioDto>> GetAllFormulariosWhithDetailsAsync(QueryObjectFormulario query)
         {
-             var formulariosModel = await _formularioRepo.GetAllAsync(query);
+             var formularios = await _formularioRepo.GetAllAsync(query);
 
-            //TODO: AGREGAR LOS DATOS DLE ENCARGADO Q FIRMA
-            var formulariosWhitDetails = formulariosModel.Select( f => new FormularioDto {
-                id = f.Id,
-                NombreCompletoEstudiante = f.Estudiante!.AppUser!.NombreCompleto,
-                CarnetIdentidadEstudiante = f.Estudiante!.AppUser.CarnetIdentidad,
-                NombreCarrera = f.Estudiante!.Carrera!.Nombre,
-                EmailEstudiante = f.Estudiante!.AppUser.Email,
-                NombreDepartamento = f.Departamento!.Nombre,
-                NombreFacultad = f.Departamento!.Facultad!.Nombre,
-                Motivo = f.Motivo,
-                NombreEncargado = f.Encargado!.AppUser!.NombreCompleto,
-                Firmado = f.Firmado,
-                FechaFirmado = f.FechaFirmado,
-                Fechacreacion = f.Fechacreacion
+            Console.WriteLine($"Cantidad de formularios después de la combinación: {formularios.Count}");
 
-            }).ToList();
-            Console.WriteLine($"Cantidad de formularios después de la combinación: {formulariosWhitDetails.Count}");
-
-            return formulariosWhitDetails;
+            return formularios;
 
      }
 
@@ -311,7 +313,7 @@ namespace MyApiUCI.Service
             //TODO:Arreglar como arriba
             return new FormularioDto {
                 id = formularioModel.Id,
-                NombreCompletoEstudiante = formularioModel.Estudiante!.AppUser!.NombreCompleto,
+                NombreEstudiante = formularioModel.Estudiante!.AppUser!.NombreCompleto,
                 NombreUsuarioEstudiante = formularioModel.Estudiante.AppUser.UserName,
                 CarnetIdentidadEstudiante = formularioModel.Estudiante.AppUser.CarnetIdentidad,
                 EmailEstudiante = formularioModel.Estudiante.AppUser.Email,

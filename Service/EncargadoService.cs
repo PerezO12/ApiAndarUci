@@ -26,25 +26,23 @@ namespace MyApiUCI.Service
 
         public async Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto)
         {
-            var encargadosTask = _encargadoRepo.GetAllAsync(new QueryObjectEncargado { UsuarioId = userId });
-            var encargados = await encargadosTask;
-            var encargado = encargados.FirstOrDefault();
-
-            if(encargado == null) return null;
-
             try{
-                    // Decodificar la llave pública en base64
-                    byte[] llavePublicaBytes = Convert.FromBase64String(encargadoDto.LlavePublica);
+                byte[] llavePublicaBytes = Convert.FromBase64String(encargadoDto.LlavePublica); // Decodificar la llave pública en base64
+                using (var rsa = RSA.Create())
+                {
+                    rsa.ImportSubjectPublicKeyInfo(llavePublicaBytes, out _);
+                }
 
-                    using (var rsa = RSA.Create())
-                    {
-                        rsa.ImportSubjectPublicKeyInfo(llavePublicaBytes, out _);
-                    }
-                    encargado.LlavePublica = llavePublicaBytes;
-                    await _encargadoRepo.UpdateAsync(encargado.Id, encargado);
-                    return new EncargadoFirmaDto{
-                        LlavePublica = encargadoDto.LlavePublica
-                    };
+                var encargado = await _encargadoRepo
+                    .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto{
+                        LlavePublica = llavePublicaBytes
+                    });
+                if(encargado == null) return null;
+
+                return new EncargadoFirmaDto{
+                    LlavePublica = encargadoDto.LlavePublica
+                };
+                
                 } catch(FormatException)
                 {
                     return null; 
@@ -58,24 +56,21 @@ namespace MyApiUCI.Service
 
         public async Task<EncargadoFirmaDto?> GenerarFirmaDigitalAsync(string userId)
         {
-            var encargadosTask = _encargadoRepo.GetAllAsync(new QueryObjectEncargado { UsuarioId = userId });
-            var encargados = await encargadosTask;
-            var encargado = encargados.FirstOrDefault();
-
-            if(encargado == null) return (null); 
-
-            //TODO:si viene alguna firma digital publica la comproabmos y guardamos, falta hacer
             using var rsaGenerado = RSA.Create(2048);
+            var llavePublicaByte = rsaGenerado.ExportSubjectPublicKeyInfo();
+            //var encargado = await _encargadoRepo.GetEncargadoByUserIdAsync(userId);
+            var encargado = await _encargadoRepo
+                .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto{
+                    LlavePublica = llavePublicaByte
+            });
+            if(encargado == null || encargado.LlavePublica == null) return (null); 
 
-            encargado.LlavePublica = rsaGenerado.ExportSubjectPublicKeyInfo();
-            await _encargadoRepo.UpdateAsync(encargado.Id, encargado);
-
-            string llavePublica = Convert.ToBase64String(encargado.LlavePublica);
-            string llavePrivada = Convert.ToBase64String(rsaGenerado.ExportPkcs8PrivateKey());
+            string llavePublicaString = Convert.ToBase64String(encargado.LlavePublica);
+            string llavePrivadaString = Convert.ToBase64String(rsaGenerado.ExportPkcs8PrivateKey());
 
             return (new EncargadoFirmaDto{
-                LlavePrivada = llavePrivada,
-                LlavePublica = llavePublica
+                LlavePrivada = llavePrivadaString,
+                LlavePublica = llavePublicaString
             });
         }
 
@@ -123,6 +118,30 @@ namespace MyApiUCI.Service
         public async Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId)
         {
             return await _encargadoRepo.GetEncargadoByDepartamentoId(departamentoId);
+        }
+
+        public async Task<EncargadoDto?> GetByUserIdWithUserId(string id)
+        {
+            var encargado = await _encargadoRepo.GetByUserIdAsync(id);
+            if(encargado == null) return null;
+
+            return new EncargadoDto{
+                Id = encargado.Id,
+                UsuarioId = encargado.UsuarioId,
+                DepartamentoNombre = encargado.Departamento!.Nombre,
+                DepartamentoId = encargado.Departamento.Id,
+                FacultadNombre = encargado.Departamento.Facultad?.Nombre,
+                NombreCompleto = encargado.AppUser!.NombreCompleto,
+                CarnetIdentidad = encargado.AppUser.CarnetIdentidad,
+                NombreUsuario = encargado.AppUser.UserName,
+                Email = encargado.AppUser.Email,
+                NumeroTelefono = encargado.AppUser.PhoneNumber
+            };
+        }
+
+        public async Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId)
+        {
+            return await _encargadoRepo.ExisteEncargadoByDepartamentoIdAsync(departamentoId);
         }
     }
 }

@@ -13,9 +13,11 @@ namespace MyApiUCI.Interfaces
     {
         public Task<List<EncargadoDto>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query);
         public Task<EncargadoDto?> GetByIdEncargadoWithDetailsAsync(int id);
+        public Task<EncargadoDto?> GetByUserIdWithUserId(string id);
         public Task<Encargado?> GetEncaradoByUserId(string userId);
         public Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId);
         public Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto);
         public Task<EncargadoFirmaDto?> GenerarFirmaDigitalAsync(string userId);
+        Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId);
     }
 }

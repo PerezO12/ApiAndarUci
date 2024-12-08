@@ -1,3 +1,4 @@
+using ApiUCI.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
@@ -10,19 +11,28 @@ namespace MyApiUCI.Repository
     
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<FacultadRepository> _logger;
 
-        public FacultadRepository(ApplicationDbContext context)
+        public FacultadRepository(ApplicationDbContext context, ILogger<FacultadRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<Facultad> CreateAsync(Facultad facultadModel)
         {
-            await _context.Facultad.AddAsync(facultadModel);
-            await _context.SaveChangesAsync();
-            return facultadModel;
+            try{
+                await _context.Facultad.AddAsync(facultadModel);
+                await _context.SaveChangesAsync();
+                return facultadModel;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"Error al crear la facultad: {ex.Message}");
+                throw;
+            }
         }
-
+        //TODO:AGREGAR LOGGER
         public async Task<Facultad?> DeleteAsync(int id)
         {
             var facultadModel = await _context.Facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
@@ -41,18 +51,13 @@ namespace MyApiUCI.Repository
             return await _context.Facultad.AnyAsync(f => f.Id == id && f.Activo == true);
         }
 
-        public async Task<List<Facultad>> GetAllAsync(QueryObject query)
+        public async Task<List<Facultad>> GetAllAsync(QueryObjectFacultad query)
         {
             var facultades = _context.Facultad.Where(f => f.Activo == true).AsQueryable();
 
-            if (query.ListaId.Any())
+            if (!string.IsNullOrWhiteSpace(query.Facultad))
             {
-                facultades = facultades.Where(f => query.ListaId.Contains(f.Id));
-            }
-
-            if (!string.IsNullOrWhiteSpace(query.Nombre))
-            {
-                facultades = facultades.Where(f => f.Nombre.ToLower() == query.Nombre.ToLower());
+                facultades = facultades.Where(f => f.Nombre.ToLower() == query.Facultad.ToLower());
             }
 
             // Ordenar
@@ -62,9 +67,9 @@ namespace MyApiUCI.Repository
                 {
                     facultades = query.Descender ? facultades.OrderByDescending(f => f.Nombre) : facultades.OrderBy(f => f.Nombre);
                 }
-                else if (query.OrdernarPor.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                else if (query.OrdernarPor.Equals("Fecha", StringComparison.OrdinalIgnoreCase))
                 {
-                    facultades = query.Descender ? facultades.OrderByDescending(f => f.Id) : facultades.OrderBy(f => f.Id);
+                    facultades = query.Descender ? facultades.OrderByDescending(f => f.FechaCreacion) : facultades.OrderBy(f => f.FechaCreacion);
                 }
             }
 
