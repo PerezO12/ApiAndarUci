@@ -22,18 +22,18 @@ namespace ApiUCI.Service
         private readonly UserManager<AppUser> _userManager;
         private readonly ApplicationDbContext _context;
         private readonly IEstudianteRepository _estudianteRepo;
-        private readonly IEncargadoRepository _encargadoRepo;
+        private readonly IEncargadoService _encargadoService;
         public UsuarioService(
             UserManager<AppUser> usuarioManager,
             ApplicationDbContext context,
             IEstudianteRepository estudianteRepo,
-            IEncargadoRepository encargadoRepo
+            IEncargadoService encargadoService
             )
         {
             _userManager = usuarioManager;
             _context = context;
             _estudianteRepo = estudianteRepo;
-            _encargadoRepo = encargadoRepo;
+            _encargadoService = encargadoService;
             
         }
 
@@ -97,7 +97,7 @@ namespace ApiUCI.Service
                     } 
                 }
                 if(rol.Contains("Encargado")) {
-                    var result = await _estudianteRepo.DeleteByUserIdAsync(usuarioId);
+                    var result = await _encargadoService.DeleteByUserIdAsync(usuarioId);
                     if(result == null) 
                     {
                         return new ResultadoDto{
@@ -151,12 +151,12 @@ namespace ApiUCI.Service
                     }
                     else if(usuarioUpdateDto.Roles.Contains("Encargado"))
                     {
-                        var encargado = await _encargadoRepo
+                        var encargado = await _encargadoService
                         .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto {
                             DepartamentoId = usuarioUpdateDto.DepartamentoId,
                             Activo = usuarioUpdateDto.Activo
                         });
-                        if(encargado == null) return IdentityResult.Failed(new IdentityError { Description = "Estudiante no encontrado"});
+                        if(encargado == null) return IdentityResult.Failed(new IdentityError { Description = "Encargado no encontrado"});
                     }
 
                 }//si hay un cambio de rol
@@ -175,12 +175,12 @@ namespace ApiUCI.Service
                     }
                     else if(usuarioUpdateDto.Roles.Contains("Encargado"))//encargado
                     {   //si vamos a crear un encargado verificamos q no existe un encargado en el departamento
-                        var existeEncargadoDepartamento = await _encargadoRepo.ExisteEncargadoByDepartamentoIdAsync(usuarioUpdateDto.DepartamentoId);
+                        var existeEncargadoDepartamento = await _encargadoService.ExisteEncargadoByDepartamentoIdAsync(usuarioUpdateDto.DepartamentoId);
                         if(existeEncargadoDepartamento)
                         {
                             return IdentityResult.Failed(new IdentityError { Description = "Ya existe un encargado en el departamento"});
                         }
-                        await _encargadoRepo
+                        await _encargadoService
                             .CreateAsync( new Encargado {
                                             UsuarioId = userId,
                                             DepartamentoId = usuarioUpdateDto.DepartamentoId
@@ -199,7 +199,7 @@ namespace ApiUCI.Service
                     }
                     else if(rolsActual.Contains("Encargado"))
                     {
-                        await _encargadoRepo.DeleteByUserIdAsync(userId);
+                        await _encargadoService.DeleteByUserIdAsync(userId);
                         await _userManager.RemoveFromRoleAsync(usuario, "Encargado");
                     }
                     else if(rolsActual.Contains("Admin"))
@@ -234,7 +234,7 @@ namespace ApiUCI.Service
                 }   
                 else if(usuarioUpdateDto.Roles.Contains("Encargado"))
                 {
-                    await _encargadoRepo.DeleteByUserIdAsync(userId);
+                    await _encargadoService.DeleteByUserIdAsync(userId);
                 }
                 Console.Write(ex);
                 throw;

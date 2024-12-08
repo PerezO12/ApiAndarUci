@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using MyApiUCI.Models;
 
 
@@ -23,11 +24,10 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         base.OnModelCreating(builder);
 
-        // Definir la restricción de unicidad para UsuarioId y DepartamentoId en la tabla Formulario
-        builder.Entity<Formulario>()
-            .HasIndex(f => new { f.EstudianteId, f.DepartamentoId })
-            .IsUnique()
-            .HasDatabaseName("IX_Formulario_Estudiante_Departamento_Activo");
+        builder.Entity<Encargado>()
+        .HasIndex(e => e.DepartamentoId)
+        .IsUnique()
+        .HasFilter("\"Activo\" = true");
 
         List<IdentityRole> roles = new List<IdentityRole>
         {
@@ -46,7 +46,14 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
                 Name = "Encargado",
                 NormalizedName = "ENCARGADO"
             },
+            new IdentityRole
+            {
+                Name = "Profesor",
+                NormalizedName = "PROFESOR"
+            },
         };
         builder.Entity<IdentityRole>().HasData(roles);
+
     }
+
 }

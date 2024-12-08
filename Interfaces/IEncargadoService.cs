@@ -11,13 +11,19 @@ namespace MyApiUCI.Interfaces
 {
     public interface IEncargadoService
     {
-        public Task<List<EncargadoDto>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query);
-        public Task<EncargadoDto?> GetByIdEncargadoWithDetailsAsync(int id);
-        public Task<EncargadoDto?> GetByUserIdWithUserId(string id);
-        public Task<Encargado?> GetEncaradoByUserId(string userId);
-        public Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId);
-        public Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto);
-        public Task<EncargadoFirmaDto?> GenerarFirmaDigitalAsync(string userId);
+        Task<List<EncargadoDto>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query);
+        Task<EncargadoDto?> GetByIdEncargadoWithDetailsAsync(int id);
+        Task<EncargadoDto?> GetByUserIdWithUserId(string id);
+        Task<Encargado?> GetEncaradoByUserId(string userId);
+        Task<Encargado?> GetEncargadoByDepartamentoIdAsync(int departamentoId);
+        Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto);
+        Task<EncargadoFirmaDto?> GenerarFirmaDigitalAsync(string userId);
+        Task<Encargado?> DeleteAsync(int id);
+        Task<Encargado?> DeleteByUserIdAsync(string userId);
+        Task<Encargado?> DeleteEncargadoByDepartamentoIdAsync(int departamentoId, bool borrarDepartamento = true);
+        Task<Encargado> CreateAsync(Encargado encargadoModel);
+        Task<Encargado?> UpdateEncargadoByUserIdAsync(string id, EncargadoUpdateDto encargadoDto);
+        Task<Encargado?> UpdateAsync(int id, EncargadoUpdateDto encargadoDto);
         Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId);
     }
 }

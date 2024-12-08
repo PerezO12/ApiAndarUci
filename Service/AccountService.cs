@@ -16,7 +16,7 @@ namespace MyApiUCI.Service
         private readonly IFacultadRepository _facuRepo;
         private readonly ICarreraRepository _carreraRepo;
         private readonly IEstudianteRepository _estudianteRepo;
-        private readonly IEncargadoRepository _encargadoRepo;
+        private readonly IEncargadoService _encargadoService;
         private readonly ApplicationDbContext _context;
         public AccountService(
             UserManager<AppUser> userManager,
@@ -25,7 +25,7 @@ namespace MyApiUCI.Service
             IFacultadRepository facuRepo,
             ICarreraRepository carreraRepo,
             IEstudianteRepository estudianteRepo,
-            IEncargadoRepository encargadoRepo,
+            IEncargadoService encargadoService,
             ApplicationDbContext context
             )
         {
@@ -35,7 +35,7 @@ namespace MyApiUCI.Service
             _facuRepo = facuRepo;
             _carreraRepo = carreraRepo;
             _estudianteRepo = estudianteRepo;
-            _encargadoRepo = encargadoRepo;
+            _encargadoService = encargadoService;
             _context = context;
         }
 
@@ -58,14 +58,20 @@ namespace MyApiUCI.Service
 
         public async Task<NewUserDto?> Login(LoginDto loginDto)
         {
-            var user = await  _userManager.Users.FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.Nombre.ToLower());
+            try{
+
+            var user = await  _userManager.Users
+                .FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.Nombre.ToLower());
             if(user == null) return null;
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-
             if(!result.Succeeded) return null;
-            var rol = await _userManager.GetRolesAsync(user);
-            if(rol == null) return null;
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if(roles == null || !roles.Any())
+            {
+                throw new Exception("El usuario no tiene roles asignados.");
+            }
             var token = await _tokenService.CreateTokenAsync(user);
             // Guarda el token en la base de datos
             await _userManager.SetAuthenticationTokenAsync(user, "JWT", "AccessToken", token);
@@ -75,10 +81,15 @@ namespace MyApiUCI.Service
                     NombreCompleto = user.NombreCompleto,
                     NombreUsuario = user.UserName,
                     Email = user.Email,
-                    Rol = rol[0],
+                    Rol = roles[0],
                     Token = token
-                }
-;
+                };
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
         }
 
         public async Task<UserPerfilDto?> ObtenerPerfilAsync(string id)
@@ -103,7 +114,7 @@ namespace MyApiUCI.Service
             var existeDepartamento = await _context.Departamento.FindAsync(registerDto.DepartamentoId);
             if(existeDepartamento == null) return (IdentityResult.Failed(new IdentityError { Description = "Departamento no existe"}), null);
             //comprobar q  no haya un encargado en el departamento ya q solo puede haber un encargado
-            var existeEncargadoEnDepartmaneto = await _encargadoRepo.ExisteEncargadoByDepartamentoIdAsync(registerDto.DepartamentoId);
+            var existeEncargadoEnDepartmaneto = await _encargadoService.ExisteEncargadoByDepartamentoIdAsync(registerDto.DepartamentoId);
             if(existeEncargadoEnDepartmaneto) return (IdentityResult.Failed(new IdentityError { Description = "Ya existe un encargado en el departamento"}), null);
             // Crear el usuario
             var appUser = new AppUser
@@ -134,6 +145,9 @@ namespace MyApiUCI.Service
             try{
                 await _context.Encargado.AddAsync(encargado);
                 await _context.SaveChangesAsync();
+                existeDepartamento.EncargadoId = encargado.Id;
+                await _context.SaveChangesAsync();
+
             }
             catch (Exception ex)
             {

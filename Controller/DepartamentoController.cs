@@ -22,21 +22,25 @@ namespace MyApiUCI.Controller
         private readonly IDepartamentoRepository _depaRepo;
         private readonly IFacultadRepository _facuRepo;
         private readonly IEstudianteService _estudianteService;
+        private readonly IEncargadoService _encargadoService;
         private readonly ILogger<DepartamentoController> _logger;
         public DepartamentoController(
             IDepartamentoRepository depaRepo,
             IFacultadRepository facuRepo,
             IEstudianteService estudianteService,
+            IEncargadoService encargadoService,
             ILogger<DepartamentoController> logger
             )
         {
             _depaRepo = depaRepo;
             _facuRepo = facuRepo;
+            _encargadoService = encargadoService;
             _estudianteService = estudianteService;
             _logger = logger;
         }
 
         //Get
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll( [FromQuery] QueryObjectDepartamentos query)
         {
@@ -57,6 +61,7 @@ namespace MyApiUCI.Controller
         }
 
         //GetByID
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
@@ -65,8 +70,10 @@ namespace MyApiUCI.Controller
             var departamentoModel = await _depaRepo.GetByIdAsync(id);
             if(departamentoModel == null)
             {
-                return NotFound("Departament no existe");
+                return NotFound(new {msg="Departament no existe"});
             }
+            var encargado = await _encargadoService.GetEncargadoByDepartamentoIdAsync(departamentoModel.Id);
+
             return Ok(departamentoModel.toDepartamentDto()); 
                 
             }
@@ -77,9 +84,8 @@ namespace MyApiUCI.Controller
             }
         }
 
-
         //Post
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create( [FromBody]CreateDepartamentoDto departamentoDto)
         {
@@ -102,6 +108,7 @@ namespace MyApiUCI.Controller
         }
 
         //Put
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateDepartamentoDto departamentoDto)
@@ -132,6 +139,7 @@ namespace MyApiUCI.Controller
         }
 
         //Delete
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> Delete([FromRoute]int id)
@@ -143,7 +151,10 @@ namespace MyApiUCI.Controller
                 {
                     return NotFound("El departamento no existe");
                 }
-                return Ok(departamentoModel.toDepartamentDto());
+                //cuando tu borras uun departamento debes borrar el encargado
+                await _encargadoService.DeleteEncargadoByDepartamentoIdAsync(departamentoModel.Id, false);
+
+                return Ok(new {msg="Departamento borrado exitosamente"});
             }
             catch(Exception ex)
             {
@@ -151,7 +162,8 @@ namespace MyApiUCI.Controller
                 return StatusCode(500, new{ msg = "Error al borrar el departamento. Informar al administrador"});
             }
         }
-
+        
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPatch]
         [Route("{id}")]
         public async Task<IActionResult> UpdatePatch([FromRoute] int id, [FromBody] PatchDepartamentoDto departamentoDto)

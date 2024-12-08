@@ -15,6 +15,8 @@ namespace MyApiUCI.Mappers
                 Id = departamentoModel.Id, //Borrar
                 Nombre = departamentoModel.Nombre,
                 Facultad = departamentoModel.Facultad?.Nombre,
+                EncargadoNombre = departamentoModel.Encargado?.AppUser?.NombreCompleto ?? "",
+                EncargadoId = departamentoModel.EncargadoId,
                 FechaCreacion = departamentoModel?.Fechacreacion
             };
         }
@@ -29,7 +31,8 @@ namespace MyApiUCI.Mappers
         {
             return new Departamento{
                 Nombre = departamentoDto.Nombre,
-                FacultadId = departamentoDto.FacultadId
+                FacultadId = departamentoDto.FacultadId,
+                //EncargadoId = departamentoDto.EncargadoId
             };
         }
         public static Departamento toPatchingDepartamento(this Departamento departamento, PatchDepartamentoDto departamentoDto)
@@ -42,6 +45,10 @@ namespace MyApiUCI.Mappers
             {
                 departamento.FacultadId = departamentoDto.FacultadId.Value;
             }
+/*             if (departamentoDto.EncargadoId.HasValue)
+            {
+                departamento.EncargadoId = departamentoDto.EncargadoId.Value;
+            } */
             return departamento;
         }
     }

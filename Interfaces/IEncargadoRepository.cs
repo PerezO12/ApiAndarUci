@@ -21,6 +21,7 @@ namespace MyApiUCI.Interfaces
         Task<Encargado?> UpdateEncargadoByUserIdAsync(string id, EncargadoUpdateDto encargadoDto);
         Task<Encargado?> DeleteAsync(int id);
         Task<Encargado?> DeleteByUserIdAsync(string userId);
+        Task<Encargado?> DeleteByDepartamentoIdAsync(int departamentoId);
         Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId);
     }
 }

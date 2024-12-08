@@ -127,7 +127,9 @@ namespace MyApiUCI.Repository
 
         public async Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId)
         {
-            return await _context.Encargado.FirstOrDefaultAsync(e => e.Activo && e.DepartamentoId == departamentoId);
+            return await _context.Encargado
+            .Include(e => e.AppUser)
+            .FirstOrDefaultAsync(e => e.Activo && e.DepartamentoId == departamentoId);
         }
         public async Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId)
         {
@@ -160,6 +162,18 @@ namespace MyApiUCI.Repository
             await _context.SaveChangesAsync();
 
             return encargadoExiste;
+        }
+
+        public async Task<Encargado?> DeleteByDepartamentoIdAsync(int departamentoId)
+        {
+            var encargado = await _context.Encargado
+                .Include(d => d.AppUser)
+                .FirstOrDefaultAsync(e => e.DepartamentoId == departamentoId);
+            if(encargado == null) return null;
+
+            encargado.Activo = false;
+            await _context.SaveChangesAsync();
+            return encargado;
         }
     }
 }

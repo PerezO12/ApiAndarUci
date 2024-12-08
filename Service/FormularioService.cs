@@ -46,7 +46,7 @@ namespace MyApiUCI.Service
             //TODO:HACER LAS 2 FUCNIONES DE FOMRA ASYNC
             var departamento = await _departamentoRepo.GetByIdAsync(formularioDto.DepartamentoId);
             var estudiante = await _estudianteService.GetEstudianteByUserId(userId);
-            var encargado = await _encargadoService.GetEncargadoByDepartamentoId(formularioDto.DepartamentoId);
+            var encargado = await _encargadoService.GetEncargadoByDepartamentoIdAsync(formularioDto.DepartamentoId);
             
             if(departamento == null) {
                 return new ResultadoDto{

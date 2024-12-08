@@ -33,6 +33,9 @@ namespace MyApiUCI.Repository
                 await _context.Entry(departamentoModel)
                     .Reference(d => d.Facultad)
                     .LoadAsync();
+                await _context.Entry(departamentoModel)
+                    .Reference(d => d.Encargado)
+                    .LoadAsync();
                 return departamentoModel;
             }
             catch(Exception ex)
@@ -71,6 +74,8 @@ namespace MyApiUCI.Repository
                 var departamentos = _context.Departamento
                     .Where(d => d.Activo == true)
                     .Include(d => d.Facultad)
+                    .Include(d => d.Encargado)
+                        .ThenInclude(e => e!.AppUser)
                     .AsQueryable();
                 //validaciones de busquesdas
 
@@ -85,6 +90,10 @@ namespace MyApiUCI.Repository
                 if(query.FacultadId.HasValue && query.FacultadId > 0)
                 {
                     departamentos = departamentos.Where(d => d.FacultadId == query.FacultadId);
+                }
+                if(query.EncargadoId.HasValue && query.FacultadId > 0)
+                {
+                    departamentos = departamentos.Where(d => d.EncargadoId == query.EncargadoId);
                 }
                 //Ordenamiento
                 if(!string.IsNullOrWhiteSpace(query.OrdenarPor))
@@ -133,6 +142,8 @@ namespace MyApiUCI.Repository
             {
                 return await _context.Departamento
                     .Include( d => d.Facultad)
+                    .Include(d => d.Encargado)
+                        .ThenInclude(e => e!.AppUser)
                     .FirstOrDefaultAsync( d => d.Id == id && d.Activo == true);
 
             }
@@ -148,16 +159,18 @@ namespace MyApiUCI.Repository
             try
             {
                 var departamentModel = await _context.Departamento
+                    .Include(d => d.Facultad)
+                    .Include(d => d.Encargado)
+                        .ThenInclude(e => e!.AppUser!.NombreCompleto)
                     .FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
                 if(departamentModel == null)
                 {
                     return null;
                 }
                 departamentModel.toPatchingDepartamento(departamentoDto);
+
                 await _context.SaveChangesAsync();
-                await _context.Entry(departamentModel)
-                    .Reference(d => d.Facultad)
-                    .LoadAsync();
+
                 return departamentModel;
             }
             catch(Exception ex)
@@ -167,11 +180,21 @@ namespace MyApiUCI.Repository
             }
         }
 
+        public async Task<Departamento?> CambiarEncargado(int departamentoId, int? nuevoEncargado = null)
+        {
+            var departamento = await _context.Departamento.FindAsync(departamentoId);
+            if(departamento == null) return null;
+            departamento.EncargadoId = nuevoEncargado;
+            await _context.SaveChangesAsync();
+            return departamento;
+        }
         public async Task<Departamento?> UpdateAsync(int id, Departamento departamentoModel)
         {
             try
             {
                 var existeDepartamento = await _context.Departamento
+                    .Include(d => d.Facultad)
+                    .Include(d => d.Encargado)
                     .FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
                 if(existeDepartamento == null)
                 {
@@ -179,11 +202,10 @@ namespace MyApiUCI.Repository
                 }
                 existeDepartamento.Nombre = departamentoModel.Nombre;
                 existeDepartamento.FacultadId = departamentoModel.FacultadId;
+                existeDepartamento.EncargadoId = departamentoModel.EncargadoId;
 
                 await _context.SaveChangesAsync();
-                await _context.Entry(existeDepartamento)
-                    .Reference(d => d.Facultad)
-                    .LoadAsync();
+
                 return existeDepartamento;
             }
             catch(Exception ex)

@@ -12,16 +12,22 @@ using System.IO;
 using System.IO.Compression;
 using MyApiUCI.Models;
 using ApiUCI.Helpers;
+using MyApiUCI.Dtos.Departamento;
+using Microsoft.AspNetCore.Identity;
 
 namespace MyApiUCI.Service
 {
     public class EncargadoService : IEncargadoService
     {
         private readonly IEncargadoRepository _encargadoRepo;
+        private readonly IDepartamentoRepository _depaRepo;
+        private readonly UserManager<AppUser> _userManager;
 
-        public EncargadoService( IEncargadoRepository encargadoRepo)
+        public EncargadoService( IEncargadoRepository encargadoRepo, IDepartamentoRepository depRepo, UserManager<AppUser> userManager)
         {
             _encargadoRepo = encargadoRepo;
+            _depaRepo = depRepo;
+            _userManager = userManager;
         }
 
         public async Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto)
@@ -115,7 +121,7 @@ namespace MyApiUCI.Service
             };
         }
 
-        public async Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId)
+        public async Task<Encargado?> GetEncargadoByDepartamentoIdAsync(int departamentoId)
         {
             return await _encargadoRepo.GetEncargadoByDepartamentoId(departamentoId);
         }
@@ -142,6 +148,91 @@ namespace MyApiUCI.Service
         public async Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId)
         {
             return await _encargadoRepo.ExisteEncargadoByDepartamentoIdAsync(departamentoId);
+        }
+
+        public async Task<Encargado?> DeleteEncargadoByDepartamentoIdAsync(int departamentoId, bool borrarDepartamento)
+        {
+            var encargado = await _encargadoRepo.DeleteByDepartamentoIdAsync(departamentoId);
+            //todo: verificar si funciona
+            //si se elimina el encargdalo lo logico es eliminar la referencia del departamento hacia el
+            if(encargado == null) return null;
+
+            await _userManager.RemoveFromRoleAsync(encargado!.AppUser!, "Encargado");
+            await _userManager.AddToRoleAsync(encargado!.AppUser!, "Profesor");
+            if(borrarDepartamento)
+            {
+                await _depaRepo.CambiarEncargado(departamentoId);
+            }
+            return encargado;
+        }
+
+        public async Task<Encargado?> DeleteByUserIdAsync(string userId)
+        {
+            //todo:VEr si fucniona
+            var encargado = await _encargadoRepo.DeleteByUserIdAsync(userId);
+            if(encargado == null) return null;
+            await _depaRepo.CambiarEncargado(encargado.DepartamentoId);
+            return encargado;
+        }
+
+        public async Task<Encargado?> DeleteAsync(int id)
+        {
+            var encargado = await _encargadoRepo.DeleteAsync(id);
+            if(encargado == null) return null;
+            await _depaRepo.CambiarEncargado(id);
+            return encargado;
+        }
+
+        public async Task<Encargado> CreateAsync(Encargado encargadoModel)
+        {
+            try{
+                var encagado = await _encargadoRepo.CreateAsync(encargadoModel);
+                await _depaRepo.CambiarEncargado(encagado.DepartamentoId, encagado.Id); 
+                return encagado;
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
+        }
+
+        public async Task<Encargado?> UpdateEncargadoByUserIdAsync(string id, EncargadoUpdateDto encargadoDto)
+        {
+            try
+            {
+                var encargado = await _encargadoRepo.UpdateEncargadoByUserIdAsync(id, encargadoDto);
+                if(encargado == null) return null;
+                if(encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
+                {
+                    await _depaRepo.CambiarEncargado(encargado.Id, encargadoDto.DepartamentoId);
+                }
+                return encargado;
+            }
+            catch (Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
+        }
+
+        public async Task<Encargado?> UpdateAsync(int id, EncargadoUpdateDto encargadoDto)
+        {
+            try
+            {
+                var encargado = await _encargadoRepo.UpdateAsync(id, encargadoDto);
+                if(encargado == null) return null;
+                if(encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
+                {
+                    await _depaRepo.CambiarEncargado(encargado.Id, encargadoDto.DepartamentoId);
+                }
+                return encargado;
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                throw;
+            }
         }
     }
 }

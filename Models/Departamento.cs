@@ -16,12 +16,14 @@ public partial class Departamento
 
     [Required]
     public int FacultadId { get; set; }
+    [ForeignKey("Encargado")]
+    public int? EncargadoId { get; set; }
 
     public DateTime? Fechacreacion { get; set; } = DateTime.Now.ToUniversalTime();
     
     public bool Activo { get; set; } = true;
 
-    public virtual ICollection<Encargado> Encargados { get; set; } = new List<Encargado>();
+    public virtual Encargado? Encargado { get; set; }
 
     public virtual Facultad? Facultad { get; set; }
 

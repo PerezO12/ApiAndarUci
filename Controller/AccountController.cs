@@ -97,13 +97,22 @@ namespace MyApiUCI.Controller
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            if(!ModelState.IsValid) return BadRequest(new{ msg = "Contraseña/Usuario incorrecto"});//NO HACe falta
+            try
+            {
 
-            var user = await  _acountService.Login(loginDto);
-            
-            if(user == null) return Unauthorized(new { msg = "Usuario o Contraseña Incorrectos"});
+                if(!ModelState.IsValid) return BadRequest(new{ msg = "Contraseña/Usuario incorrecto"});//NO HACe falta
 
-            return Ok(user);
+                var user = await  _acountService.Login(loginDto);
+                
+                if(user == null) return Unauthorized(new { msg = "Usuario o Contraseña Incorrectos"});
+
+                return Ok(user);
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                return StatusCode(500, new {msg="Ocurrio un error, informar al administrador"});
+            }
             
         }
 
