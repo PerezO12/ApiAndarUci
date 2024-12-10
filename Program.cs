@@ -29,6 +29,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // TODO: CAMBIAR CORS DESPUES
+//Cors
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", builder =>
@@ -129,6 +130,9 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFormularioService, FormularioService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IDepartamentoService, DepartamentoService>();
+
 
 // Configuración de JsonOptions
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -141,6 +145,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 var app = builder.Build();
 
+//Creacion del usuario admin en la primera migration
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

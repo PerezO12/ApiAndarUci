@@ -85,7 +85,7 @@ namespace MyApiUCI.Controller
             if(usuarioId == null) 
             {
                 _logger.LogInformation("El token no contiene el id del usuario");
-                return BadRequest("Token no valido");
+                return BadRequest("Token no válido");
             }
             _logger.LogInformation("Usuario autenticado con Id: {UsuarioId}", usuarioId);
 
@@ -108,7 +108,7 @@ namespace MyApiUCI.Controller
             if( usuarioId == null )
             {
                 _logger.LogInformation("El token no contiene el id del usuario");
-                return BadRequest("Token no valido");
+                return BadRequest("Token no válido");
             }
             _logger.LogInformation("Usuario autenticado con Id: {UsuarioId}", usuarioId);
 
@@ -127,7 +127,7 @@ namespace MyApiUCI.Controller
         public async Task<IActionResult> GetFormularioEstudianteWhitDetails([FromRoute] int id)
         {
             var userId = User.FindFirst("UsuarioId")?.Value;
-            if(userId == null) return BadRequest("Token no valido");
+            if(userId == null) return BadRequest("Token no válido");
 
             var formulario = await _formularioService.GetFormEstudianteByIdForEncargadoAsync(userId, id);
             if(formulario == null) return BadRequest("No existe el formulario");
@@ -149,7 +149,7 @@ namespace MyApiUCI.Controller
             if (usuarioId == null)
             {
                 _logger.LogWarning("El token no contiene el Id del usuario.");
-                return BadRequest("Token no valido.");
+                return BadRequest("Token no válido.");
             }
             _logger.LogInformation("Usuario autenticado con Id: {UsuarioId}", usuarioId);
 
@@ -188,7 +188,7 @@ namespace MyApiUCI.Controller
             if (usuarioId == null)
             {
                 _logger.LogWarning("El token no contiene el Id del usuario.");
-                return BadRequest("Token no valido.");
+                return BadRequest("Token no válido.");
             }
             _logger.LogInformation("Usuario autenticado con Id: {UsuarioId}", usuarioId);
 
@@ -213,7 +213,7 @@ namespace MyApiUCI.Controller
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
             var usuarioId = User.FindFirst("UsuarioId")?.Value;
-            if(usuarioId == null) return BadRequest("Token no valido");
+            if(usuarioId == null) return BadRequest("Token no válido");
             try
             {
                 var respuesta = await _formularioService.FirmarFormularioAsync(usuarioId, id, formularioDto);
@@ -242,7 +242,7 @@ namespace MyApiUCI.Controller
         public async Task<IActionResult> DeleteFormularioEstudiante([FromRoute]int id)
         {
             var userId = User.FindFirst("UsuarioId")?.Value;
-            if(userId == null ) return BadRequest("Token no valido");
+            if(userId == null ) return BadRequest("Token no válido");
 
             var resultado = await _formularioService.DeleteFormularioEstudianteAsync(userId, id);
         

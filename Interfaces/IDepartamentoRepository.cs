@@ -18,6 +18,7 @@ namespace MyApiUCI.Interfaces
         public Task<Departamento?> UpdateAsync(int id, Departamento departdepartamentoModelamento);
         Task<Departamento?> CambiarEncargado(int departamentoId, int? nuevoEncargado = null);
         public Task<Departamento?> DeleteAsync(int id);
+        Task<List<Departamento>> DeleteAllDepartamentosByFacultad(int facultadId);//cuidado!!!
         public Task<Departamento?> PatchAsync(int id, PatchDepartamentoDto departamentoDto);
     }
 }

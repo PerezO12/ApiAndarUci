@@ -90,7 +90,7 @@ namespace MyApiUCI.Controller
         public async Task<IActionResult> Create( [FromBody]CreateDepartamentoDto departamentoDto)
         {
             try{
-                if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
+                if(!ModelState.IsValid) return BadRequest("El modelo no es válido");
                 if( !await _facuRepo.FacultyExists(departamentoDto.FacultadId))
                 {
                 return NotFound("Faculty does not exist");
@@ -115,7 +115,7 @@ namespace MyApiUCI.Controller
         {
             try
             {
-                if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
+                if(!ModelState.IsValid) return BadRequest("El modelo no es válido");
                 if( !await _facuRepo.FacultyExists(departamentoDto.FacultadId))
                 {
                 return NotFound("Facultad no existe");
@@ -191,16 +191,17 @@ namespace MyApiUCI.Controller
             try 
             {
                 var userId = User.FindFirst("UsuarioId")?.Value;
-                if(userId == null) return BadRequest("Token no valido");
+                if(userId == null) return BadRequest("Token no válido");
 
                 var estudiante = await _estudianteService.GetEstudianteByUserId(userId);
                 if(estudiante == null) return BadRequest("El estudiante no existe");
 
                 var departamentos = await _depaRepo.GetAllDepartamentosByFacultadId(estudiante.FacultadId);
-
+            
                 if(departamentos == null) return NotFound("No hay departamentos correspondientes");
+                var departamentosDto = departamentos.Select( d => d.toDepartamentDto());
 
-                return Ok(departamentos);
+                return Ok(departamentosDto);
             }
             catch(Exception ex)
             {

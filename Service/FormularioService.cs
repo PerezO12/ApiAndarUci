@@ -69,7 +69,7 @@ namespace MyApiUCI.Service
                     Error = true
                 };
             };
-            if(estudiante.FacultadId == departamento.Id){
+            if(estudiante.FacultadId != departamento.FacultadId){
                 return new ResultadoDto{
                     msg = "El departamento seleccionado no corresponde a la facultad del estudiante.",
                     TipoError = "BadRequest",
@@ -184,7 +184,7 @@ namespace MyApiUCI.Service
                 }
                 if(encargado.LlavePublica == null) {
                     return new ResultadoDto {
-                        msg = "No tiene llave publica registrada",
+                        msg = "No tiene llave pública registrada",
                         TipoError = "NotFound",
                         Error = true
                     };
@@ -218,14 +218,14 @@ namespace MyApiUCI.Service
                 var documentoFirmado = rsa.SignHash(hasDocumento, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 
                 var verificador = new FirmaDigital();
-                //comprobamos si su firma coincide con la correspondiente publica
+                //comprobamos si su firma coincide con la correspondiente pública
                 bool esCorrespondiente = verificador.VerificarFirmaFormulario(contenidoJson, documentoFirmado, hasDocumento, encargado.LlavePublica );
 
                 if(!esCorrespondiente) {
                     return new ResultadoDto {
                         msg = "La llave privada proporcionada no coincide con la clave pública asociada.",
                         TipoError = "BadRequest",
-                        Error = false
+                        Error = true
                     };
                 }
                 formulario.FirmaEncargado = documentoFirmado;
@@ -243,7 +243,7 @@ namespace MyApiUCI.Service
             catch (FormatException)
             {
                 return new ResultadoDto {
-                    msg = "La llave no es valida",
+                    msg = "La llave no es válida",
                     TipoError = "BadRequest",
                     Error = true
                 };
@@ -251,7 +251,7 @@ namespace MyApiUCI.Service
             catch (CryptographicException)
             {
                 return new ResultadoDto {
-                    msg = "La llave no es valida",
+                    msg = "La llave no es válida",
                     TipoError = "BadRequest",
                     Error = true
                 };

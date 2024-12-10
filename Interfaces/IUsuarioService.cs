@@ -14,7 +14,7 @@ namespace ApiUCI.Interfaces
     public interface IUsuarioService
     {
         Task<IdentityResult> UpdateAsync(string id, UsuarioWhiteRolUpdateDto ususarioDto);
-        Task<ResultadoDto> DeleteUserYRolAsync(string usuarioId, string adminId, string password);
+        Task<ResultadoDto> DeleteUserYRolAsync(string usuarioId, string adminId);
         Task<List<UsuarioDto>> GetAllAsync(QueryObjectUsuario query);
         Task<UsuarioDto?> GetByIdAsync(string id);
         Task<AppUser?> DeleteAsync(string id);

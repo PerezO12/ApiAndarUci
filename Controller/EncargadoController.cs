@@ -65,23 +65,23 @@ namespace MyApiUCI.Controller
         //Generar sus llaves publicas llaves privadas solo acceder encargados
         [HttpPost("cambiar-llave")]
         public async Task<IActionResult> CambiarLlavePublica([FromBody] EncargadoCambiarLlaveDto encargado) {
-            if(!ModelState.IsValid) return  BadRequest(new {msg="No valido"});
+            if(!ModelState.IsValid) return  BadRequest(new {msg="No válido"});
             try
             {
                 var usuarioId = User.FindFirst("UsuarioId")?.Value;
                 if (usuarioId == null)
                 {
-                    return BadRequest(new {msg="Token no valido."});
+                    return BadRequest(new {msg="Token no válido."});
                 }
                 var usuario = await _userManager.FindByIdAsync(usuarioId);
                 if(usuario == null ) return NotFound(new {msg="Usuario no existe"}); 
 
                 var result = await _signInManager.CheckPasswordSignInAsync(usuario, encargado.Password, false);
-                if(!result.Succeeded) return NotFound(new {msg="Usuario/Password incorrectos"});
+                if(!result.Succeeded) return NotFound(new {msg="Contraseña incorrecta"});
 
                 var llaves = await _encargadoService.CambiarLlavePublicalAsync(usuarioId, encargado);
                 
-                if(llaves == null) return BadRequest(new {msg="Llave publica no valida"});
+                if(llaves == null) return BadRequest(new {msg="Llave pública no válida"});
                 
                 return Ok(llaves);
             }
@@ -94,13 +94,13 @@ namespace MyApiUCI.Controller
 
         [HttpPost("generar-llaves")]
         public async Task<IActionResult> GenerarLlaves([FromBody] EncargadoGenerarLLaveDto encargado) {
-            if(!ModelState.IsValid) return  BadRequest(new {msg="No valido"});
+            if(!ModelState.IsValid) return  BadRequest(new {msg="No válido"});
             
             try{
                 var usuarioId = User.FindFirst("UsuarioId")?.Value;
                 if (usuarioId == null)
                 {
-                    return BadRequest(new {msg="Token no valido."});
+                    return BadRequest(new {msg="Token no válido."});
                 }
                 var usuario = await _userManager.FindByIdAsync(usuarioId);
                 if(usuario == null ) return NotFound(new {msg="Usuario no existe"}); 

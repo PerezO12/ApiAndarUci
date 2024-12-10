@@ -2,6 +2,7 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using ApiUCI.Dtos.Cuentas;
+using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Cuentas;
@@ -14,11 +15,12 @@ namespace MyApiUCI.Controller
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _acountService;
+        private readonly IAuthService _authService;
 
-
-        public AccountController(IAccountService acountService, ApplicationDbContext context, ITokenService tokenService)
+        public AccountController(IAccountService acountService, IAuthService authService)
         {
             _acountService = acountService;
+            _authService = authService;
         }
         [Authorize(Policy = "AdminPolicy")]
         [HttpPost("registrar/admin")]
@@ -30,6 +32,16 @@ namespace MyApiUCI.Controller
             }
             try
             {
+                //validacion de contraseña
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new {msg = "Token no válido"});
+
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
+
+                var passwordResult = await _authService.VerifyUserPassword(admin, registroDto.PasswordAdmin);
+                if(!passwordResult) return Unauthorized(new {msg = "Contraseña Incorrecta"});
+                
                 //registrar al usuario
                 var (resultado, newAdminDto) = await _acountService.RegistrarAdministradorAsync(registroDto);
                 if(!resultado.Succeeded) return BadRequest(new {msg = resultado.Errors.ToArray()});
@@ -54,6 +66,16 @@ namespace MyApiUCI.Controller
 
             try
             {
+                //validacion de contraseña
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new {msg = "Token no válido"});
+
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
+                
+                var passwordResult = await _authService.VerifyUserPassword(admin, registerDto.PasswordAdmin);
+                if(!passwordResult) return Unauthorized(new {msg = "Contraseña Incorrecta"});
+
                 // Llamar al servicio para registrar al usuario
                 var (resultRegister, newEstudianteDto) = await _acountService.RegisterEstudianteAsync(registerDto);
                 
@@ -77,10 +99,22 @@ namespace MyApiUCI.Controller
             {
                 return BadRequest(new {msg = ModelState});
             }
+            //required password
+            
 
             try
             {
-                // Llamar al servicio para registrar al usuario
+                //validacion de contraseña
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new {msg = "Token no válido"});
+
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
+                
+                var passwordResult = await _authService.VerifyUserPassword(admin, registerDto.PasswordAdmin);
+                if(!passwordResult) return Unauthorized(new {msg = "Contraseña Incorrecta"});
+
+                // Llamar al servicio para registrar al usuario 
                 var (resultRegister, newEncargadoDto) = await _acountService.RegisterEncargadoAsync(registerDto);
                 
                 if (!resultRegister.Succeeded) return BadRequest(new {msg = resultRegister.Errors});
@@ -102,7 +136,7 @@ namespace MyApiUCI.Controller
 
                 if(!ModelState.IsValid) return BadRequest(new{ msg = "Contraseña/Usuario incorrecto"});//NO HACe falta
 
-                var user = await  _acountService.Login(loginDto);
+                var user = await  _authService.Login(loginDto);
                 
                 if(user == null) return Unauthorized(new { msg = "Usuario o Contraseña Incorrectos"});
 
@@ -120,12 +154,12 @@ namespace MyApiUCI.Controller
         [HttpGet("obtener-perfil")]
         public async Task<IActionResult> ObtenerPerfil()
         {
-            //solo usuarios con token validospodran acceder
+            //solo usuarios con token válidospodran acceder
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            if(userId == null) return BadRequest(new {msg = "Token no valido"});
+            if(userId == null) return BadRequest(new {msg = "Token no válido"});
 
-            var usuarioDto = await _acountService.ObtenerPerfilAsync(userId);
+            var usuarioDto = await _authService.ObtenerPerfilAsync(userId);
             return Ok(usuarioDto);
         }
         
@@ -136,13 +170,16 @@ namespace MyApiUCI.Controller
             {
                 return BadRequest(ModelState);
             }
-            var userId = User.FindFirst("UsuarioId")?.Value;
-            if(userId == null) return BadRequest(new {msg = "Token no valido"});
 
             try
             {
+                var userId = User.FindFirst("UsuarioId")?.Value;
+                if(userId == null) return BadRequest(new {msg = "Token no válido"});
+
+                var usuario = await _authService.ExisteUsuario(userId);
+                if(usuario == null) return NotFound(new {msg = "El usuario no existe"});
                 // Llamar al servicio para registrar al usuario
-                var resultado = await _acountService.CambiarPasswordAsync(userId, cuentadDto );
+                var resultado = await _authService.CambiarPasswordAsync(usuario, cuentadDto );
                 
                 if (!resultado.Succeeded) return BadRequest(new {msg = resultado.Errors});
 

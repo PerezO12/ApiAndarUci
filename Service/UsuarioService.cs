@@ -37,7 +37,7 @@ namespace ApiUCI.Service
             
         }
 
-        public async Task<ResultadoDto> DeleteUserYRolAsync(string usuarioId, string adminId, string password)
+        public async Task<ResultadoDto> DeleteUserYRolAsync(string usuarioId, string adminId)
         {
             try
             {
@@ -49,14 +49,6 @@ namespace ApiUCI.Service
                         TipoError = "Unauthorized",
                         Error = true
                     }; 
-                }
-                var resultadoPassword = await _userManager.CheckPasswordAsync(adminUser, password);
-                if(!resultadoPassword) {
-                    return new ResultadoDto{
-                        msg = "Contraseña incorrecta",
-                        TipoError = "Unauthorized",
-                        Error = true
-                    };
                 }
                 var usuarioBorrar = await _userManager.FindByIdAsync(usuarioId);
                 if(usuarioBorrar == null || usuarioBorrar.Activo == false)

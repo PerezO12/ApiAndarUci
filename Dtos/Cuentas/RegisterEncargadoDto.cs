@@ -19,7 +19,7 @@ namespace MyApiUCI.Dtos.Cuentas
         public string Password { get; set; } = null!;
 
         [Required]
-        [MinLength(10, ErrorMessage = "No es un nombre valido")]
+        [MinLength(10, ErrorMessage = "No es un nombre válido")]
         public string NombreCompleto { get; set; } = null!;
 
         [Required]
@@ -29,6 +29,9 @@ namespace MyApiUCI.Dtos.Cuentas
 
         [Required]
         public int DepartamentoId { get; set; }
+
+        [Required (ErrorMessage= "La contraseña es requerida")]
+        public string PasswordAdmin { get; set; } = null!;
 
     }
 }

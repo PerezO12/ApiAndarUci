@@ -55,7 +55,7 @@ namespace ApiUCI.Middleware
             {
                 context.Response.StatusCode = 401; // Unauthorized
                 context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync("{\"error\": \"Invalido o Token expirado\"}");
+                await context.Response.WriteAsync("{\"error\": \"Inválido o Token expirado\"}");
                 return;
             }
 

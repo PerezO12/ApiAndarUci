@@ -214,6 +214,28 @@ namespace MyApiUCI.Repository
                 throw;
             }
         }
-        
+
+        //cuidado!!!!
+        public async Task<List<Departamento>> DeleteAllDepartamentosByFacultad(int facultadId)
+        {
+            try
+            {
+                var encargados = await _context.Departamento
+                    .Where(e => e.FacultadId == facultadId && e.Activo == true)
+                    .ToListAsync();
+                foreach (var encargado in encargados)
+                {
+                    encargado.Activo = false;
+                }
+                await _context.SaveChangesAsync();
+
+                return encargados;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
     }
 }

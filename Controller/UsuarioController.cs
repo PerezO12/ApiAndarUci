@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Dtos.Usuarios;
 using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+
 using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
 
 namespace MyApiUCI.Controller
 {
@@ -21,10 +14,11 @@ namespace MyApiUCI.Controller
     public class UsuarioController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
-
-        public UsuarioController(IUsuarioService usuarioService)
+        private readonly IAuthService _authService;
+        public UsuarioController(IUsuarioService usuarioService, IAuthService authService)
         {
             _usuarioService = usuarioService;
+            _authService = authService;
         }
         
         [Authorize(Policy = "AdminPolicy")]
@@ -50,7 +44,7 @@ namespace MyApiUCI.Controller
         {
             try 
             {
-                if(!ModelState.IsValid) return BadRequest(new {msg = "Modelo no valido"});
+                if(!ModelState.IsValid) return BadRequest(new {msg = "Modelo no válido"});
 
                 var resultado = await _usuarioService.UpdateAsync(id, usuarioUpdateDto);
 
@@ -70,11 +64,18 @@ namespace MyApiUCI.Controller
         public async Task<IActionResult> Delete([FromRoute] string id, [FromBody]PasswordDto password) 
         {
             if(!ModelState.IsValid) return BadRequest(new {msg = "La contraseña es obligatoria"});
-            var adminId = User.FindFirst("UsuarioId")?.Value;
-            if(adminId == null) return BadRequest("Token no valido");
             try
             {
-                var resultado = await _usuarioService.DeleteUserYRolAsync(id, adminId, password.Password);
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new{msg="Token no válido"});
+
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return Unauthorized(new {msg="No Authorizado"});
+
+                var passwordCorrecta = await _authService.VerifyUserPassword(admin, password.Password );
+                if(!passwordCorrecta) return Unauthorized(new {msg="Contraseña incorrecta"});
+                
+                var resultado = await _usuarioService.DeleteUserYRolAsync(id, adminId);
                 if(resultado.Error)
                 {
                     return resultado.TipoError switch

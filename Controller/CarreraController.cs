@@ -63,7 +63,7 @@ namespace MyApiUCI.Controller
         {
             try
             {
-                if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
+                if(!ModelState.IsValid) return BadRequest("El modelo no es válido");
 
                 if( !await _facuRepo.FacultyExists(carreraDto.FacultadId)) return NotFound("Facultad no existe");
 
@@ -83,7 +83,7 @@ namespace MyApiUCI.Controller
         {
             try
             {
-                if(!ModelState.IsValid) return BadRequest("El modelo no es valido");
+                if(!ModelState.IsValid) return BadRequest("El modelo no es válido");
                 
                 if( !await _facuRepo.FacultyExists(carreraDto.FacultadId)) return NotFound("Facultad no existe");
 

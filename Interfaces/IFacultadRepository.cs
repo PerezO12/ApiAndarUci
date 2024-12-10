@@ -15,7 +15,7 @@ namespace MyApiUCI.Interfaces
         public Task<Facultad> CreateAsync(Facultad facultadModel);
         public Task<Facultad?> UpdateAsync(int id, Facultad facultadModel);
             //Task<Facultad?> PatchFacultad(int id, Facultad facultad)
-        public Task<Facultad?> DeleteAsync(int id);
+       // public Task<Facultad?> DeleteAsync(int id);
         public Task<bool> FacultyExists(int id);
 
     }

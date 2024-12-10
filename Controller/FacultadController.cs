@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Mappers;
 using MyApiUCI.Dtos.Facultad;
-using MyApiUCI.Dtos.Departamento;
-using MyApiUCI.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using ApiUCI.Helpers.Querys;
+using ApiUCI.Interfaces;
+using ApiUCI.Dtos.Cuentas;
+using System.Security.Claims;
+
 
 
 namespace MyApiUCI.Controller
@@ -15,9 +17,13 @@ namespace MyApiUCI.Controller
     public class FacultadController : ControllerBase
     {
         private readonly IFacultadRepository _facultadRepo;
-        public FacultadController( IFacultadRepository facultadRepo)
+        private readonly IAuthService _authService;
+        private readonly IDepartamentoService _depaService;
+        public FacultadController( IFacultadRepository facultadRepo, IAuthService authService, IDepartamentoService depaService)
         {
             _facultadRepo = facultadRepo;
+            _authService = authService;
+            _depaService = depaService;
         }
 
         [HttpGet]
@@ -41,7 +47,7 @@ namespace MyApiUCI.Controller
             return Ok(facultadModel.toFacultadDto()); //convertir a dto
         }
 
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Created(FacultadCreateDto facultadDto)
         {
@@ -53,7 +59,7 @@ namespace MyApiUCI.Controller
             return CreatedAtAction(nameof(GetById), new { id = facultadModel.Id }, facultadModel.toFacultadDto());
         }
 
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id,[FromBody]FacultadUpdateDto facultadDto)
@@ -68,19 +74,35 @@ namespace MyApiUCI.Controller
 
             return Ok(facultadModel.toFacultadDto());
         }
-        
-        //[Authorize(Policy = "AdminPolicy")]
+       /*  
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete]
         [Route("{id}")]
-        public async Task<IActionResult> Delete([FromRoute]int id) {
-            var facultadModel = await _facultadRepo.DeleteAsync(id);
-            
-            if(facultadModel == null)
+        public async Task<IActionResult> Delete([FromRoute]int id, [FromBody] PasswordDto password) {
+
+            try
             {
-                return NotFound("Faculty not found");
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new {msg="Token no válido"});
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return BadRequest(new {msg="El usuario no existe"});
+                var passwordCorrecta = await _authService.VerifyUserPassword(admin, password.Password);
+                if(!passwordCorrecta) return Unauthorized(new {msg="La contraseña es incorrecta"});
+
+                var facultadModel = await _facultadRepo.DeleteAsync(id);
+                if(facultadModel == null) return NotFound("La facultad no existe");
+                //borrar sus respectivos departamentos
+                await _depaService.DeleteAllDepartamentosByFacultad(facultadModel.Id);
+                //asignarle a sus respectivas carreras un null
+
+                return Ok(new {msg= "Facultad eliminada exitosamente"} );
             }
-            return Ok(facultadModel.toFacultadDto());
-        } 
+            catch(Exception ex)
+            {
+                Console.Write(ex);
+                return StatusCode(500, "Ocurrio un error, contactar al administrador");
+            }
+        }  */
 
    
     }
