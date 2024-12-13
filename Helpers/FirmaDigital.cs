@@ -13,7 +13,7 @@ namespace ApiUCI.Helpers
         {
             try
             {
-                // Crear un objeto RSA y cargar la llave pública
+                // Crear un objeto RSA y cargar la clave pública
                 using var rsa = RSA.Create();
 
                 rsa.ImportSubjectPublicKeyInfo(llavePublicaBytes, out _);
@@ -22,7 +22,7 @@ namespace ApiUCI.Helpers
                 // Generar el hash del contenido original
                 var hasDocumento = SHA256.HashData(contenidoBytes);
 
-                // Verificar la firma digital usando la llave pública
+                // Verificar la firma digital usando la clave pública
                 bool firmaValida = rsa.VerifyHash(hasDocumento, firmaDigital, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
                 return firmaValida;
             }

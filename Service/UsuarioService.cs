@@ -107,7 +107,7 @@ namespace ApiUCI.Service
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -118,8 +118,16 @@ namespace ApiUCI.Service
             {
                 var usuario = await _userManager.FindByIdAsync(userId);
                 if(usuario == null) return IdentityResult.Failed(new IdentityError { Description = "Usuario no encontrado"});
-                var rolsActual = await _userManager.GetRolesAsync(usuario);
-
+                var rolesActual = await _userManager.GetRolesAsync(usuario);
+                //comprobar q si va a cambiar el nomre de usuario no exista otro con el mismo nombre
+                if( (usuarioUpdateDto.NombreUsuario != null ) && (usuario.UserName != usuarioUpdateDto.NombreUsuario)){
+                    var existeUsername = await  _userManager.Users
+                        .FirstOrDefaultAsync(
+                            u => u.UserName != null 
+                            && u.UserName.ToLower() == usuarioUpdateDto.NombreUsuario.ToLower() 
+                            && u.Id != usuario.Id);
+                    if(existeUsername != null) return IdentityResult.Failed(new IdentityError { Description = "Nombre de usuario no disponible"});
+                }
                 // Mapear los valores manualmente desde el DTO
                 usuario.NombreCompleto = usuarioUpdateDto.NombreCompleto ?? usuario.NombreCompleto;
                 usuario.Activo = usuarioUpdateDto.Activo ?? usuario.Activo;
@@ -128,8 +136,8 @@ namespace ApiUCI.Service
                 usuario.Email = usuarioUpdateDto.Email ?? usuario.Email;
                 usuario.PhoneNumber = usuarioUpdateDto.NumeroTelefono ?? usuario.PhoneNumber;
        
-                //verifica si no ocurrio un cambio de rol            
-                if(rolsActual.ToHashSet().SetEquals(usuarioUpdateDto.Roles))
+                //verifica si no ocurrió un cambio de rol            
+                if(rolesActual.ToHashSet().SetEquals(usuarioUpdateDto.Roles))
                 {
                     if(usuarioUpdateDto.Roles.Contains("Estudiante"))
                     {
@@ -143,6 +151,11 @@ namespace ApiUCI.Service
                     }
                     else if(usuarioUpdateDto.Roles.Contains("Encargado"))
                     {
+                        /* var encargado = await _encargadoService
+                        .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto {
+                            DepartamentoId = usuarioUpdateDto.DepartamentoId,
+                            Activo = usuarioUpdateDto.Activo
+                        }); */
                         var encargado = await _encargadoService
                         .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto {
                             DepartamentoId = usuarioUpdateDto.DepartamentoId,
@@ -184,17 +197,17 @@ namespace ApiUCI.Service
                         await _userManager.AddToRoleAsync(usuario, "Admin");
                     }
                     //ver rol antiguo para borrarlo
-                    if(rolsActual.Contains("Estudiante"))
+                    if(rolesActual.Contains("Estudiante"))
                     {
                         await _estudianteRepo.DeleteByUserIdAsync(userId);
                         await _userManager.RemoveFromRoleAsync(usuario, "Estudiante");
                     }
-                    else if(rolsActual.Contains("Encargado"))
+                    else if(rolesActual.Contains("Encargado"))
                     {
                         await _encargadoService.DeleteByUserIdAsync(userId);
                         await _userManager.RemoveFromRoleAsync(usuario, "Encargado");
                     }
-                    else if(rolsActual.Contains("Admin"))
+                    else if(rolesActual.Contains("Admin"))
                     {
                         await _userManager.RemoveFromRoleAsync(usuario, "Admin");
                     }
@@ -204,7 +217,6 @@ namespace ApiUCI.Service
                 // Actualizar el usuario
                 var result = await _userManager.UpdateAsync(usuario);
                 if(!result.Succeeded) return IdentityResult.Failed(new IdentityError { Description = "Error al actualizar el usuario"});
-                        
                 //ver si el password viene para cambiarlo
                 if(!string.IsNullOrWhiteSpace(usuarioUpdateDto.Password))
                 {
@@ -228,7 +240,7 @@ namespace ApiUCI.Service
                 {
                     await _encargadoService.DeleteByUserIdAsync(userId);
                 }
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -247,7 +259,7 @@ namespace ApiUCI.Service
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }

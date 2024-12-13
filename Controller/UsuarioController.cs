@@ -44,7 +44,14 @@ namespace MyApiUCI.Controller
         {
             try 
             {
-                if(!ModelState.IsValid) return BadRequest(new {msg = "Modelo no válido"});
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new{msg="Token no válido"});
+
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return Unauthorized(new {msg="No Authorizado"});
+
+                var passwordCorrecta = await _authService.VerifyUserPassword(admin, usuarioUpdateDto.PasswordAdmin );
+                if(!passwordCorrecta) return Unauthorized(new {msg="Contraseña incorrecta"});
 
                 var resultado = await _usuarioService.UpdateAsync(id, usuarioUpdateDto);
 
@@ -54,7 +61,7 @@ namespace MyApiUCI.Controller
             }
             catch(Exception ex)
             {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new {msg = "Algo salio mal, notificar al administrador"});
             }
         }
@@ -90,8 +97,8 @@ namespace MyApiUCI.Controller
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
-                return StatusCode(500, new {msg = "Ocurrio un error, informar al administrador"});
+                Console.WriteLine(ex);
+                return StatusCode(500, new {msg = "Ocurrió un error, informar al administrador"});
             }
         }                 
     }

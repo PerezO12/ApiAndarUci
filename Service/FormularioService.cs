@@ -184,7 +184,7 @@ namespace MyApiUCI.Service
                 }
                 if(encargado.LlavePublica == null) {
                     return new ResultadoDto {
-                        msg = "No tiene llave pública registrada",
+                        msg = "No tiene clave pública registrada",
                         TipoError = "NotFound",
                         Error = true
                     };

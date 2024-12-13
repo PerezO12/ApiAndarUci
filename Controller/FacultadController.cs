@@ -99,8 +99,8 @@ namespace MyApiUCI.Controller
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
-                return StatusCode(500, "Ocurrio un error, contactar al administrador");
+                Console.WriteLine(ex);
+                return StatusCode(500, "Ocurrió un error, contactar al administrador");
             }
         }  */
 

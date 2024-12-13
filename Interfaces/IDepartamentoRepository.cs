@@ -11,14 +11,17 @@ namespace MyApiUCI.Interfaces
 {
     public interface IDepartamentoRepository
     {
-        public Task<List<Departamento>> GetAllAsync( QueryObjectDepartamentos query );
-        public Task<List<Departamento>> GetAllDepartamentosByFacultadId(int id);
-        public Task<Departamento?> GetByIdAsync(int id);
-        public Task<Departamento> CreateAsync(Departamento departamentoModel);
-        public Task<Departamento?> UpdateAsync(int id, Departamento departdepartamentoModelamento);
+        Task<List<Departamento>> GetAllAsync( QueryObjectDepartamentos query );
+        Task<List<Departamento>> GetAllDepartamentosByFacultadId(int id);
+        Task<Departamento?> GetByIdAsync(int id);
+        Task<Departamento> CreateAsync(Departamento departamentoModel);
+        Task<Departamento?> UpdateAsync(int id, Departamento departdepartamentoModelamento);
         Task<Departamento?> CambiarEncargado(int departamentoId, int? nuevoEncargado = null);
-        public Task<Departamento?> DeleteAsync(int id);
+        Task<Departamento?> DeleteAsync(int id);
+        Task<Departamento?> DeleteEncargadoByEncargadoID(int encargadoId);
         Task<List<Departamento>> DeleteAllDepartamentosByFacultad(int facultadId);//cuidado!!!
-        public Task<Departamento?> PatchAsync(int id, PatchDepartamentoDto departamentoDto);
+        Task<Departamento?> PatchAsync(int id, PatchDepartamentoDto departamentoDto);
+        Task<bool> ExistDepartamento(int id);
+        Task<bool> TieneEncargado(int id);
     }
 }

@@ -34,7 +34,7 @@ namespace MyApiUCI.Repository
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -53,7 +53,7 @@ namespace MyApiUCI.Repository
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -61,7 +61,7 @@ namespace MyApiUCI.Repository
         {
             try
             {
-                var estudianteModel = await _context.Estudiante.FirstOrDefaultAsync( e => e.UsuarioId == userId);
+                var estudianteModel = await _context.Estudiante.FirstOrDefaultAsync( e => e.UsuarioId == userId && e.Activo == true);
                 if(estudianteModel == null) return null;
 
                 estudianteModel.Activo = false;
@@ -71,7 +71,7 @@ namespace MyApiUCI.Repository
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         
@@ -118,7 +118,7 @@ namespace MyApiUCI.Repository
             {
                 estudiantes = estudiantes.Where(e => e.FacultadId == query.FacultadId);
             }
-            //buscar por carreara Id
+            //buscar por carrera Id
             if(query.CarreraId.HasValue)
             {
                 estudiantes = estudiantes.Where(e => e.CarreraId == query.CarreraId);

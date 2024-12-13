@@ -9,29 +9,32 @@ namespace MyApiUCI.Dtos.Cuentas
     public class RegisterEncargadoDto
     {
         [Required]
-        public string? nombreUsuario { get; set; }
+        [MinLength(4, ErrorMessage = "No es un nombre válido")]
+        public string? NombreUsuario { get; set; }
         
         [Required]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "No es un correo válido")]
         public string Email { get; set; } = null!;
 
         [Required]
+        [MinLength(8, ErrorMessage = "La contraseña es muy corta.")]
         public string Password { get; set; } = null!;
 
         [Required]
-        [MinLength(10, ErrorMessage = "No es un nombre válido")]
+        [MinLength(10, ErrorMessage = "No es un nombre válido.")]
+        [MaxLength(100, ErrorMessage = "No es un nombre válido.")]
         public string NombreCompleto { get; set; } = null!;
 
         [Required]
-        [StringLength(11, MinimumLength = 11, ErrorMessage = "El Carnet de Identidad debe tener exactamente 11 caracteres.")]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "El Carnet de Identidad solo debe contener números.")]
+        [StringLength(11, MinimumLength = 11, ErrorMessage = "El carné de identidaddebe tener exactamente 11 caracteres.")]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "El carné de identidadsolo debe contener números.")]
         public string CarnetIdentidad { get; set; } = null!;
 
         [Required]
         public int DepartamentoId { get; set; }
 
-        [Required (ErrorMessage= "La contraseña es requerida")]
-        public string PasswordAdmin { get; set; } = null!;
+        //[Required (ErrorMessage= "La contraseña es requerida")]
+        //public string PasswordAdmin { get; set; } = null!;
 
     }
 }

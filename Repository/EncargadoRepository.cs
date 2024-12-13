@@ -39,7 +39,7 @@ namespace MyApiUCI.Repository
 
         public async Task<Encargado?> DeleteByUserIdAsync(string userId)
         {
-            var encargadoModel = await _context.Encargado.FirstOrDefaultAsync(e => e.UsuarioId == userId);
+            var encargadoModel = await _context.Encargado.FirstOrDefaultAsync(e => e.UsuarioId == userId && e.Activo == true);
             if(encargadoModel == null) return null;
 
             encargadoModel.Activo = false;

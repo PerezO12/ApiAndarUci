@@ -2,8 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Helpers.Querys;
+using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Departamento;
@@ -22,6 +25,7 @@ namespace MyApiUCI.Controller
         private readonly IDepartamentoRepository _depaRepo;
         private readonly IFacultadRepository _facuRepo;
         private readonly IEstudianteService _estudianteService;
+        private readonly IAuthService _authService;
         private readonly IEncargadoService _encargadoService;
         private readonly ILogger<DepartamentoController> _logger;
         public DepartamentoController(
@@ -29,11 +33,13 @@ namespace MyApiUCI.Controller
             IFacultadRepository facuRepo,
             IEstudianteService estudianteService,
             IEncargadoService encargadoService,
+            IAuthService authService,
             ILogger<DepartamentoController> logger
             )
         {
             _depaRepo = depaRepo;
             _facuRepo = facuRepo;
+            _authService = authService;
             _encargadoService = encargadoService;
             _estudianteService = estudianteService;
             _logger = logger;
@@ -142,10 +148,21 @@ namespace MyApiUCI.Controller
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete]
         [Route("{id}")]
-        public async Task<IActionResult> Delete([FromRoute]int id)
+        public async Task<IActionResult> Delete([FromRoute]int id, [FromBody]PasswordDto password)
         {
+
             try
             {
+                var adminId = User.FindFirstValue("UsuarioId");
+                if(adminId == null) return BadRequest(new {msg = "Token no válido"});
+                var admin = await _authService.ExisteUsuario(adminId);
+                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
+
+                var passwordResult = await _authService.VerifyUserPassword(admin, password.Password);
+                if(!passwordResult) return Unauthorized(new {msg = "Contraseña incorrecta"});
+
+
+
                 var departamentoModel = await _depaRepo.DeleteAsync(id);
                 if(departamentoModel == null)
                 {

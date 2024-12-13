@@ -35,7 +35,7 @@ namespace MyApiUCI.Controller
                 return Ok(carreraDto);
             }
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { msg = "Error al obtener las Carreras, contacte al administrador" });
             }
         }
@@ -52,7 +52,7 @@ namespace MyApiUCI.Controller
                 return Ok(carrera.toCarreraDto());
             }
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { msg = "Error al obtener la carrera, informe al administrador" });
             }
         }
@@ -72,7 +72,7 @@ namespace MyApiUCI.Controller
                 return CreatedAtAction(nameof(GetByID), new{Id = carreraModel.Id}, carreraModel.toCarreraDto());
             }
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { msg = "Error al crear la carrera, informe al administrador" });
             }
 
@@ -94,7 +94,7 @@ namespace MyApiUCI.Controller
                 return Ok(carreraModel.toCarreraDto());
             }
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { msg = "Error al actualizar la carrera, informe al administrador" });
             }
             
@@ -111,7 +111,7 @@ namespace MyApiUCI.Controller
                 return Ok(carreraModel.toCarreraDto());
             }
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { msg = "Error al borrar la carrera, informe al administrador" });
             }
         }
@@ -130,7 +130,7 @@ namespace MyApiUCI.Controller
                 return Ok(carrera.toCarreraDto());
             }
             catch(Exception ex) {
-                Console.Write(ex.Message);
+                Console.WriteLine(ex.Message);
                 return StatusCode(500, new { msg = "Error al actualizar la carrera, informe al administrador" });
             }
         }

@@ -237,5 +237,49 @@ namespace MyApiUCI.Repository
                 throw;
             }
         }
+
+        public async Task<bool> ExistDepartamento(int id)
+        {
+            try
+            {
+                return await _context.Departamento.AnyAsync(d => d.Id == id && d.Activo == true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al verificar el departamento: {ex.Message}");//todo: no se si retornar false o relan la exception
+                return false;
+            }
+        }
+        public async Task<bool> TieneEncargado(int id)
+        {
+            try
+            {
+                return await _context.Departamento.AnyAsync(d => d.Id == id && d.Activo == true && d.EncargadoId != null);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al verificar el departamento: {ex.Message}");//todo: no se si retornar false o relan la exception
+                return false;
+            }
+        }
+
+        public async Task<Departamento?> DeleteEncargadoByEncargadoID(int encargadoId)
+        {
+            try
+            {
+                var departamentoModel = await _context.Departamento.FirstOrDefaultAsync(d => d.EncargadoId == encargadoId && d.Activo == true);
+                
+                if(departamentoModel == null) return null;
+
+                departamentoModel.EncargadoId = null;
+                await _context.SaveChangesAsync();
+                return departamentoModel;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError($"Error al borrar el encargado con {encargadoId}del departamento id : {ex.Message}");
+                throw;
+            }
+        }
     }
 }

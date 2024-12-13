@@ -33,7 +33,7 @@ namespace MyApiUCI.Service
         public async Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto)
         {
             try{
-                byte[] llavePublicaBytes = Convert.FromBase64String(encargadoDto.LlavePublica); // Decodificar la llave pública en base64
+                byte[] llavePublicaBytes = Convert.FromBase64String(encargadoDto.LlavePublica); // Decodificar la clave pública en base64
                 using (var rsa = RSA.Create())
                 {
                     rsa.ImportSubjectPublicKeyInfo(llavePublicaBytes, out _);
@@ -192,7 +192,7 @@ namespace MyApiUCI.Service
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -205,13 +205,14 @@ namespace MyApiUCI.Service
                 if(encargado == null) return null;
                 if(encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
                 {
-                    await _depaRepo.CambiarEncargado(encargado.Id, encargadoDto.DepartamentoId);
+                    await _depaRepo.DeleteEncargadoByEncargadoID(encargado.Id);
+                    await _depaRepo.CambiarEncargado(encargado.DepartamentoId, encargado.Id);
                 }
                 return encargado;
             }
             catch (Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }
@@ -230,7 +231,7 @@ namespace MyApiUCI.Service
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }

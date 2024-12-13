@@ -57,7 +57,7 @@ namespace ApiUCI.Service
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         
@@ -91,7 +91,7 @@ namespace ApiUCI.Service
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 throw;
             }
         }

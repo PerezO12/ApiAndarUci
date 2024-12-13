@@ -81,13 +81,13 @@ namespace MyApiUCI.Controller
 
                 var llaves = await _encargadoService.CambiarLlavePublicalAsync(usuarioId, encargado);
                 
-                if(llaves == null) return BadRequest(new {msg="Llave pública no válida"});
+                if(llaves == null) return BadRequest(new {msg="clave pública no válida"});
                 
                 return Ok(llaves);
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 return StatusCode(500, "Contactar al administrador");
             }
         }
@@ -116,7 +116,7 @@ namespace MyApiUCI.Controller
             }
             catch(Exception ex)
             {
-                Console.Write(ex);
+                Console.WriteLine(ex);
                 return StatusCode(500, new {msg= "Contactar al administrador"});
             }
         }

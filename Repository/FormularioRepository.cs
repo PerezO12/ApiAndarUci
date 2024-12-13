@@ -161,7 +161,7 @@ namespace MyApiUCI.Repository
                 formularios = formularios
                     .Where(f => f.NombreCompletoEstudiante.ToLower().Contains(query.Nombre.ToLower()));
             }
-            if(query.Carrera != null) //Buscar por carreara nombre
+            if(query.Carrera != null) //Buscar por carrera nombre
             {
                 formularios = formularios
                     .Where(f => f.NombreCarrera.ToLower().Contains(query.Carrera.ToLower()));

@@ -9,13 +9,15 @@ namespace ApiUCI.Dtos.Cuentas
     public class RegistroAdministradorDto
     {
         [Required]
+        [MinLength(4, ErrorMessage = "No es un nombre válido")]
         public string NombreUsuario { get; set; } = null!;
         
         [Required]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "No es un correo válido")]
         public string Email { get; set; } = null!;
 
         [Required]
+        [MinLength(8, ErrorMessage = "La contraseña es muy corta")]
         public string Password { get; set; } = null!;
 
         [Required]
@@ -24,8 +26,8 @@ namespace ApiUCI.Dtos.Cuentas
         public string NombreCompleto { get; set; } = null!;
 
         [Required]
-        [StringLength(11, MinimumLength = 11, ErrorMessage = "El Carnet de Identidad debe tener exactamente 11 números.")]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "El Carnet de Identidad solo debe contener números.")]
+        [StringLength(11, MinimumLength = 11, ErrorMessage = "El carné de identidaddebe tener exactamente 11 números.")]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "El carné de identidadsolo debe contener números.")]
         public string CarnetIdentidad { get; set; } = null!;
         
         [Required (ErrorMessage= "La contraseña es requerida")]
