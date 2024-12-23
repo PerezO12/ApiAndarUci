@@ -14,9 +14,9 @@ namespace ApiUCI.Contracts.V1
         public static class Account
         {
             public const string RutaGenaral = Base + "/account";
-            public const string RegistrarAdmin = "registrar/admin";
-            public const string RegistrarEstudiante =  "registrar/estudiante";
-            public const string RegistrarEncargado = "registrar/encargado";
+            
+            
+            
             public const string Login = "login";
             public const string ObtenerPerfil = "obtener-perfil";
             public const string CambiarPassword = "cambiar-password";
@@ -33,6 +33,7 @@ namespace ApiUCI.Contracts.V1
         {
             public const string RutaGenaral = Base + "/encargado";
             public const string GetByUserId = "usuario/{id}";
+            public const string RegistrarEncargado = "registrar-encargado";
             public const string CambiarLlaves = "cambiar-llave";
             public const string GenerarLlaves = "generar-llaves";
 
@@ -41,6 +42,7 @@ namespace ApiUCI.Contracts.V1
         {
             public const string RutaGenaral = Base + "/estudiante";
             public const string GetByUserId = "usuario/{id}";
+            public const string RegistrarEstudiante =  "registrar-estudiante";
 
         }
         public static class Facultad
@@ -62,6 +64,7 @@ namespace ApiUCI.Contracts.V1
         public static class Usuario
         {
             public const string RutaGenaral = Base + "/usuario";
+            public const string RegistrarAdmin = "registrar-admin";
         }
     }
 }

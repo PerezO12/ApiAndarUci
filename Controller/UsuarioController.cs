@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ApiUCI.Contracts.V1;
+using ApiUCI.Dtos;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Dtos.Usuarios;
 using ApiUCI.Extensions;
@@ -18,12 +19,55 @@ namespace MyApiUCI.Controller
     {
         private readonly IUsuarioService _usuarioService;
         private readonly IAuthService _authService;
-        public UsuarioController(IUsuarioService usuarioService, IAuthService authService)
+        public readonly ILogger _logger;
+        public UsuarioController(IUsuarioService usuarioService, IAuthService authService, ILogger logger)
         {
             _usuarioService = usuarioService;
             _authService = authService;
+            _logger = logger;
         }
         
+        private IActionResult HandleResponse<T>(RespuestasServicios<T> respuesta)
+        {
+            if (respuesta.Success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpPost(ApiRoutes.Usuario.RegistrarAdmin)]
+        public async Task<IActionResult> RegistrarAdmin([FromBody] RegistroAdministradorDto registroDto) 
+        {
+            try
+            {
+                var adminId = User.GetUserId();
+                var passwordResult = await _authService.VerifyUserPassword(adminId, registroDto.PasswordAdmin);
+                if (!passwordResult)
+                {
+                    var error = ErrorBuilder.Build("Password", "Contraseña incorrecta");
+                    return Unauthorized(RespuestasServicios<string>.ErrorResponse(error, "No autorizado"));
+                }
+
+                var respuesta = await _usuarioService.RegistrarAdministradorAsync(registroDto);
+                return HandleResponse(respuesta);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Token no válido");
+                var error = ErrorBuilder.Build("Token", "Token no válido");
+                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al registrar administrador para el usuario {AdminId}", User.GetUserId());
+                var error = ErrorBuilder.Build("General", "Contactar al administrador");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, "Error interno del servidor"));
+            }
+        }
+
+
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectUsuario query)
         {

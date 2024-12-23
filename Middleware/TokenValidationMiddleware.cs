@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiUCI.Contracts.V1;
+using ApiUCI.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using MyApiUCI.Models;
@@ -39,13 +40,13 @@ namespace ApiUCI.Middleware
             }
 
             var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            var usuarioId = context.User.FindFirst("UsuarioId")?.Value;
+            var usuarioId = context.User.GetUserId();//TODO:VERIFICAR
 
             if (string.IsNullOrEmpty(usuarioId) || string.IsNullOrEmpty(token))
             {
                 context.Response.StatusCode = 401; // Unauthorized
                 context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync("{\"error\": \"Falta token o UsuarioIdº\"}");
+                await context.Response.WriteAsync("{\"error\": \"Falta token o Token Inválido\"}");
                 return;
             }
 

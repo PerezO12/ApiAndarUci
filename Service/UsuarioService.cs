@@ -13,6 +13,8 @@ using ApiUCI.Interfaces;
 using ApiUCI.Dtos;
 using ApiUCI.Dtos.Estudiante;
 using ApiUCI.Dtos.Encargado;
+using ApiUCI.Dtos.Cuentas;
+using ApiUCI.Extensions;
 
 
 namespace ApiUCI.Service
@@ -351,7 +353,6 @@ namespace ApiUCI.Service
             return usuariosDto;
         }
 
-
         public async Task<UsuarioDto?> GetByIdAsync(string id)
         {
             var user = await _userManager
@@ -371,5 +372,48 @@ namespace ApiUCI.Service
            };
         }
 
+        public async Task<RespuestasServicios<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto)
+        {
+            // Crear el usuario
+            var appUser = new AppUser
+            {
+                UserName = registroDto.NombreUsuario,
+                Email = registroDto.Email,
+                NombreCompleto = registroDto.NombreCompleto,
+                CarnetIdentidad = registroDto.CarnetIdentidad
+            };
+
+            // Crear el usuario en la base de datos
+            var createUserResult = await _userManager.CreateAsync(appUser, registroDto.Password);
+            if (!createUserResult.Succeeded)
+            {
+                var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
+                return RespuestasServicios<NewAdminDto>.ErrorResponse(errores);
+            }
+
+            // Asignar rol de administrador
+            var roleResult = await _userManager.AddToRoleAsync(appUser, "Admin");
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(appUser); // Revertir creación del usuario si falla la asignación del rol
+                var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
+                return RespuestasServicios<NewAdminDto>.ErrorResponse(errores);
+            }
+
+            // Crear el DTO para el administrador
+            var newAdminDto = new NewAdminDto
+            {
+                Id = appUser.Id,
+                Activo = appUser.Activo,
+                CarnetIdentidad = appUser.CarnetIdentidad,
+                NombreUsuario = appUser.UserName!,
+                Email = appUser.Email,
+                NombreCompleto = appUser.NombreCompleto,
+                Roles = new List<string> { "Admin" }
+            };
+
+            // Devolver éxito con el DTO
+            return RespuestasServicios<NewAdminDto>.SuccessResponse(newAdminDto, "Administrador creado exitosamente");
+        }
     }
 }

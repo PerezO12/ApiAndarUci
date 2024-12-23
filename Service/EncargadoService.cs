@@ -14,6 +14,9 @@ using MyApiUCI.Models;
 using ApiUCI.Helpers;
 using MyApiUCI.Dtos.Departamento;
 using Microsoft.AspNetCore.Identity;
+using ApiUCI.Dtos;
+using MyApiUCI.Dtos.Cuentas;
+using ApiUCI.Extensions;
 
 namespace MyApiUCI.Service
 {
@@ -195,6 +198,79 @@ namespace MyApiUCI.Service
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+        public async Task<RespuestasServicios<NewEncargadoDto>> RegisterEncargadoAsync(RegisterEncargadoDto registerDto)
+        {
+            // Verificar si el departamento existe
+            if (!await _depaRepo.ExistDepartamento(registerDto.DepartamentoId))
+            {
+                var errors = ErrorBuilder.Build("DepartamentoId", "El departamento no existe");
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errors);
+            }
+
+            // Verificar si ya existe un encargado en el departamento
+            if (await _depaRepo.TieneEncargado(registerDto.DepartamentoId))
+            {
+                var errors = ErrorBuilder.Build("DepartamentoId", "Ya existe un encargado en el departamento");
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errors);
+            }
+
+            // Crear el usuario
+            var appUser = new AppUser
+            {
+                UserName = registerDto.NombreUsuario,
+                Email = registerDto.Email,
+                NombreCompleto = registerDto.NombreCompleto,
+                CarnetIdentidad = registerDto.CarnetIdentidad
+            };
+
+            // Crear el usuario en la base de datos
+            var createUserResult = await _userManager.CreateAsync(appUser, registerDto.Password);
+            if (!createUserResult.Succeeded)
+            {
+                var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errores);
+            }
+
+            // Asignar el rol de encargado
+            var roleResult = await _userManager.AddToRoleAsync(appUser, "Encargado");
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(appUser); // Revertir la creación del usuario si falla la asignación de rol
+                var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errores);
+            }
+
+            try
+            {
+                var encagado = await _encargadoRepo.CreateAsync((new Encargado
+                {
+                    UsuarioId = appUser.Id,
+                    DepartamentoId = registerDto.DepartamentoId
+                }));
+                await _depaRepo.CambiarEncargado(encagado.DepartamentoId, encagado.Id);
+            }
+            catch (Exception ex)
+            {
+                await _userManager.DeleteAsync(appUser);
+                await _encargadoRepo.DeleteByUserIdAsync(appUser.Id);
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
+            // Crear el DTO de encargado
+            var newEncargadoDto = new NewEncargadoDto
+            {
+                Id = appUser.Id,
+                Activo = appUser.Activo,
+                CarnetIdentidad = appUser.CarnetIdentidad,
+                NombreUsuario = appUser.UserName!,
+                Email = appUser.Email,
+                NombreCompleto = appUser.NombreCompleto,
+                Roles = new List<string> { "Encargado" }
+            };
+
+            return RespuestasServicios<NewEncargadoDto>.SuccessResponse(newEncargadoDto, "Encargado creado exitosamente");
         }
 
         public async Task<Encargado?> UpdateEncargadoByUserIdAsync(string id, EncargadoUpdateDto encargadoDto)

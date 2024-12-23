@@ -1,3 +1,4 @@
+using ApiUCI.Contracts.V1;
 using ApiUCI.Data;
 using ApiUCI.Interfaces;
 using ApiUCI.Middleware;
@@ -44,11 +45,13 @@ builder.Services.AddCors(options =>
 // Configuración de Swagger para integrarlo con el JWT
 builder.Services.AddSwaggerGen(option =>
 {
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Andar", Version = "v1" });
+    //todo: prueba
+    //option.SwaggerDoc("v1", new OpenApiInfo { Title = "Api Andar", Version = "v1" });
+    option.SwaggerDoc(ApiRoutes.Version, new OpenApiInfo { Title = "Api Andar-Lite", Version = ApiRoutes.Version });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
+        Description = "Por favor entre un token válido",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
@@ -129,7 +132,6 @@ builder.Services.AddScoped<IFormularioRepository, FormularioRepository>();
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 builder.Services.AddScoped<IEncargadoService, EncargadoService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IFormularioService, FormularioService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -142,7 +144,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     // Usa referencias de objetos en lugar de seguir serializando de forma infinita
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
     // Para ignorar datos en null
-    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    //options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
 
 var app = builder.Build();

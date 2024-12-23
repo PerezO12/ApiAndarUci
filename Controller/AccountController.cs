@@ -18,99 +18,26 @@ namespace MyApiUCI.Controller
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly IAccountService _acountService;
         private readonly IAuthService _authService;
-        private readonly ILogger _logger;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(
-            IAccountService acountService, 
-            IAuthService authService,
-            ILogger<AccountController> logger
-        )
+        public AccountController(IAuthService authService, ILogger<AccountController> logger)
         {
-            _acountService = acountService;
             _authService = authService;
             _logger = logger;
         }
 
+        // Centraliza el manejo de respuestas exitosas y errores
         private IActionResult HandleResponse<T>(RespuestasServicios<T> respuesta)
         {
-            if (respuesta.Success)
-            {
-                return Ok(respuesta);
-            }
-            return BadRequest(respuesta);
+            return respuesta.Success ? Ok(respuesta) : BadRequest(respuesta);
         }
 
-        [Authorize(Policy = "AdminPolicy")]
-        [HttpPost(ApiRoutes.Account.RegistrarAdmin)]
-        public async Task<IActionResult> RegistrarAdmin([FromBody] RegistroAdministradorDto registroDto) 
+        private IActionResult HandleError(Exception ex, string customMessage = "Error en el servidor", string property = "General")
         {
-            try
-            {
-                var adminId = User.GetUserId();
-                var passwordResult = await _authService.VerifyUserPassword(adminId, registroDto.PasswordAdmin);
-                if (!passwordResult)
-                {
-                    var error = ErrorBuilder.Build("Password", "Contraseña incorrecta");
-                    return Unauthorized(RespuestasServicios<string>.ErrorResponse(error, "No autorizado"));
-                }
-
-                var respuesta = await _acountService.RegistrarAdministradorAsync(registroDto);
-                return HandleResponse(respuesta);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogError(ex, "Token no válido");
-                var error = ErrorBuilder.Build("Token", "Token no válido");
-                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al registrar administrador para el usuario {AdminId}", User.GetUserId());
-                var error = ErrorBuilder.Build("General", "Contactar al administrador");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, "Error interno del servidor"));
-            }
-        }
-
-        [Authorize(Policy = "AdminPolicy")]
-        [HttpPost(ApiRoutes.Account.RegistrarEstudiante)]
-        public async Task<IActionResult> RegisterEstudiante([FromBody] RegisterEstudianteDto registerDto)
-        {
-            try
-            {
-                var respuesta = await _acountService.RegisterEstudianteAsync(registerDto);
-                return HandleResponse(respuesta);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al registrar estudiante");
-                var error = ErrorBuilder.Build("General", "Error en el servidor");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
-            }
-        }
-
-        [Authorize(Policy = "AdminPolicy")]
-        [HttpPost(ApiRoutes.Account.RegistrarEncargado)]
-        public async Task<IActionResult> RegisterEncargado([FromBody] RegisterEncargadoDto registerDto)
-        {
-            try
-            {
-                var respuesta = await _acountService.RegisterEncargadoAsync(registerDto);
-                return HandleResponse(respuesta);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                _logger.LogError(ex, "Token no válido");
-                var error = ErrorBuilder.Build("Token", "Token no válido");
-                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al registrar encargado para el usuario {AdminId}", User.GetUserId());
-                var error = ErrorBuilder.Build("General", "Error en el servidor");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
-            }
+            _logger.LogError(ex, customMessage);
+            var error = ErrorBuilder.Build(property, customMessage);
+            return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
         }
 
         [HttpPost(ApiRoutes.Account.Login)]
@@ -123,9 +50,7 @@ namespace MyApiUCI.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error en el login");
-                var error = ErrorBuilder.Build("Login", "Ocurrió un error, informar al administrador");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
+                return HandleError(ex, "Error en el login", "Login");
             }
         }
 
@@ -147,9 +72,7 @@ namespace MyApiUCI.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener perfil para el usuario {UserId}", User.GetUserId());
-                var error = ErrorBuilder.Build("General", "Error en el servidor");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
+                return HandleError(ex, "Error al obtener perfil para el usuario", "Perfil");
             }
         }
 
@@ -160,6 +83,7 @@ namespace MyApiUCI.Controller
             {
                 var userId = User.GetUserId();
                 var usuario = await _authService.ExisteUsuario(userId);
+
                 if (usuario == null)
                 {
                     var error = ErrorBuilder.Build("Usuario", "El usuario no existe");
@@ -177,9 +101,7 @@ namespace MyApiUCI.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al cambiar contraseña para el usuario {UserId}", User.GetUserId());
-                var error = ErrorBuilder.Build("General", "Error en el servidor");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
+                return HandleError(ex, "Error al cambiar contraseña para el usuario", "CambioContraseña");
             }
         }
     }

@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiUCI.Contracts.V1;
+using ApiUCI.Dtos;
 using ApiUCI.Dtos.Encargado;
+using ApiUCI.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MyApiUCI.Dtos.Cuentas;
 using MyApiUCI.Helpers;
 using MyApiUCI.Interfaces;
 using MyApiUCI.Models;
@@ -20,11 +23,45 @@ namespace MyApiUCI.Controller
         private readonly IEncargadoService _encargadoService;
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
-        public EncargadoController(IEncargadoService encargadoService, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
+        private readonly ILogger _logger;
+        public EncargadoController(IEncargadoService encargadoService, SignInManager<AppUser> signInManager, UserManager<AppUser> userManager, ILogger logger)
         {
             _encargadoService = encargadoService;
             _signInManager = signInManager;
             _userManager = userManager;
+            _logger = logger;
+        }
+
+        private IActionResult HandleResponse<T>(RespuestasServicios<T> respuesta)
+        {
+            if (respuesta.Success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
+        }
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpPost(ApiRoutes.Encargado.RegistrarEncargado)]
+        public async Task<IActionResult> RegisterEncargado([FromBody] RegisterEncargadoDto registerDto)
+        {
+            try
+            {
+                var respuesta = await _encargadoService.RegisterEncargadoAsync(registerDto);
+                return HandleResponse(respuesta);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Token no válido");
+                var error = ErrorBuilder.Build("Token", "Token no válido");
+                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al registrar encargado para el usuario {AdminId}", User.GetUserId());
+                var error = ErrorBuilder.Build("General", "Error en el servidor");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
+            }
         }
 
         [Authorize(Policy = "AdminPolicy")]

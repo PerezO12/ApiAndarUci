@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ApiUCI.Dtos;
+using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Dtos.Usuarios;
 using Microsoft.AspNetCore.Identity;
 using MyApiUCI.Dtos.Usuarios;
@@ -18,5 +19,6 @@ namespace ApiUCI.Interfaces
         Task<List<UsuarioDto>> GetAllAsync(QueryObjectUsuario query);
         Task<UsuarioDto?> GetByIdAsync(string id);
         Task<AppUser?> DeleteAsync(string id);
+        public Task<RespuestasServicios<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto); 
     }
 }

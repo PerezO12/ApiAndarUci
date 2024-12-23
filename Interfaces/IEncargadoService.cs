@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Dtos;
 using ApiUCI.Dtos.Encargado;
+using MyApiUCI.Dtos.Cuentas;
 using MyApiUCI.Dtos.Encargado;
 using MyApiUCI.Helpers;
 using MyApiUCI.Models;
@@ -22,6 +24,7 @@ namespace MyApiUCI.Interfaces
         Task<Encargado?> DeleteByUserIdAsync(string userId);
         Task<Encargado?> DeleteEncargadoByDepartamentoIdAsync(int departamentoId, bool borrarDepartamento = true);
         Task<Encargado> CreateAsync(Encargado encargadoModel);
+        Task<RespuestasServicios<NewEncargadoDto>> RegisterEncargadoAsync(RegisterEncargadoDto registerDto);
         Task<Encargado?> UpdateEncargadoByUserIdAsync(string id, EncargadoUpdateDto encargadoDto);
         Task<Encargado?> UpdateAsync(int id, EncargadoUpdateDto encargadoDto);
         Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId);
