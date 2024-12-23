@@ -15,10 +15,11 @@ using ApiUCI.Dtos.Formulario;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ApiUCI.Dtos;
 using ApiUCI.Helpers.Querys;
+using ApiUCI.Contracts.V1;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[controller]")]
+    [Route(ApiRoutes.Formulario.RutaGenaral)]
     [ApiController]
     public class FormularioController : ControllerBase
     {
@@ -79,7 +80,7 @@ namespace MyApiUCI.Controller
         //TODO: poner para que el estudiante sea el q pueda acceder a esto
         
         [Authorize(Policy = "EstudiantePolicy")]
-        [HttpGet("estudiantes")]
+        [HttpGet(ApiRoutes.Formulario.GetFormularioEstudiante)]
         public async Task<IActionResult> GetFormulariosEstudiante([FromQuery] QueryObjectFormularioEstudiantes query){
             var usuarioId = User.FindFirst("UsuarioId")?.Value;
             if(usuarioId == null) 
@@ -101,7 +102,7 @@ namespace MyApiUCI.Controller
         }
 
         [Authorize(Policy = "EncargadoPolicy")]
-        [HttpGet("encargados")]
+        [HttpGet(ApiRoutes.Formulario.GetAllFormulariosByEncargado)]
         public async Task<IActionResult> GetAllFormulariosByEncargado([FromQuery] QueryObjectFormularioEncargado query)
         {
             var usuarioId = User.FindFirst("UsuarioId")?.Value;
@@ -123,7 +124,7 @@ namespace MyApiUCI.Controller
         }
 
         [Authorize(Policy = "EncargadoPolicy")]
-        [HttpGet("encargados/{id}")]
+        [HttpGet(ApiRoutes.Formulario.GetFormularioEstudianteWhitDetails)]
         public async Task<IActionResult> GetFormularioEstudianteWhitDetails([FromRoute] int id)
         {
             var userId = User.FindFirst("UsuarioId")?.Value;
@@ -208,7 +209,7 @@ namespace MyApiUCI.Controller
         }
 
         //solo encargado
-        [HttpPatch("firmar/{id}")]
+        [HttpPatch(ApiRoutes.Formulario.FirmarFormulario)]
         public async Task<IActionResult> FirmarFormulario([FromRoute] int id, [FromBody] FormularioFirmarDto formularioDto)
         {
             if(!ModelState.IsValid) return BadRequest(ModelState);
@@ -259,7 +260,7 @@ namespace MyApiUCI.Controller
 
             return Ok(new { msg = resultado.msg });
         }
-        //agregar prote
+/*         //agregar prote
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("admin/{id}")]
         public async Task<IActionResult> DeleteFormularioAdmin([FromRoute] int id)
@@ -269,7 +270,7 @@ namespace MyApiUCI.Controller
                 return BadRequest(new{ msg= resultado.msg} );
             }
             return Ok(new { msg = resultado.msg });
-        }
+        } */
 
 
     }

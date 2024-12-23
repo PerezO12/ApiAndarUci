@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Contracts.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +15,8 @@ using MyApiUCI.Repository;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route(ApiRoutes.Estudiante.RutaGenaral)]
     public class EstudianteController : ControllerBase
     {
         public readonly IEstudianteService _estudianteService;
@@ -25,7 +26,7 @@ namespace MyApiUCI.Controller
             _estudianteService = estudianteService;
         }
 
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectEstudiante query)
         { 
@@ -42,6 +43,7 @@ namespace MyApiUCI.Controller
            return Ok(estudiantes);
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute]int id) {
             var estudiante = await _estudianteService.GetByIdWithDetailsAsync(id);
@@ -49,7 +51,9 @@ namespace MyApiUCI.Controller
             
             return Ok(estudiante);
         }
-        [HttpGet("usuario/{id}")]
+
+        [Authorize(Policy = "AdminPolicy")]
+        [HttpGet(ApiRoutes.Estudiante.GetByUserId)]
         public async Task<IActionResult> GetByUserId([FromRoute] string id)
         {
             var estudiante = await _estudianteService.GetEstudianteWithByUserId(id);

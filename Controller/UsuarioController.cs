@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using ApiUCI.Contracts.V1;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Dtos.Usuarios;
+using ApiUCI.Extensions;
 using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,8 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Helpers;
 
 namespace MyApiUCI.Controller
-{
-    [Route("api/[controller]")]
+{   
+    [Authorize(Policy = "AdminPolicy")]
+    [Route(ApiRoutes.Usuario.RutaGenaral)]
     [ApiController]
     public class UsuarioController : ControllerBase
     {
@@ -21,7 +24,6 @@ namespace MyApiUCI.Controller
             _authService = authService;
         }
         
-        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectUsuario query)
         {
@@ -29,7 +31,6 @@ namespace MyApiUCI.Controller
             return Ok(usuariosDto);
         }
 
-        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{Id}")]
         public async Task<IActionResult> GetById([FromRoute]string Id)
         {
@@ -38,20 +39,16 @@ namespace MyApiUCI.Controller
             return Ok(usuario);
         }
         
-        [Authorize(Policy = "AdminPolicy")]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UsuarioWhiteRolUpdateDto usuarioUpdateDto)
         {
             try 
             {
-                var adminId = User.FindFirstValue("UsuarioId");
-                if(adminId == null) return BadRequest(new{msg="Token no válido"});
+                var adminId = User.GetUserId(); //todo: verificar
+                if(adminId == null) return BadRequest(new {errors="Token no válido"});
 
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return Unauthorized(new {msg="No Authorizado"});
-
-                var passwordCorrecta = await _authService.VerifyUserPassword(admin, usuarioUpdateDto.PasswordAdmin );
-                if(!passwordCorrecta) return Unauthorized(new {msg="Contraseña incorrecta"});
+                var passwordCorrecta = await _authService.VerifyUserPassword(adminId, usuarioUpdateDto.PasswordAdmin );
+                if(!passwordCorrecta) return Unauthorized(new {errors="Contraseña incorrecta"});
 
                 var resultado = await _usuarioService.UpdateAsync(id, usuarioUpdateDto);
 
@@ -66,7 +63,6 @@ namespace MyApiUCI.Controller
             }
         }
         
-        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] string id, [FromBody]PasswordDto password) 
         {
@@ -76,11 +72,8 @@ namespace MyApiUCI.Controller
                 var adminId = User.FindFirstValue("UsuarioId");
                 if(adminId == null) return BadRequest(new{msg="Token no válido"});
 
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return Unauthorized(new {msg="No Authorizado"});
-
-                var passwordCorrecta = await _authService.VerifyUserPassword(admin, password.Password );
-                if(!passwordCorrecta) return Unauthorized(new {msg="Contraseña incorrecta"});
+                var passwordCorrecta = await _authService.VerifyUserPassword(adminId, password.Password );
+                if(!passwordCorrecta) return Unauthorized(new {errors="Contraseña incorrecta"});
                 
                 var resultado = await _usuarioService.DeleteUserYRolAsync(id, adminId);
                 if(resultado.Error)

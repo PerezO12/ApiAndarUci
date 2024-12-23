@@ -2,6 +2,7 @@ using ApiUCI.Data;
 using ApiUCI.Interfaces;
 using ApiUCI.Middleware;
 using ApiUCI.Service;
+using ApiUCI.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -79,7 +80,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 8;
 })
-.AddEntityFrameworkStores<ApplicationDbContext>();
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddErrorDescriber<CustomIdentityErrorDescriber>();
 
 // Configuración del JWT Bearer
 builder.Services.AddAuthentication(options =>

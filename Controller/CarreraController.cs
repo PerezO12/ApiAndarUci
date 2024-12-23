@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Contracts.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Carrera;
@@ -11,7 +12,7 @@ using MyApiUCI.Mappers;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[controller]")]
+    [Route(ApiRoutes.Carrera.RutaGenaral)]
     [ApiController]
     public class CarreraController : ControllerBase
     {
@@ -57,7 +58,7 @@ namespace MyApiUCI.Controller
             }
         }
 
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCarreraDto carreraDto)
         {
@@ -77,7 +78,7 @@ namespace MyApiUCI.Controller
             }
 
         }
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id ,[FromBody] UpdateCarreraDto carreraDto)
         {
@@ -99,7 +100,7 @@ namespace MyApiUCI.Controller
             }
             
         }
-        //[Authorize(Policy = "AdminPolicy")]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {

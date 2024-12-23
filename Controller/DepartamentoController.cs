@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ApiUCI.Contracts.V1;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Helpers.Querys;
 using ApiUCI.Interfaces;
@@ -18,7 +19,7 @@ using MyApiUCI.Repository;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[controller]")]
+    [Route(ApiRoutes.Departamento.RutaGenaral)]
     [ApiController]
     public class DepartamentoController : ControllerBase 
     {
@@ -155,10 +156,8 @@ namespace MyApiUCI.Controller
             {
                 var adminId = User.FindFirstValue("UsuarioId");
                 if(adminId == null) return BadRequest(new {msg = "Token no válido"});
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
 
-                var passwordResult = await _authService.VerifyUserPassword(admin, password.Password);
+                var passwordResult = await _authService.VerifyUserPassword(adminId, password.Password);
                 if(!passwordResult) return Unauthorized(new {msg = "Contraseña incorrecta"});
 
 

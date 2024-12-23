@@ -8,14 +8,21 @@ namespace ApiUCI.Dtos
 {
     public class RespuestasServicios<T>
     {
-        public T? Data { get; private set; }
-        public bool Success { get; private set; }
-        public string? ErrorMessage { get; private set; }
-        public ErrorType ErrorType { get; private set; } = ErrorType.None;
+        public bool Success { get; set; }
+        public T? Data { get; set; }
+        public Dictionary<string, string[]>? Errors { get; set; }
+        public string? Message { get; set; }
+        //public ErrorType ErrorType { get; private set; } = ErrorType.None;
 
-        public static RespuestasServicios<T> SuccessResult(T data) 
-            => new RespuestasServicios<T> { Data = data, Success = true };
-        public static RespuestasServicios<T> FailureResult(string error, ErrorType errorType)
-            => new RespuestasServicios<T> { Success = false, ErrorMessage = error, ErrorType = errorType };
+        public static RespuestasServicios<T> SuccessResponse(T data, string message = "")
+        {
+            return new RespuestasServicios<T> { Success = true, Data = data, Message = message };
+        }
+
+        public static RespuestasServicios<T> ErrorResponse(Dictionary<string, string[]> errors, string message = "Error en la solicitud")
+        {
+            return new RespuestasServicios<T> { Success = false, Errors = errors, Message = message };
+        }
     }
 }
+

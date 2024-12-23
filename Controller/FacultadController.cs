@@ -7,12 +7,13 @@ using ApiUCI.Helpers.Querys;
 using ApiUCI.Interfaces;
 using ApiUCI.Dtos.Cuentas;
 using System.Security.Claims;
+using ApiUCI.Contracts.V1;
 
 
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[controller]")]
+    [Route(ApiRoutes.Facultad.RutaGenaral)]
     [ApiController]
     public class FacultadController : ControllerBase
     {

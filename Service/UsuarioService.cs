@@ -306,9 +306,9 @@ namespace ApiUCI.Service
             }
 
             // Ordenar
-            if (!string.IsNullOrWhiteSpace(query.OrdernarPor))
+            if (!string.IsNullOrWhiteSpace(query.OrdenarPor))
             {
-                usuariosQuery = query.OrdernarPor.ToLower() switch
+                usuariosQuery = query.OrdenarPor.ToLower() switch
                 {
                     "nombre" => query.Descender
                         ? usuariosQuery.OrderByDescending(u => u.User.NombreCompleto)

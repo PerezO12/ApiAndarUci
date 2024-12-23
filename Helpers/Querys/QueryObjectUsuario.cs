@@ -14,7 +14,7 @@ namespace MyApiUCI.Helpers
         public string? Email { get; set; } = null;
         public string? CarnetIdentidad { get; set; } = null;
         //ORDENAR
-        public string? OrdernarPor { get; set; } = null; //Para ordenar
+        public string? OrdenarPor { get; set; } = null; //Para ordenar
         public bool Descender { get; set; } = false; 
         public int NumeroPagina { get; set; } = 1; //Paginainicial por defecto 1
         public int TamañoPagina { get; set; } = 10; //Cantidad d elementos a retornar 

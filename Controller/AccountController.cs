@@ -1,222 +1,185 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ApiUCI.Contracts.V1;
+using ApiUCI.Dtos;
 using ApiUCI.Dtos.Cuentas;
+using ApiUCI.Extensions;
 using ApiUCI.Interfaces;
 using ApiUCI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyApiUCI.Dtos.Cuentas;
 using MyApiUCI.Interfaces;
-//Crear una ruta donde sea validar jwt y retornar datos del usuario con ese jwt
+
 namespace MyApiUCI.Controller
 {
-    [Route("api/account")]
+    [Route(ApiRoutes.Account.RutaGenaral)]
     [ApiController]
     public class AccountController : ControllerBase
     {
         private readonly IAccountService _acountService;
         private readonly IAuthService _authService;
         private readonly ILogger _logger;
+
         public AccountController(
             IAccountService acountService, 
             IAuthService authService,
             ILogger<AccountController> logger
-            )
+        )
         {
             _acountService = acountService;
             _authService = authService;
             _logger = logger;
         }
+
+        private IActionResult HandleResponse<T>(RespuestasServicios<T> respuesta)
+        {
+            if (respuesta.Success)
+            {
+                return Ok(respuesta);
+            }
+            return BadRequest(respuesta);
+        }
+
         [Authorize(Policy = "AdminPolicy")]
-        [HttpPost("registrar/admin")]
+        [HttpPost(ApiRoutes.Account.RegistrarAdmin)]
         public async Task<IActionResult> RegistrarAdmin([FromBody] RegistroAdministradorDto registroDto) 
         {
-
-            var adminId = User.FindFirstValue("UsuarioId");
-            if(adminId == null) return BadRequest(new {msg = "Token no válido"});
             try
             {
-                //validacion de contraseña
-
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
-
-                var passwordResult = await _authService.VerifyUserPassword(admin, registroDto.PasswordAdmin);
-                if(!passwordResult) return Unauthorized(new {msg = "Contraseña incorrecta"});
-                
-                //registrar al usuario
-                var respuesta = await _acountService.RegistrarAdministradorAsync(registroDto);
-                if (!respuesta.Success) 
+                var adminId = User.GetUserId();
+                var passwordResult = await _authService.VerifyUserPassword(adminId, registroDto.PasswordAdmin);
+                if (!passwordResult)
                 {
-                    return respuesta.ErrorType switch
-                    {
-                        ErrorType.BadRequest => BadRequest( new { admin = "Solicitud incorrecta", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.NotFound => NotFound( new { admin = "Recurso no encontrado", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.Unauthorized => Unauthorized(new { admin = "No autorizado", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.Forbidden => StatusCode(403, new { admin = "Acción prohibida", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.InternalServerError => StatusCode(500, new { admin = "Error interno del servidor", msg = respuesta.ErrorMessage?.ToString() }),
-                         _ => StatusCode(500, new { admin = "Falta validar esta acción. Reportar el error", msg = respuesta.ErrorMessage?.ToString() })
-                    };
+                    var error = ErrorBuilder.Build("Password", "Contraseña incorrecta");
+                    return Unauthorized(RespuestasServicios<string>.ErrorResponse(error, "No autorizado"));
                 }
 
-                return StatusCode(201, respuesta.Data);
-
-            } catch(Exception ex) 
+                var respuesta = await _acountService.RegistrarAdministradorAsync(registroDto);
+                return HandleResponse(respuesta);
+            }
+            catch (UnauthorizedAccessException ex)
             {
-                _logger.LogError(ex, "Error al registrar administrador para el usuario {AdminId}", adminId);
-                return StatusCode(500, new { message = "Contactar al administrador" });
+                _logger.LogError(ex, "Token no válido");
+                var error = ErrorBuilder.Build("Token", "Token no válido");
+                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al registrar administrador para el usuario {AdminId}", User.GetUserId());
+                var error = ErrorBuilder.Build("General", "Contactar al administrador");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, "Error interno del servidor"));
             }
         }
+
         [Authorize(Policy = "AdminPolicy")]
-        [HttpPost("registrar/estudiante")]
+        [HttpPost(ApiRoutes.Account.RegistrarEstudiante)]
         public async Task<IActionResult> RegisterEstudiante([FromBody] RegisterEstudianteDto registerDto)
         {
-
             try
             {
-                //validacion de contraseña
-                var adminId = User.FindFirstValue("UsuarioId");
-                if(adminId == null) return BadRequest(new {msg = "Token no válido"});
-
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
-                
-/*                 var passwordResult = await _authService.VerifyUserPassword(admin, registerDto.PasswordAdmin);
-                if(!passwordResult) return Unauthorized(new {msg = "Contraseña incorrecta"});
- */
-                // Llamar al servicio para registrar al usuario
                 var respuesta = await _acountService.RegisterEstudianteAsync(registerDto);
-                if (!respuesta.Success) 
-                {
-                    return respuesta.ErrorType switch
-                    {
-                        ErrorType.BadRequest => BadRequest( new { admin = "Solicitud incorrecta", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.NotFound => NotFound( new { admin = "Recurso no encontrado", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.Unauthorized => Unauthorized(new { admin = "No autorizado", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.Forbidden => StatusCode(403, new { admin = "Acción prohibida", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.InternalServerError => StatusCode(500, new { admin = "Error interno del servidor", msg = respuesta.ErrorMessage?.ToString() }),
-                         _ => StatusCode(500, new { admin = "Falta validar esta acción. Reportar el error", msg = respuesta.ErrorMessage?.ToString() })
-                    };
-                }
-
-                return StatusCode(201, respuesta.Data);
-
+                return HandleResponse(respuesta);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error en el servidor", error = ex.Message });
+                _logger.LogError(ex, "Error al registrar estudiante");
+                var error = ErrorBuilder.Build("General", "Error en el servidor");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
             }
         }
 
         [Authorize(Policy = "AdminPolicy")]
-        [HttpPost("registrar/encargado")]
+        [HttpPost(ApiRoutes.Account.RegistrarEncargado)]
         public async Task<IActionResult> RegisterEncargado([FromBody] RegisterEncargadoDto registerDto)
         {
-            // Validar el modelo recibido
-/*             if (!ModelState.IsValid)
-            {
-                return BadRequest(new {msg = ModelState});
-            } */
-            var adminId = User.FindFirstValue("UsuarioId");
-            if(adminId == null) return BadRequest(new {msg = "Token no válido"});
-
             try
             {
-                //validacion de contraseña
-
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return NotFound(new {msg = "El usuario no existe"});
-/*                 
-                var passwordResult = await _authService.VerifyUserPassword(admin, registerDto.PasswordAdmin);
-                if(!passwordResult) return Unauthorized(new {admin = "No autorizado", msg = "Contraseña incorrecta"});
- */
-                // Llamar al servicio para registrar al usuario 
                 var respuesta = await _acountService.RegisterEncargadoAsync(registerDto);
-                
-                if (!respuesta.Success) 
-                {
-                    return respuesta.ErrorType switch
-                    {
-                        ErrorType.BadRequest => BadRequest( new { admin = "Solicitud incorrecta", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.NotFound => NotFound( new { admin = "Recurso no encontrado", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.Unauthorized => Unauthorized(new { admin = "No autorizado", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.Forbidden => StatusCode(403, new { admin = "Acción prohibida", msg = respuesta.ErrorMessage?.ToString() }),
-                        ErrorType.InternalServerError => StatusCode(500, new { admin = "Error interno del servidor", msg = respuesta.ErrorMessage?.ToString() }),
-                         _ => StatusCode(500, new { admin = "Falta validar esta acción. Reportar el error", msg = respuesta.ErrorMessage?.ToString() })
-                    };
-                }
-
-                return StatusCode(201, respuesta.Data);
-
+                return HandleResponse(respuesta);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Token no válido");
+                var error = ErrorBuilder.Build("Token", "Token no válido");
+                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error en el servidor", error = ex.Message });
+                _logger.LogError(ex, "Error al registrar encargado para el usuario {AdminId}", User.GetUserId());
+                var error = ErrorBuilder.Build("General", "Error en el servidor");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
             }
         }
-        
-        [HttpPost("login")]
+
+        [HttpPost(ApiRoutes.Account.Login)]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             try
             {
-
-                if(!ModelState.IsValid) return BadRequest(new{ msg = "Contraseña/Usuario incorrecto"});//NO HACe falta
-
-                var user = await  _authService.Login(loginDto);
-                
-                if(user == null) return Unauthorized(new { msg = "Usuario o Contraseña Incorrectos"});
-
-                return Ok(user);
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, new {msg="Ocurrió un error, informar al administrador"});
-            }
-            
-        }
-
-        [Authorize]
-        [HttpGet("obtener-perfil")]
-        public async Task<IActionResult> ObtenerPerfil()
-        {
-            //solo usuarios con token válidospodran acceder
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if(userId == null) return BadRequest(new {msg = "Token no válido"});
-
-            var usuarioDto = await _authService.ObtenerPerfilAsync(userId);
-            return Ok(usuarioDto);
-        }
-        
-        [HttpPost("cambiar-password")]
-        public async Task<IActionResult> CambiarPassword([FromBody] CambiarPasswordDto cuentadDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                var userId = User.FindFirst("UsuarioId")?.Value;
-                if(userId == null) return BadRequest(new {msg = "Token no válido"});
-
-                var usuario = await _authService.ExisteUsuario(userId);
-                if(usuario == null) return NotFound(new {msg = "El usuario no existe"});
-                // Llamar al servicio para registrar al usuario
-                var resultado = await _authService.CambiarPasswordAsync(usuario, cuentadDto );
-                
-                if (!resultado.Succeeded) return BadRequest(new {msg = resultado.Errors});
-
-                return Ok(new {msg = "La contraseña fue cambiada exitosamente"});
-
+                var resultado = await _authService.Login(loginDto);
+                return HandleResponse(resultado);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error en el servidor", error = ex.Message });
+                _logger.LogError(ex, "Error en el login");
+                var error = ErrorBuilder.Build("Login", "Ocurrió un error, informar al administrador");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
+            }
+        }
+
+        [Authorize]
+        [HttpGet(ApiRoutes.Account.ObtenerPerfil)]
+        public async Task<IActionResult> ObtenerPerfil()
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var respuesta = await _authService.ObtenerPerfilAsync(userId);
+                return HandleResponse(respuesta);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Token no válido");
+                var error = ErrorBuilder.Build("Token", "Token no válido");
+                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener perfil para el usuario {UserId}", User.GetUserId());
+                var error = ErrorBuilder.Build("General", "Error en el servidor");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
+            }
+        }
+
+        [HttpPost(ApiRoutes.Account.CambiarPassword)]
+        public async Task<IActionResult> CambiarPassword([FromBody] CambiarPasswordDto cuentadDto)
+        {
+            try
+            {
+                var userId = User.GetUserId();
+                var usuario = await _authService.ExisteUsuario(userId);
+                if (usuario == null)
+                {
+                    var error = ErrorBuilder.Build("Usuario", "El usuario no existe");
+                    return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Usuario no encontrado"));
+                }
+
+                var resultado = await _authService.CambiarPasswordAsync(usuario, cuentadDto);
+                return HandleResponse(resultado);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogError(ex, "Token no válido");
+                var error = ErrorBuilder.Build("Token", "Token no válido");
+                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cambiar contraseña para el usuario {UserId}", User.GetUserId());
+                var error = ErrorBuilder.Build("General", "Error en el servidor");
+                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, ex.Message));
             }
         }
     }

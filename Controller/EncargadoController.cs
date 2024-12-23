@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Contracts.V1;
 using ApiUCI.Dtos.Encargado;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,7 @@ using MyApiUCI.Models;
 
 namespace MyApiUCI.Controller
 {
-    [Route("api/[controller]")]
+    [Route(ApiRoutes.Encargado.RutaGenaral)]
     [ApiController]
     public class EncargadoController : ControllerBase
     {
@@ -42,6 +43,7 @@ namespace MyApiUCI.Controller
            var encargados = await _encargadoService.GetAllEncargadosWithDetailsAsync(query);
            return Ok(encargados);
         }
+        
         [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
@@ -53,7 +55,7 @@ namespace MyApiUCI.Controller
         }
 
         [Authorize(Policy = "AdminPolicy")]
-        [HttpGet("usuario/{id}")]
+        [HttpGet(ApiRoutes.Encargado.GetByUserId)]
         public async Task<IActionResult> GetByUserId([FromRoute] string id)
         {
             var encargado = await _encargadoService.GetByUserIdWithUserId(id);
@@ -63,7 +65,7 @@ namespace MyApiUCI.Controller
         }
 
         //Generar sus llaves publicas llaves privadas solo acceder encargados
-        [HttpPost("cambiar-llave")]
+        [HttpPost(ApiRoutes.Encargado.CambiarLlaves)]
         public async Task<IActionResult> CambiarLlavePublica([FromBody] EncargadoCambiarLlaveDto encargado) {
             if(!ModelState.IsValid) return  BadRequest(new {msg="No válido"});
             try
@@ -92,7 +94,7 @@ namespace MyApiUCI.Controller
             }
         }
 
-        [HttpPost("generar-llaves")]
+        [HttpPost(ApiRoutes.Encargado.GenerarLlaves)]
         public async Task<IActionResult> GenerarLlaves([FromBody] EncargadoGenerarLLaveDto encargado) {
             if(!ModelState.IsValid) return  BadRequest(new {msg="No válido"});
             

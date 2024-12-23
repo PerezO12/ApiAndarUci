@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiUCI.Contracts.V1;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using MyApiUCI.Models;
@@ -15,10 +16,7 @@ namespace ApiUCI.Middleware
         // Lista de rutas públicas, como la de login
         private static readonly string[] PublicRoutes = new string[]
         {
-            "/api/account/login", // Ruta de login
-            //todo:temporal
-            "/api/account/register/encargado", // Ruta de registro encargado
-            "/api/account/register/estudiante", // Ruta de registro estudiante
+            $"/{ApiRoutes.Account.RutaGenaral}/{ApiRoutes.Account.Login}", // Ruta de login
         };
 
         public TokenValidationMiddleware(RequestDelegate next, IServiceScopeFactory serviceScopeFactory)
@@ -30,10 +28,12 @@ namespace ApiUCI.Middleware
         public async Task Invoke(HttpContext context)
         {
             var path = context.Request.Path.ToString();
-
+            //Console.WriteLine("Rutas públicas: " + string.Join(", ", PublicRoutes));
+            //Console.WriteLine("Path: " + path);
             // Excluir las rutas públicas
             if (string.IsNullOrEmpty(path) || PublicRoutes.Contains(path, StringComparer.OrdinalIgnoreCase))
             {
+                //Console.WriteLine("Entre: " + string.Join(", ", PublicRoutes));
                 await _next(context);
                 return;
             }

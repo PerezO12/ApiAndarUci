@@ -1,5 +1,6 @@
 using ApiUCI.Dtos;
 using ApiUCI.Dtos.Cuentas;
+using ApiUCI.Extensions;
 using ApiUCI.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace MyApiUCI.Service
         private readonly IEncargadoService _encargadoService;
         private readonly IDepartamentoRepository _depaRepo;
         private readonly ApplicationDbContext _context;
+
         public AccountService(          
             UserManager<AppUser> userManager,
             IFacultadRepository facuRepo,
@@ -26,7 +28,7 @@ namespace MyApiUCI.Service
             IEncargadoService encargadoService,
             IDepartamentoRepository depaRepo,
             ApplicationDbContext context
-            )
+        )
         {
             _userManager = userManager;
             _facuRepo = facuRepo;
@@ -37,19 +39,21 @@ namespace MyApiUCI.Service
             _context = context;
         }
 
-
-
         public async Task<RespuestasServicios<NewEncargadoDto>> RegisterEncargadoAsync(RegisterEncargadoDto registerDto)
         {
             // Verificar si el departamento existe
             if (!await _depaRepo.ExistDepartamento(registerDto.DepartamentoId))
-                return RespuestasServicios<NewEncargadoDto>.FailureResult("Departamento no existe", ErrorType.NotFound);
-
+            {
+                var errors = ErrorBuilder.Build("DepartamentoId", "El departamento no existe");
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errors);
+            }
 
             // Verificar si ya existe un encargado en el departamento
             if (await _depaRepo.TieneEncargado(registerDto.DepartamentoId))
-                return RespuestasServicios<NewEncargadoDto>.FailureResult("Ya existe un encargado en el departamento", ErrorType.BadRequest);
-
+            {
+                var errors = ErrorBuilder.Build("DepartamentoId", "Ya existe un encargado en el departamento");
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errors);
+            }
 
             // Crear el usuario
             var appUser = new AppUser
@@ -59,15 +63,13 @@ namespace MyApiUCI.Service
                 NombreCompleto = registerDto.NombreCompleto,
                 CarnetIdentidad = registerDto.CarnetIdentidad
             };
-            
+
             // Crear el usuario en la base de datos
             var createUserResult = await _userManager.CreateAsync(appUser, registerDto.Password);
             if (!createUserResult.Succeeded)
             {
-                return RespuestasServicios<NewEncargadoDto>.FailureResult(
-                    string.Join(", ", createUserResult.Errors.Select(e => e.Description)),
-                    ErrorType.BadRequest
-                );
+                var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errores);
             }
 
             // Asignar el rol de encargado
@@ -75,24 +77,24 @@ namespace MyApiUCI.Service
             if (!roleResult.Succeeded)
             {
                 await _userManager.DeleteAsync(appUser); // Revertir la creación del usuario si falla la asignación de rol
-                return RespuestasServicios<NewEncargadoDto>.FailureResult(
-                    string.Join(", ", roleResult.Errors.Select(e => e.Description)),
-                    ErrorType.InternalServerError
-                );
+                var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
+                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errores);
             }
 
             try
             {
-            //ya aqui se actualiza el departamento tmb
-               await _encargadoService.CreateAsync(new Encargado{
-                        UsuarioId = appUser.Id,
-                        DepartamentoId = registerDto.DepartamentoId
-                    });
+                // Actualizar el departamento
+                await _encargadoService.CreateAsync(new Encargado
+                {
+                    UsuarioId = appUser.Id,
+                    DepartamentoId = registerDto.DepartamentoId
+                });
             }
             catch (Exception ex)
             {
                 await _userManager.DeleteAsync(appUser); // Revertir la creación del usuario si falla la creación del encargado
-                return RespuestasServicios<NewEncargadoDto>.FailureResult($"Error al guardar el encargado: {ex.Message}", ErrorType.InternalServerError);
+                var errors = ErrorBuilder.Build("Exception", $"Error al guardar el encargado: {ex.Message}");
+                throw;
             }
 
             // Crear el DTO de encargado
@@ -107,19 +109,25 @@ namespace MyApiUCI.Service
                 Roles = new List<string> { "Encargado" }
             };
 
-            return RespuestasServicios<NewEncargadoDto>.SuccessResult(newEncargadoDto);
+            return RespuestasServicios<NewEncargadoDto>.SuccessResponse(newEncargadoDto, "Encargado creado exitosamente");
         }
 
-        //Estudiantes
         public async Task<RespuestasServicios<NewEstudianteDto>> RegisterEstudianteAsync(RegisterEstudianteDto registerDto)
         {
             // Verificar si la facultad existe
             if (!await _facuRepo.FacultyExists(registerDto.FacultadId)) 
-                return RespuestasServicios<NewEstudianteDto>.FailureResult("Facultad no existe", ErrorType.NotFound);
+            {
+                var errors = ErrorBuilder.Build("FacultadId", "La facultad no existe");
+                return RespuestasServicios<NewEstudianteDto>.ErrorResponse(errors);
+            }
+
             // Verificar si la carrera existe
             if (!await _carreraRepo.ExisteCarrera(registerDto.CarreraId)) 
-                return RespuestasServicios<NewEstudianteDto>.FailureResult("Carrera no existe", ErrorType.NotFound);
-                
+            {
+                var errors = ErrorBuilder.Build("CarreraId", "La carrera no existe");
+                return RespuestasServicios<NewEstudianteDto>.ErrorResponse(errors);
+            }
+
             // Crear el usuario
             var appUser = new AppUser
             {
@@ -128,51 +136,53 @@ namespace MyApiUCI.Service
                 NombreCompleto = registerDto.NombreCompleto,
                 CarnetIdentidad = registerDto.CarnetIdentidad
             };
+
             var createUserResult = await _userManager.CreateAsync(appUser, registerDto.Password);
-            //validacion d la creacio
             if (!createUserResult.Succeeded) 
-            return RespuestasServicios<NewEstudianteDto>.FailureResult(
-                string.Join(", ", createUserResult.Errors.Select(e => e.Description)),
-                    ErrorType.BadRequest
-            );
-            
+            {
+                var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
+                return RespuestasServicios<NewEstudianteDto>.ErrorResponse(errores);
+            }
+
             var roleResult = await _userManager.AddToRoleAsync(appUser, "Estudiante");
             if (!roleResult.Succeeded) 
             {
                 await _userManager.DeleteAsync(appUser); // Revertir creación del usuario
-                return RespuestasServicios<NewEstudianteDto>.FailureResult(
-                    string.Join(", ", roleResult.Errors.Select(e => e.Description)),
-                    ErrorType.InternalServerError
-                );
+                var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
+                return RespuestasServicios<NewEstudianteDto>.ErrorResponse(errores);
             }
-                
+
             var estudiante = new Estudiante
             {
                 UsuarioId = appUser.Id,
                 CarreraId = registerDto.CarreraId,
                 FacultadId = registerDto.FacultadId
-             };
-            try{
+            };
+
+            try
+            {
                 await _estudianteRepo.CreateAsync(estudiante);
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 await _userManager.DeleteAsync(appUser);
-                Console.WriteLine($"Error al crear el estudiante: {ex.Message}");
-                return RespuestasServicios<NewEstudianteDto>.FailureResult("Error al registrar el estudiante.", ErrorType.InternalServerError);
+                var errors = ErrorBuilder.Build("Exception", $"Error al crear el estudiante: {ex.Message}");
+                throw;
             }
-                var newEstudianteDto = new NewEstudianteDto
-                {
-                    Id = appUser.Id,
-                    Activo = appUser.Activo,
-                    CarnetIdentidad = appUser.CarnetIdentidad,
-                    NombreUsuario = appUser.UserName!,
-                    Email = appUser.Email,
-                    NombreCompleto = appUser.NombreCompleto,
-                    Roles = new List<string> { "Estudiante" }
-                };
 
-                return RespuestasServicios<NewEstudianteDto>.SuccessResult(newEstudianteDto);
-            }
+            var newEstudianteDto = new NewEstudianteDto
+            {
+                Id = appUser.Id,
+                Activo = appUser.Activo,
+                CarnetIdentidad = appUser.CarnetIdentidad,
+                NombreUsuario = appUser.UserName!,
+                Email = appUser.Email,
+                NombreCompleto = appUser.NombreCompleto,
+                Roles = new List<string> { "Estudiante" }
+            };
+
+            return RespuestasServicios<NewEstudianteDto>.SuccessResponse(newEstudianteDto, "Estudiante creado exitosamente");
+        }
 
         public async Task<RespuestasServicios<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto)
         {
@@ -184,15 +194,13 @@ namespace MyApiUCI.Service
                 NombreCompleto = registroDto.NombreCompleto,
                 CarnetIdentidad = registroDto.CarnetIdentidad
             };
-            
+
             // Crear el usuario en la base de datos
             var createUserResult = await _userManager.CreateAsync(appUser, registroDto.Password);
             if (!createUserResult.Succeeded)
             {
-                return RespuestasServicios<NewAdminDto>.FailureResult(
-                    string.Join(", ", createUserResult.Errors.Select(e => e.Description)),
-                    ErrorType.BadRequest
-                );
+                var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
+                return RespuestasServicios<NewAdminDto>.ErrorResponse(errores);
             }
 
             // Asignar rol de administrador
@@ -200,10 +208,8 @@ namespace MyApiUCI.Service
             if (!roleResult.Succeeded)
             {
                 await _userManager.DeleteAsync(appUser); // Revertir creación del usuario si falla la asignación del rol
-                return RespuestasServicios<NewAdminDto>.FailureResult(
-                    string.Join(", ", roleResult.Errors.Select(e => e.Description)),
-                    ErrorType.InternalServerError
-                );
+                var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
+                return RespuestasServicios<NewAdminDto>.ErrorResponse(errores);
             }
 
             // Crear el DTO para el administrador
@@ -219,7 +225,7 @@ namespace MyApiUCI.Service
             };
 
             // Devolver éxito con el DTO
-            return RespuestasServicios<NewAdminDto>.SuccessResult(newAdminDto);
+            return RespuestasServicios<NewAdminDto>.SuccessResponse(newAdminDto, "Administrador creado exitosamente");
         }
     }
 }

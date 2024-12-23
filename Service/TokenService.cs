@@ -31,7 +31,7 @@ namespace MyApiUCI.Service
             {
                 new Claim("UsuarioId", user.Id), //todo;arreglar esto
                 //new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                //new Claim(JwtRegisteredClaimNames.GivenName, user.UserName),
+                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id) // ID del usuario
             };
             var roles = await _userManager.GetRolesAsync(user);
