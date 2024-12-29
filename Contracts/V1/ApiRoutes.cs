@@ -54,7 +54,7 @@ namespace ApiUCI.Contracts.V1
             public const string RutaGenaral = Base + "/formulario";
             public const string GetFormularioEstudiante = "estudiantes";
             public const string GetAllFormulariosByEncargado = "encargados";
-            public const string GetFormularioEstudianteWhitDetails = "encargados/{id}";
+            public const string GetFormEstudianteByIdForEncargadoAsync = "encargados/{id}";
             public const string FirmarFormulario = "firmar/{id}";
         }
         public static class Rol

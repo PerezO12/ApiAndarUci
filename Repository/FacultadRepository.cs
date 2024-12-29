@@ -33,18 +33,17 @@ namespace MyApiUCI.Repository
             }
         }
         //TODO:AGREGAR LOGGER
-/*         public async Task<Facultad?> DeleteAsync(int id)
+        public async Task<Facultad?> DeleteAsync(int id)
         {
             var facultadModel = await _context.Facultad.FirstOrDefaultAsync(f => f.Id == id && f.Activo == true);
             
             if(facultadModel == null)
-            {
                 return null;
-            }
+                
             facultadModel.Activo = false;
             await _context.SaveChangesAsync();
             return facultadModel;
-        } */
+        }
 
         public async Task<bool> FacultyExists(int id)
         {

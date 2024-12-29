@@ -44,7 +44,6 @@ namespace MyApiUCI.Repository
         {
             try
             {
-
                 var carreraExist = await _context.Carrera.FirstOrDefaultAsync(c => c.Id == id && c.Activo == true);
                 
                 if(carreraExist == null)
@@ -132,6 +131,7 @@ namespace MyApiUCI.Repository
             try
             {
             return await _context.Carrera
+                .Include(f => f.Facultad)
                 .FirstOrDefaultAsync(c => c.Id == id && c.Activo == true);
             }
             catch(Exception ex)

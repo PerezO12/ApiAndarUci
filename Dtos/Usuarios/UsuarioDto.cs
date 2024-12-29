@@ -14,6 +14,6 @@ namespace MyApiUCI.Dtos.Usuarios
         public string NombreUsuario { get; set; } = null!;
         public string? Email { get; set; }
         public string? NumeroTelefono { get; set;}
-        public List<string> Roles { get; set; } = new List<string>();
+        public IList<string> Roles { get; set; } = new List<string>();
     }
 }

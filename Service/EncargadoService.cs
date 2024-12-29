@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Identity;
 using ApiUCI.Dtos;
 using MyApiUCI.Dtos.Cuentas;
 using ApiUCI.Extensions;
+using MyApiUCI.Mappers;
 
 namespace MyApiUCI.Service
 {
@@ -25,129 +26,182 @@ namespace MyApiUCI.Service
         private readonly IEncargadoRepository _encargadoRepo;
         private readonly IDepartamentoRepository _depaRepo;
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
+        private readonly ILogger<EncargadoService> _logger;
 
-        public EncargadoService( IEncargadoRepository encargadoRepo, IDepartamentoRepository depRepo, UserManager<AppUser> userManager)
+        public EncargadoService
+        (
+            IEncargadoRepository encargadoRepo,
+            IDepartamentoRepository depRepo,
+            UserManager<AppUser> userManager,
+            ILogger<EncargadoService> logger,
+            SignInManager<AppUser> signInManager            
+        )
         {
             _encargadoRepo = encargadoRepo;
             _depaRepo = depRepo;
             _userManager = userManager;
+            _logger = logger;
+            _signInManager = signInManager;
         }
 
-        public async Task<EncargadoFirmaDto?> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto)
+        public async Task<RespuestasGenerales<EncargadoFirmaDto?>> CambiarLlavePublicalAsync(string userId, EncargadoCambiarLlaveDto encargadoDto)
         {
-            try{
-                byte[] llavePublicaBytes = Convert.FromBase64String(encargadoDto.LlavePublica); // Decodificar la clave pública en base64
+            try
+            {
+                var usuario = await _userManager.FindByIdAsync(userId); 
+                var resultadoPassword = await _signInManager.CheckPasswordSignInAsync(usuario!, encargadoDto.Password, false);
+                if(resultadoPassword.Succeeded)
+                    return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Password", "La contraseña es incorrecta.");
+
+                // Decodificmamos la llave pública
+                byte[] llavePublicaBytes = Convert.FromBase64String(encargadoDto.LlavePublica);
+
+                // La válidamos
                 using (var rsa = RSA.Create())
                 {
                     rsa.ImportSubjectPublicKeyInfo(llavePublicaBytes, out _);
                 }
 
-                var encargado = await _encargadoRepo
-                    .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto{
-                        LlavePublica = llavePublicaBytes
-                    });
-                if(encargado == null) return null;
+                var encargado = await _encargadoRepo.UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto
+                {
+                    LlavePublica = llavePublicaBytes
+                });
 
-                return new EncargadoFirmaDto{
+                if (encargado == null)
+                    return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Encargado", "El encargado no existe.");
+
+                // Construir la respuesta de éxito
+                var nuevaFirmaEncargado = new EncargadoFirmaDto
+                {
                     LlavePublica = encargadoDto.LlavePublica
                 };
-                
-                } catch(FormatException)
-                {
-                    return null; 
-                }
-                catch (CryptographicException)
-                {
-                    return null;
-                }
-            throw new NotImplementedException();
+                return RespuestasGenerales<EncargadoFirmaDto?>.SuccessResponse(nuevaFirmaEncargado, "La clave pública fue cambiada exitosamente.");
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogError($"Error al cambiar la llave publica del encargado {userId}", ex);
+                return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("LlavePublica", "La clave pública tiene un formato no válido.");
+            }
+            catch (CryptographicException ex)
+            {
+                _logger.LogError($"Error al cambiar la llave publica del encargado {userId}", ex);
+                return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("LlavePublica", "La clave pública tiene un formato no válido.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al cambiar la llave publica del encargado {userId}, exception: {ex.Message}");
+                throw;
+            }
         }
 
-        public async Task<EncargadoFirmaDto?> GenerarFirmaDigitalAsync(string userId)
+
+        public async Task<RespuestasGenerales<EncargadoFirmaDto?>> GenerarFirmaDigitalAsync(string userId, EncargadoGenerarLLaveDto encargadoDto)
         {
-            using var rsaGenerado = RSA.Create(2048);
-            var llavePublicaByte = rsaGenerado.ExportSubjectPublicKeyInfo();
-            //var encargado = await _encargadoRepo.GetEncargadoByUserIdAsync(userId);
-            var encargado = await _encargadoRepo
-                .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto{
-                    LlavePublica = llavePublicaByte
-            });
-            if(encargado == null || encargado.LlavePublica == null) return (null); 
+            try
+            {
+                var usuario = await _userManager.FindByIdAsync(userId); 
+                var resultadoPassword = await _signInManager.CheckPasswordSignInAsync(usuario!, encargadoDto.Password, false);
+                if(resultadoPassword.Succeeded)
+                    return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Password", "La contraseña es incorrecta.");
 
-            string llavePublicaString = Convert.ToBase64String(encargado.LlavePublica);
-            string llavePrivadaString = Convert.ToBase64String(rsaGenerado.ExportPkcs8PrivateKey());
 
-            return (new EncargadoFirmaDto{
-                LlavePrivada = llavePrivadaString,
-                LlavePublica = llavePublicaString
-            });
+                using var rsaGenerado = RSA.Create(2048);
+                var llavePublicaByte = rsaGenerado.ExportSubjectPublicKeyInfo();
+
+                var encargado = await _encargadoRepo
+                    .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto
+                    {
+                        LlavePublica = llavePublicaByte
+                    });
+
+                if (encargado == null || encargado.LlavePublica == null)
+                    return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Encargado", "El encargado no existe.");
+
+                string llavePublicaString = Convert.ToBase64String(encargado.LlavePublica);
+                string llavePrivadaString = Convert.ToBase64String(rsaGenerado.ExportPkcs8PrivateKey());
+
+                var nuevaFirmaEncargado = new EncargadoFirmaDto
+                {
+                    LlavePrivada = llavePrivadaString,
+                    LlavePublica = llavePublicaString
+                };
+                return RespuestasGenerales<EncargadoFirmaDto?>.SuccessResponse(nuevaFirmaEncargado, "La firma se generó exitosamente");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al generar la firma del encargado{userId}, exception: {ex.Message}");
+                throw;
+            }
         }
 
-        public async Task<List<EncargadoDto>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query)
+
+        public async Task<RespuestasGenerales<List<EncargadoDto>>> GetAllEncargadosWithDetailsAsync(QueryObjectEncargado query)
         {
-            var encargados = await _encargadoRepo.GetAllAsync(query);
+            try
+            {
+                var encargados = await _encargadoRepo.GetAllAsync(query);
 
-            var encargadosDto = encargados.Select(e => new EncargadoDto{
-                Id = e.Id,
-                UsuarioId = e.UsuarioId,
-                DepartamentoNombre = e.Departamento!.Nombre,
-                DepartamentoId = e.Departamento.Id,
-                NombreCompleto = e.AppUser!.NombreCompleto,
-                CarnetIdentidad = e.AppUser.CarnetIdentidad,
-                NombreUsuario = e.AppUser.UserName,
-                Email = e.AppUser.Email,
-                NumeroTelefono = e.AppUser.PhoneNumber
-            }).ToList();
-            return encargadosDto;
+                if (encargados == null || !encargados.Any())
+                    return RespuestasGenerales<List<EncargadoDto>>.ErrorResponseService("Encargados", "No se encontraron encargados.");
+
+                var encargadosDto = encargados.Select(e => e.toEncargadoDtoFromEncargado()).ToList();
+
+                return RespuestasGenerales<List<EncargadoDto>>.SuccessResponse(encargadosDto, "Encargados obtenidos exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al obtener encargados: {ex.Message}");
+                return RespuestasGenerales<List<EncargadoDto>>.ErrorResponseService("encargados", "Hubo un error al obtener los encargados.");
+            }
         }
 
+        //se puede borrar
         public async Task<Encargado?> GetEncaradoByUserId(string userId)
         {
             return await _encargadoRepo.GetEncargadoByUserIdAsync(userId);
         }
 
-        public async Task<EncargadoDto?> GetByIdEncargadoWithDetailsAsync(int id)
+        public async Task<RespuestasGenerales<EncargadoDto?>> GetByIdEncargadoWithDetailsAsync(int id)
         {
-            var encargado = await _encargadoRepo.GetByIdAsync(id);
-            if(encargado == null) return null;
+            try
+            {
+                var encargado = await _encargadoRepo.GetByIdAsync(id);
+                if (encargado == null)
+                    return RespuestasGenerales<EncargadoDto?>.ErrorResponseService("Encargado", "El encargado no existe.");
 
-            return new EncargadoDto{
-                Id = encargado.Id,
-                UsuarioId = encargado.UsuarioId,
-                DepartamentoNombre = encargado.Departamento!.Nombre,
-                DepartamentoId = encargado.Departamento.Id,
-                NombreCompleto = encargado.AppUser!.NombreCompleto,
-                CarnetIdentidad = encargado.AppUser.CarnetIdentidad,
-                NombreUsuario = encargado.AppUser.UserName,
-                Email = encargado.AppUser.Email,
-                NumeroTelefono = encargado.AppUser.PhoneNumber
-            };
+                return RespuestasGenerales<EncargadoDto?>.SuccessResponse(encargado.toEncargadoDtoFromEncargado(), "Encargado obtenido exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al obtener encargado con ID {id}: {ex.Message}");
+                return RespuestasGenerales<EncargadoDto?>.ErrorResponseService("Encargado", "Hubo un error al obtener el encargado."); ;
+            }
         }
 
+        //borrar
         public async Task<Encargado?> GetEncargadoByDepartamentoIdAsync(int departamentoId)
         {
             return await _encargadoRepo.GetEncargadoByDepartamentoId(departamentoId);
         }
 
-        public async Task<EncargadoDto?> GetByUserIdWithUserId(string id)
+        public async Task<RespuestasGenerales<EncargadoDto?>> GetByUserIdWithUserId(string id)
         {
-            var encargado = await _encargadoRepo.GetByUserIdAsync(id);
-            if(encargado == null) return null;
+            try
+            {
+                var encargado = await _encargadoRepo.GetByUserIdAsync(id);
+                if (encargado == null)
+                    return RespuestasGenerales<EncargadoDto?>.ErrorResponseService("Encargado", "No se encontró el encargado.");
 
-            return new EncargadoDto{
-                Id = encargado.Id,
-                UsuarioId = encargado.UsuarioId,
-                DepartamentoNombre = encargado.Departamento!.Nombre,
-                DepartamentoId = encargado.Departamento.Id,
-                FacultadNombre = encargado.Departamento.Facultad?.Nombre,
-                NombreCompleto = encargado.AppUser!.NombreCompleto,
-                CarnetIdentidad = encargado.AppUser.CarnetIdentidad,
-                NombreUsuario = encargado.AppUser.UserName,
-                Email = encargado.AppUser.Email,
-                NumeroTelefono = encargado.AppUser.PhoneNumber
-            };
-        }
-
+                return RespuestasGenerales<EncargadoDto?>.SuccessResponse(encargado.toEncargadoDtoFromEncargado(), "Encargado obtenido exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al obtener encargado con ID {id}: {ex.Message}");
+                throw;
+            }
+        }   
+        //borrar
         public async Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId)
         {
             return await _encargadoRepo.ExisteEncargadoByDepartamentoIdAsync(departamentoId);
@@ -155,66 +209,83 @@ namespace MyApiUCI.Service
 
         public async Task<Encargado?> DeleteEncargadoByDepartamentoIdAsync(int departamentoId, bool borrarDepartamento)
         {
-            var encargado = await _encargadoRepo.DeleteByDepartamentoIdAsync(departamentoId);
-            //todo: verificar si funciona
-            //si se elimina el encargdalo lo logico es eliminar la referencia del departamento hacia el
-            if(encargado == null) return null;
-
-            await _userManager.RemoveFromRoleAsync(encargado!.AppUser!, "Encargado");
-            await _userManager.AddToRoleAsync(encargado!.AppUser!, "Profesor");
-            if(borrarDepartamento)
+            try
             {
-                await _depaRepo.CambiarEncargado(departamentoId);
+                var encargado = await _encargadoRepo.DeleteByDepartamentoIdAsync(departamentoId);
+
+                if (encargado == null) return null;
+
+                await _userManager.RemoveFromRoleAsync(encargado.AppUser!, "Encargado");
+                await _userManager.AddToRoleAsync(encargado.AppUser!, "Profesor");//arreglar esto luego 
+                
+                if (borrarDepartamento)
+                {
+                    await _depaRepo.CambiarEncargado(departamentoId);
+                }
+                return encargado;
+
             }
-            return encargado;
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al borrar el encargado del departamento: {departamentoId}: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<Encargado?> DeleteByUserIdAsync(string userId)
         {
-            //todo:VEr si fucniona
-            var encargado = await _encargadoRepo.DeleteByUserIdAsync(userId);
-            if(encargado == null) return null;
-            await _depaRepo.CambiarEncargado(encargado.DepartamentoId);
-            return encargado;
+            try
+            {
+                var encargado = await _encargadoRepo.DeleteByUserIdAsync(userId);
+                if (encargado == null) return null;
+                await _depaRepo.CambiarEncargado(encargado.DepartamentoId);
+                return encargado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al borrar el encargado con ID {userId}: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<Encargado?> DeleteAsync(int id)
         {
-            var encargado = await _encargadoRepo.DeleteAsync(id);
-            if(encargado == null) return null;
-            await _depaRepo.CambiarEncargado(id);
-            return encargado;
+            try
+            {
+                var encargado = await _encargadoRepo.DeleteAsync(id);
+                if (encargado == null) return null;
+
+                await _depaRepo.CambiarEncargado(id);
+                return encargado;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al borrar el encargado con ID {id}: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<Encargado> CreateAsync(Encargado encargadoModel)
         {
-            try{
+            try
+            {
                 var encagado = await _encargadoRepo.CreateAsync(encargadoModel);
-                await _depaRepo.CambiarEncargado(encagado.DepartamentoId, encagado.Id); 
+                await _depaRepo.CambiarEncargado(encagado.DepartamentoId, encagado.Id);
                 return encagado;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError($"Error al crear el encargado: {ex.Message}");
                 throw;
             }
         }
-        public async Task<RespuestasServicios<NewEncargadoDto>> RegisterEncargadoAsync(RegisterEncargadoDto registerDto)
+        public async Task<RespuestasGenerales<NewEncargadoDto>> RegisterEncargadoAsync(RegisterEncargadoDto registerDto)
         {
-            // Verificar si el departamento existe
             if (!await _depaRepo.ExistDepartamento(registerDto.DepartamentoId))
-            {
-                var errors = ErrorBuilder.Build("DepartamentoId", "El departamento no existe");
-                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errors);
-            }
-
-            // Verificar si ya existe un encargado en el departamento
+                return RespuestasGenerales<NewEncargadoDto>.ErrorResponseService("Departamento", "El departamento no existe.");
             if (await _depaRepo.TieneEncargado(registerDto.DepartamentoId))
-            {
-                var errors = ErrorBuilder.Build("DepartamentoId", "Ya existe un encargado en el departamento");
-                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errors);
-            }
-
+                return RespuestasGenerales<NewEncargadoDto>.ErrorResponseService("Departamento", "Ya existe un encargado en el departamento");
+           
             // Crear el usuario
             var appUser = new AppUser
             {
@@ -229,7 +300,7 @@ namespace MyApiUCI.Service
             if (!createUserResult.Succeeded)
             {
                 var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
-                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errores);
+                return RespuestasGenerales<NewEncargadoDto>.ErrorResponseController(errores);
             }
 
             // Asignar el rol de encargado
@@ -238,7 +309,7 @@ namespace MyApiUCI.Service
             {
                 await _userManager.DeleteAsync(appUser); // Revertir la creación del usuario si falla la asignación de rol
                 var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
-                return RespuestasServicios<NewEncargadoDto>.ErrorResponse(errores);
+                return RespuestasGenerales<NewEncargadoDto>.ErrorResponseController(errores);
             }
 
             try
@@ -270,7 +341,7 @@ namespace MyApiUCI.Service
                 Roles = new List<string> { "Encargado" }
             };
 
-            return RespuestasServicios<NewEncargadoDto>.SuccessResponse(newEncargadoDto, "Encargado creado exitosamente");
+            return RespuestasGenerales<NewEncargadoDto>.SuccessResponse(newEncargadoDto, "Encargado creado exitosamente");
         }
 
         public async Task<Encargado?> UpdateEncargadoByUserIdAsync(string id, EncargadoUpdateDto encargadoDto)
@@ -278,8 +349,8 @@ namespace MyApiUCI.Service
             try
             {
                 var encargado = await _encargadoRepo.UpdateEncargadoByUserIdAsync(id, encargadoDto);
-                if(encargado == null) return null;
-                if(encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
+                if (encargado == null) return null;
+                if (encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
                 {
                     await _depaRepo.DeleteEncargadoByEncargadoID(encargado.Id);
                     await _depaRepo.CambiarEncargado(encargado.DepartamentoId, encargado.Id);
@@ -288,7 +359,7 @@ namespace MyApiUCI.Service
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError($"Error al actualizar el encargado {id} : {ex.Message}");
                 throw;
             }
         }
@@ -298,16 +369,16 @@ namespace MyApiUCI.Service
             try
             {
                 var encargado = await _encargadoRepo.UpdateAsync(id, encargadoDto);
-                if(encargado == null) return null;
-                if(encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
+                if (encargado == null) return null;
+                if (encargadoDto.DepartamentoId != null && encargadoDto.DepartamentoId > 0)
                 {
                     await _depaRepo.CambiarEncargado(encargado.Id, encargadoDto.DepartamentoId);
                 }
                 return encargado;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Console.WriteLine(ex);
+                _logger.LogError($"Error al actualizar el encargado {id}: {ex.Message}");
                 throw;
             }
         }

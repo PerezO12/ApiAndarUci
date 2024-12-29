@@ -1,3 +1,4 @@
+using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MyApiUCI.Interfaces;
@@ -11,7 +12,7 @@ namespace ApiUCI.Data
         {
             // Servicios necssarios
             using var scope = serviceProvider.CreateScope();
-            var accountService = scope.ServiceProvider.GetRequiredService<IAccountService>();
+            var usuarioService = scope.ServiceProvider.GetRequiredService<IUsuarioService>();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             

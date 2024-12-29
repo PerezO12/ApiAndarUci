@@ -1,5 +1,6 @@
 using ApiUCI.Contracts.V1;
 using ApiUCI.Data;
+using ApiUCI.Filters;
 using ApiUCI.Interfaces;
 using ApiUCI.Middleware;
 using ApiUCI.Service;
@@ -136,6 +137,8 @@ builder.Services.AddScoped<IFormularioService, FormularioService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartamentoService, DepartamentoService>();
+builder.Services.AddScoped<ICarreraService, CarreraService>();
+builder.Services.AddScoped<IFacultadService, FacultadService>();
 
 
 // Configuración de JsonOptions
@@ -145,6 +148,30 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
     // Para ignorar datos en null
     //options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+});
+
+//manejo global de modelo no válido
+builder.Services.AddControllers(options => 
+{
+    options.Filters.Add<ValidateModelFilter>();
+});
+
+//manejo global d expcetiones
+builder.Services.AddControllers(options => 
+{
+    options.Filters.Add<ExceptionFilter>();
+});
+
+//aplicar logging globalmente
+builder.Services.AddControllers(option => 
+{
+    option.Filters.Add<LoggingFilter>();
+}); 
+
+// Filtro de estandarizacion de respueastas
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<EstandarResponseFilter>();
 });
 
 var app = builder.Build();

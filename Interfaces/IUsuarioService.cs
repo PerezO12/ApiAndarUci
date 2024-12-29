@@ -14,11 +14,11 @@ namespace ApiUCI.Interfaces
 {
     public interface IUsuarioService
     {
-        Task<IdentityResult> UpdateAsync(string id, UsuarioWhiteRolUpdateDto ususarioDto);
-        Task<ResultadoDto> DeleteUserYRolAsync(string usuarioId, string adminId);
-        Task<List<UsuarioDto>> GetAllAsync(QueryObjectUsuario query);
-        Task<UsuarioDto?> GetByIdAsync(string id);
-        Task<AppUser?> DeleteAsync(string id);
-        public Task<RespuestasServicios<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto); 
+        Task<RespuestasGenerales<UsuarioDto>> UpdateAsync(string id, UsuarioWhiteRolUpdateDto ususarioDto);
+        Task<RespuestasGenerales<UsuarioDto>> DeleteUserYRolAsync(string usuarioId);
+        Task<RespuestasGenerales<List<UsuarioDto>>> GetAllAsync(QueryObjectUsuario query);
+        Task<RespuestasGenerales<UsuarioDto?>> GetByIdAsync(string id);
+        Task<RespuestasGenerales<UsuarioDto?>> DeleteAsync(string id);
+        Task<RespuestasGenerales<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto); 
     }
 }

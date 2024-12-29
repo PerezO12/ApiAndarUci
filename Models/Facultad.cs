@@ -11,6 +11,7 @@ public partial class Facultad
 
     [Required(ErrorMessage = "El nombre es obligatorio.")]
     [MaxLength(50, ErrorMessage = "El nombre no puede tener más de 50 caracteres.")]
+    [MinLength(3, ErrorMessage = "El nombre no es válido.")]
     public string Nombre { get; set; } = string.Empty;
 
     public DateTime FechaCreacion { get; private set;}  = DateTime.Now.ToUniversalTime();

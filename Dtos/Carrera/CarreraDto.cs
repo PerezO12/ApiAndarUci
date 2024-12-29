@@ -9,7 +9,7 @@ namespace MyApiUCI.Dtos.Carrera
     {
         public int Id { get; set; }
         public string Nombre { get; set; } = null!;
-        public string Facultad {get; set;} = null!;
+        public string? Facultad {get; set;}
         public DateTime? FechaCreacion { get; set; }
     }
 }

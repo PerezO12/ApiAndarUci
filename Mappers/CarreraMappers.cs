@@ -16,7 +16,7 @@ namespace MyApiUCI.Mappers
             {
                 Id = carrera.Id,
                 Nombre = carrera.Nombre,
-                Facultad = carrera.Facultad!.Nombre,
+                Facultad = carrera.Facultad?.Nombre,
                 FechaCreacion = carrera.Fechacreacion
                 
             };

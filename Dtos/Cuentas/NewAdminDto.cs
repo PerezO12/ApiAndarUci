@@ -12,7 +12,7 @@ namespace ApiUCI.Dtos.Cuentas
         public string? NombreUsuario { get; set;} = null!;
         public string? Email { get; set; }
         public string? NombreCompleto { get; set; }
-        public List<string> Roles { get; set; } = new List<string>();
+        public IList<string> Roles { get; set; } = new List<string>();
         public bool Activo { get; set;}
     }
 }

@@ -9,6 +9,5 @@ namespace MyApiUCI.Dtos.Departamento
     {
         public string? Nombre { get; set; }
         public int? FacultadId { get; set; }
-        public int? EncargadoId { get; set; }
     }
 }

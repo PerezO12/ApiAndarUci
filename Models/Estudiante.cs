@@ -9,15 +9,15 @@ public partial class Estudiante
 {
     [Key]
     public int Id { get; set; }
-    [Required]
+    [Required(ErrorMessage = "El usuario es obligatorio.")]
     public string UsuarioId { get; set; } = null!;
 
-    [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "El ID de la carrera debe ser positivo.")]
+    [Required(ErrorMessage = "La carrera es obligatoria.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Carrera no válida")]
     public int CarreraId { get; set; }
 
-    [Required]
-    [Range(1, int.MaxValue, ErrorMessage = "El ID de la facultad debe ser positivo.")]  
+    [Required(ErrorMessage = "La facultad es obligatoria.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Facultad no válida")]
     public int FacultadId { get; set; }
 
     public bool Activo { get; set; } = true;

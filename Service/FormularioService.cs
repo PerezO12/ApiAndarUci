@@ -24,180 +24,111 @@ namespace MyApiUCI.Service
     {
         private readonly IFormularioRepository _formularioRepo;
 
-        private readonly IEstudianteService _estudianteService;
+        private readonly IEstudianteRepository _estudianteRepo;
 
         private readonly IEncargadoService _encargadoService;
         private readonly IDepartamentoRepository _departamentoRepo;
         public FormularioService( 
             IFormularioRepository formularioRepo, 
-            IEstudianteService estudianteService,
+            IEstudianteRepository estudianteRepo,
             IEncargadoService encargadoService,
             IDepartamentoRepository departamentoRepo
             )
         {
             _formularioRepo = formularioRepo;
-            _estudianteService = estudianteService;
+            _estudianteRepo = estudianteRepo;
             _encargadoService = encargadoService;
             _departamentoRepo = departamentoRepo;
         }
 
-        public async Task<ResultadoDto> CreateFormularioAync(string userId, CreateFormularioDto formularioDto)
+        public async Task<RespuestasGenerales<FormularioEstudianteDto>> CreateFormularioAsync(string userId, CreateFormularioDto formularioDto)
         {
-            //TODO:HACER LAS 2 FUCNIONES DE FOMRA ASYNC
             var departamento = await _departamentoRepo.GetByIdAsync(formularioDto.DepartamentoId);
-            var estudiante = await _estudianteService.GetEstudianteByUserId(userId);
+            if (departamento == null)
+                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Departamento","No existe el departamento.");
+
+            var estudiante = await _estudianteRepo.GetEstudianteByUserId(userId);
+            if (estudiante == null)
+                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Estudiante", "No existe el estudiante.");
+
             var encargado = await _encargadoService.GetEncargadoByDepartamentoIdAsync(formularioDto.DepartamentoId);
-            
-            if(departamento == null) {
-                return new ResultadoDto{
-                    msg = "No existe el departamento",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
-            }
-            if(encargado == null) {
-                return new ResultadoDto{
-                    msg = "No existe el encargado",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
-            };
-            if(estudiante == null) {
-                return new ResultadoDto{
-                    msg = "No existe el estudiante",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
-            };
-            if(estudiante.FacultadId != departamento.FacultadId){
-                return new ResultadoDto{
-                    msg = "El departamento seleccionado no corresponde a la facultad del estudiante.",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
-            }
+            if (encargado == null)
+                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Encargado", "No existe el encargado.");
+
+            if (estudiante.FacultadId != departamento.FacultadId)
+                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Departamento", "El departamento seleccionado no corresponde a la facultad del estudiante.");
+
             var existeFormulario = await _formularioRepo.FormByEstudianteDepartamentoAsync(estudiante.Id, formularioDto.DepartamentoId);
-            if(existeFormulario != null) {
-                 return new ResultadoDto{
-                    msg = "El formulario ya existe.",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
-            };
+            if (existeFormulario != null)
+                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("El formulario ya existe.");
+
             var formulario = await _formularioRepo.CreateAsync(formularioDto.toFormularioFromCreate(estudiante, encargado));
-            return new ResultadoDto{
-                    msg = "Resultado creado correctamente.",
-                    TipoError = "Ok",
-                    Error = false
-                };;
+
+            return RespuestasGenerales<FormularioEstudianteDto>.SuccessResponse(formulario.toFormularioEstudianteDto(), "Formulario creado correctamente.");
         }
 
-        public async Task<ResultadoDto> DeleteFormularioAdmin(int formularioId)
+        public async Task<RespuestasGenerales<FormularioDto?>> DeleteFormularioAdmin(int formularioId)
         {
-            var formulario = await _formularioRepo.GetByIdAsync(formularioId);
-                if(formulario == null) {
-                    return new ResultadoDto{
-                        msg = "El formulario no existe",
-                        TipoError = "BadRequest",
-                        Error = true
-                    };
-                }
-            await _formularioRepo.DeleteAsync(formularioId);
-            return new ResultadoDto{
-                msg = "Formulario eliminado exitosamente",
-                TipoError = "Ok",
-                Error = false
-            };
+            var formularioBorrado = await _formularioRepo.DeleteAsync(formularioId);
+            if (formularioBorrado == null)
+                return RespuestasGenerales<FormularioDto?>.ErrorResponseService("Formulario", "El formulario no existe.");
+
+            return RespuestasGenerales<FormularioDto?>.SuccessResponse(formularioBorrado.toFormularioDtoWithDetails(), "Formulario eliminado exitosamente.");
         }
 
-        public async Task<ResultadoDto> DeleteFormularioEstudianteAsync(string userId, int formularioId)
+        public async Task<RespuestasGenerales<FormularioEstudianteDto>> DeleteFormularioEstudianteAsync(string userId, int formularioId)
         {
             try
             {
-                var estudiante = await  _estudianteService.GetEstudianteByUserId(userId);
-                if(estudiante == null) {
-                    return new ResultadoDto{
-                        msg = "El estudiante no existe",
-                        TipoError = "BadRequest",
-                        Error = true
-                    };
-                }
-                var formulario = await _formularioRepo.GetByIdAsync(formularioId);
-                if(formulario == null) {
-                    return new ResultadoDto{
-                        msg = "El formulario no existe",
-                        TipoError = "BadRequest",
-                        Error = true
-                    };
-                }
-                if(formulario.EstudianteId != estudiante.Id)
-                {
-                    return new ResultadoDto{
-                        msg = "Acción no valida",
-                        TipoError = "Unauthorized",
-                        Error = true
-                    };
-                }
-                await _formularioRepo.DeleteAsync(formularioId);
-                return new ResultadoDto{
-                        msg = "Formulario eliminado exitosamente",
-                        TipoError = "Ok",
-                        Error = false
-                    };
+                var estudiante = await _estudianteRepo.GetEstudianteByUserId(userId);
+                if (estudiante == null)
+                    return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Estudiante","El estudiante no existe");
 
-            }            
+                var formulario = await _formularioRepo.GetByIdAsync(formularioId);
+                if (formulario == null)
+                    return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Formulario", "El formulario no existe");
+
+                if (formulario.EstudianteId != estudiante.Id)
+                    return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Acción no válida.", "Unauthorized");
+
+                var formularioBorrado = await _formularioRepo.DeleteAsync(formularioId);
+
+                return RespuestasGenerales<FormularioEstudianteDto>.SuccessResponse(formularioBorrado!.toFormularioEstudianteDto(), "Formulario eliminado exitosamente");
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                return new ResultadoDto{
-                        msg = ex.Message,
-                        TipoError = "StatusCode500",
-                        Error = true
-                    }; 
+                throw;
             }
         }
 
-        public async Task<ResultadoDto> FirmarFormularioAsync(string userIdEncargado, int id, FormularioFirmarDto formularioDto)
-        {
+        public async Task<RespuestasGenerales<FormularioEncargadoDto>> FirmarFormularioAsync(string userIdEncargado, int id, FormularioFirmarDto formularioDto)
+        {   //todo: Mejorar esto
             try
             {
-                //Validar la llave privada, si no lanza una exepction es valida
+                // Validar la llave privada, si no lanza una excepción es válida
                 var llavePrivadaBytes = Convert.FromBase64String(formularioDto.LlavePrivada);
                 using var rsa = RSA.Create();
                 rsa.ImportPkcs8PrivateKey(llavePrivadaBytes, out _);
 
                 var formulario = await _formularioRepo.GetByIdAsync(id);
                 var encargado = await _encargadoService.GetEncaradoByUserId(userIdEncargado);
-                if(formulario == null){
-                    return new ResultadoDto {
-                        msg = "El formulario no existe",
-                        TipoError = "NotFound",
-                        Error = true
-                    };
-                }
-                if(encargado == null) {
-                    return new ResultadoDto {
-                        msg = "El encargado no existe",
-                        TipoError = "NotFound",
-                        Error = true
-                    };
-                }
-                if(encargado.LlavePublica == null) {
-                    return new ResultadoDto {
-                        msg = "No tiene clave pública registrada",
-                        TipoError = "NotFound",
-                        Error = true
-                    };
-                }
-                if(formulario.EncargadoId != encargado.Id) {
-                    return new ResultadoDto {
-                        msg = "No Authorizado",
-                        TipoError = "Unauthorized",
-                        Error = true
-                    };
-                }
-                //procedimiento para firmar
-                var contenidoFirmar = new FormularioFirmadoDto{
+
+                if (formulario == null)
+                    return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("Formulario","El formulario no existe");
+
+                if (encargado == null)
+                    return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("Encargado", "El encargado no existe");
+
+                if (encargado.LlavePublica == null)
+                    return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("LlavePublica", "No tiene clave pública registrada");
+
+                if (formulario.EncargadoId != encargado.Id)
+                    return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("No autorizado", "Unauthorized");
+
+                // Procedimiento para firmar
+                var contenidoFirmar = new FormularioFirmadoDto
+                {
                     FormularioId = formulario.Id,
                     EstudianteId = formulario.EstudianteId,
                     EncargadoId = formulario.EncargadoId,
@@ -207,6 +138,7 @@ namespace MyApiUCI.Service
                     Fechacreacion = formulario.Fechacreacion,
                     Motivo = formulario.Motivo
                 };
+
                 // Serializar el contenido a JSON
                 var contenidoJson = JsonSerializer.Serialize(contenidoFirmar);
                 var contenidoBytes = Encoding.UTF8.GetBytes(contenidoJson);
@@ -216,143 +148,145 @@ namespace MyApiUCI.Service
 
                 // Firmar el hash con la llave privada
                 var documentoFirmado = rsa.SignHash(hasDocumento, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-                
-                var verificador = new FirmaDigital();
-                //comprobamos si su firma coincide con la correspondiente pública
-                bool esCorrespondiente = verificador.VerificarFirmaFormulario(contenidoJson, documentoFirmado, hasDocumento, encargado.LlavePublica );
 
-                if(!esCorrespondiente) {
-                    return new ResultadoDto {
-                        msg = "La llave privada proporcionada no coincide con la clave pública asociada.",
-                        TipoError = "BadRequest",
-                        Error = true
-                    };
-                }
+                var verificador = new FirmaDigital();
+                // Comprobamos si su firma coincide con la correspondiente pública
+                bool esCorrespondiente = verificador.VerificarFirmaFormulario(contenidoJson, documentoFirmado, hasDocumento, encargado.LlavePublica);
+
+                if (!esCorrespondiente)
+                    return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("LlavePrivada", "La llave privada proporcionada no coincide con la clave pública asociada.");
+
                 formulario.FirmaEncargado = documentoFirmado;
                 formulario.HashDocumento = hasDocumento;
                 formulario.Firmado = true;
                 formulario.FechaFirmado = DateTime.UtcNow;
 
-                await _formularioRepo.UpdateAsync(formulario.Id, formulario);
-                return new ResultadoDto {
-                        msg = "Formulario firmado",
-                        TipoError = "Ok",
-                        Error = false
-                    };
+                var formularioFirmado = await _formularioRepo.UpdateAsync(formulario.Id, formulario);
+
+                return RespuestasGenerales<FormularioEncargadoDto>.SuccessResponse(formularioFirmado!.toFormularioEncargadoDto(), "Formulario firmado exitosamente.");
             }
             catch (FormatException)
             {
-                return new ResultadoDto {
-                    msg = "La llave no es válida",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
+                return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("LlavePublica", "La llave no es válida.");
             }
             catch (CryptographicException)
             {
-                return new ResultadoDto {
-                    msg = "La llave no es válida",
-                    TipoError = "BadRequest",
-                    Error = true
-                };
+                return RespuestasGenerales<FormularioEncargadoDto>.ErrorResponseService("LlavePrivada", "La llave no es válida.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                throw;   
+                throw;
             }
-   
-        }
- 
+        } 
 
-        public async Task<List<FormularioEncargadoDto>> GetAllFormulariosEncargadosAsync(string usuarioId, QueryObjectFormularioEncargado query)
+        public async Task<RespuestasGenerales<List<FormularioEncargadoDto>>> GetAllFormulariosEncargadosAsync(string usuarioId, QueryObjectFormularioEncargado query)
         {
-            var formulariosEncargados = await _formularioRepo.GetAllFormulariosByEncargado(usuarioId, query);
+            try
+            {
+                var formulariosEncargados = await _formularioRepo.GetAllFormulariosByEncargado(usuarioId, query);
 
-            return formulariosEncargados;
-        }
+                return RespuestasGenerales<List<FormularioEncargadoDto>>.SuccessResponse(formulariosEncargados, "Operación realizada exitosamente.");
 
-        public async Task<List<FormularioEstudianteDto>> GetAllFormulariosEstudiantesAsync(string usuarioId, QueryObjectFormularioEstudiantes query)
-        {
-            var formulariosEstudiante = await _formularioRepo.GetAllFormulariosByEstudiante(usuarioId, query);
-/*             var formulariosDto = formulariosEstudiante.Select(e => new FormularioEstudianteDto{
-                NombreEncargado = e.Encargado.AppUser.NombreCompleto,
-                NombreDepartamento= e.Departamento.Nombre,
-                Motivo = e.Motivo,
-                Firmado = e.Firmado,
-                FechaFirmado = e.FechaFirmado,
-                Fechacreacion = e.Fechacreacion
-            }).ToList(); */
-            return formulariosEstudiante;
-        }
-
-        public async Task<List<FormularioDto>> GetAllFormulariosWhithDetailsAsync(QueryObjectFormulario query)
-        {
-             var formularios = await _formularioRepo.GetAllAsync(query);
-
-            Console.WriteLine($"Cantidad de formularios después de la combinación: {formularios.Count}");
-
-            return formularios;
-
-     }
-
-        public async Task<FormularioEncargadoDto?> GetFormEstudianteByIdForEncargadoAsync(string userId, int formularioId)
-        {
-            var encargado = await _encargadoService.GetEncaradoByUserId(userId);
-            if(encargado == null) return null;
-
-            var formulario = await _formularioRepo.GetFormEstudianteByIdForEncargadoAsync(encargado.Id, formularioId);
-            if(formulario == null) return null;
-            return formulario;
-        }
-
-        public async Task<FormularioDto?> GetFormularioWithDetailsAsync(int id)
-        {
-            var formularioModel = await _formularioRepo.GetByIdAsync(id);
-            if(formularioModel == null) return null;
-            //TODO:Arreglar como arriba
-            return new FormularioDto {
-                id = formularioModel.Id,
-                NombreEstudiante = formularioModel.Estudiante!.AppUser!.NombreCompleto,
-                NombreUsuarioEstudiante = formularioModel.Estudiante.AppUser.UserName,
-                CarnetIdentidadEstudiante = formularioModel.Estudiante.AppUser.CarnetIdentidad,
-                EmailEstudiante = formularioModel.Estudiante.AppUser.Email,
-                NombreCarrera = formularioModel.Estudiante.Carrera!.Nombre,
-                NombreDepartamento = formularioModel.Departamento!.Nombre,
-                NombreFacultad = formularioModel.Departamento.Facultad!.Nombre,
-                Motivo = formularioModel.Motivo,
-                NombreEncargado = formularioModel.Encargado!.AppUser!.NombreCompleto,
-                Firmado = formularioModel.Firmado,
-                FechaFirmado = formularioModel.FechaFirmado,
-                Fechacreacion = formularioModel.Fechacreacion
-            };
-        }
-
-        public async Task<ResultadoDto> UpdatePatchFormularioAsync(string usuarioId, int id, UpdateFormularioDto formularioDto)
-        {
-            var formulario = await _formularioRepo.GetByIdAsync(id);
-            if(formulario == null) {
-                return new ResultadoDto {
-                    msg = "No existe el formulario",
-                    TipoError = "NotFound",
-                    Error = true
-                };;
-            };
-            if(formulario.Estudiante!.UsuarioId != usuarioId){
-                return new ResultadoDto {
-                    msg = "No Authorizado",
-                    TipoError = "Unauthorized",
-                    Error = true
-                };
             }
-
-            var formularioActualizdo = await _formularioRepo.UpadatePatchAsync(id, formularioDto);
-            
-            return new ResultadoDto {
-                    msg = "Formulario actualizado",
-                    TipoError = "Ok",
-                    Error = false
-                };
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
         }
+
+        public async Task<RespuestasGenerales<List<FormularioEstudianteDto>>> GetAllFormulariosEstudiantesAsync(string usuarioId, QueryObjectFormularioEstudiantes query)
+        {
+            try
+            {
+                var formulariosEstudiante = await _formularioRepo.GetAllFormulariosByEstudiante(usuarioId, query);
+                return RespuestasGenerales<List<FormularioEstudianteDto>>.SuccessResponse(formulariosEstudiante, "Operación realizada exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public async Task<RespuestasGenerales<List<FormularioDto>>> GetAllFormulariosWhithDetailsAsync(QueryObjectFormulario query)
+        {
+            try
+            {
+                var formularios = await _formularioRepo.GetAllAsync(query);
+                return RespuestasGenerales<List<FormularioDto>>.SuccessResponse(formularios, "Operación realizada exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public async Task<RespuestasGenerales<FormularioEncargadoDto?>> GetFormEstudianteByIdForEncargadoAsync(string userId, int formularioId)
+        {
+            try
+            {
+                var encargado = await _encargadoService.GetEncaradoByUserId(userId);
+                if(encargado == null) 
+                    return RespuestasGenerales<FormularioEncargadoDto?>.ErrorResponseService("Encargado", "El encargado no existe.", "Unauthorized");
+
+                var formulario = await _formularioRepo.GetFormEstudianteByIdForEncargadoAsync(encargado.Id, formularioId);
+                if(formulario == null) 
+                    return RespuestasGenerales<FormularioEncargadoDto?>.ErrorResponseService("Formulario", "El formulario no existe.");
+                
+                return RespuestasGenerales<FormularioEncargadoDto?>.SuccessResponse(formulario, "Operación realizada exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public async Task<RespuestasGenerales<FormularioDto?>> GetFormularioWithDetailsAsync(int id)
+        {
+            try
+            {
+                var formularioModel = await _formularioRepo.GetByIdAsync(id);
+                if(formularioModel == null) 
+                    return RespuestasGenerales<FormularioDto?>.ErrorResponseService("Formulario", "El formulario no existe.");
+                
+                return RespuestasGenerales<FormularioDto?>.SuccessResponse(formularioModel.toFormularioDtoWithDetails(), "Operación realizada exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        public async Task<RespuestasGenerales<FormularioEstudianteDto>> UpdatePatchFormularioAsync(string usuarioId, int id, UpdateFormularioDto formularioDto)
+        {
+            try
+            {
+                var formulario = await _formularioRepo.GetByIdAsync(id);
+
+                if (formulario == null)
+                    return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Formulario", "No existe el formulario");
+
+                if (formulario.Estudiante!.UsuarioId != usuarioId)
+                    return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Usuario", "No autorizado", "Unauthorized");
+
+                var formularioActualizado = await _formularioRepo.UpadatePatchAsync(id, formularioDto);
+
+
+                var formularioDtoUpdate = formularioActualizado?.toFormularioEstudianteDto();
+
+                return RespuestasGenerales<FormularioEstudianteDto>.SuccessResponse(formularioDtoUpdate!, "Formulario actualizado.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
     }
 }

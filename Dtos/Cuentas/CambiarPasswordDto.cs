@@ -8,9 +8,9 @@ namespace ApiUCI.Dtos.Cuentas
 {
     public class CambiarPasswordDto
     {
-        [Required]
+        [Required(ErrorMessage = "La contraseña es requerida.")]
         public string PasswordActual { get; set; } = null!;
-        [Required]
+        [Required(ErrorMessage = "La contraseña es requerida.")]
         public string PasswordNueva { get; set; } = null!;
     }
 }

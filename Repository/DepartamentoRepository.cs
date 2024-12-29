@@ -27,15 +27,10 @@ namespace MyApiUCI.Repository
         {
             try
             {
-                await _context.Departamento
+                var departamento = await _context.Departamento
                     .AddAsync(departamentoModel);
                 await _context.SaveChangesAsync();
-                await _context.Entry(departamentoModel)
-                    .Reference(d => d.Facultad)
-                    .LoadAsync();
-                await _context.Entry(departamentoModel)
-                    .Reference(d => d.Encargado)
-                    .LoadAsync();
+
                 return departamentoModel;
             }
             catch(Exception ex)
@@ -52,9 +47,8 @@ namespace MyApiUCI.Repository
                 var departamentoModel = await _context.Departamento.FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
                 
                 if(departamentoModel == null)
-                {
                     return null;
-                }
+
                 departamentoModel.Activo = false; //No lo eliminare lo pasare a falso
                 await _context.SaveChangesAsync();
                 return departamentoModel;
@@ -140,7 +134,7 @@ namespace MyApiUCI.Repository
         {
             try
             {
-                return await _context.Departamento
+                return  await _context.Departamento
                     .Include( d => d.Facultad)
                     .Include(d => d.Encargado)
                         .ThenInclude(e => e!.AppUser)
@@ -160,13 +154,10 @@ namespace MyApiUCI.Repository
             {
                 var departamentModel = await _context.Departamento
                     .Include(d => d.Facultad)
-                    .Include(d => d.Encargado)
-                        .ThenInclude(e => e!.AppUser!.NombreCompleto)
                     .FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
                 if(departamentModel == null)
-                {
                     return null;
-                }
+                    
                 departamentModel.toPatchingDepartamento(departamentoDto);
 
                 await _context.SaveChangesAsync();
@@ -197,9 +188,8 @@ namespace MyApiUCI.Repository
                     .Include(d => d.Encargado)
                     .FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
                 if(existeDepartamento == null)
-                {
                     return null;
-                }
+
                 existeDepartamento.Nombre = departamentoModel.Nombre;
                 existeDepartamento.FacultadId = departamentoModel.FacultadId;
                 existeDepartamento.EncargadoId = departamentoModel.EncargadoId;

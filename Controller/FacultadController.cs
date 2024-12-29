@@ -8,6 +8,9 @@ using ApiUCI.Interfaces;
 using ApiUCI.Dtos.Cuentas;
 using System.Security.Claims;
 using ApiUCI.Contracts.V1;
+using ApiUCI.Utilities;
+using ApiUCI.Extensions;
+using ApiUCI.Dtos;
 
 
 
@@ -17,47 +20,44 @@ namespace MyApiUCI.Controller
     [ApiController]
     public class FacultadController : ControllerBase
     {
-        private readonly IFacultadRepository _facultadRepo;
+        private readonly IFacultadService _facultadService;
         private readonly IAuthService _authService;
-        private readonly IDepartamentoService _depaService;
-        public FacultadController( IFacultadRepository facultadRepo, IAuthService authService, IDepartamentoService depaService)
+        public FacultadController( IFacultadService facultadService, IAuthService authService)
         {
-            _facultadRepo = facultadRepo;
+            _facultadService = facultadService;
             _authService = authService;
-            _depaService = depaService;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectFacultad query)
         {
-            var facultad = await _facultadRepo.GetAllAsync(query);
-            var facultadDto = facultad.Select( f => f.toFacultadDto());
+            var resultado = await _facultadService.GetAllAsync(query);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
             
-            return Ok(facultadDto);
+            return Ok(resultado.Data);
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var facultadModel = await _facultadRepo.GetByIdAsync(id);
-            if(facultadModel == null)
-            {
-                return NotFound("Faculty does not exist");
-            }
-            return Ok(facultadModel.toFacultadDto()); //convertir a dto
+            var resultado = await _facultadService.GetByIdAsync(id);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+            
+            return Ok(resultado.Data);
         }
 
         [Authorize(Policy = "AdminPolicy")]
         [HttpPost]
         public async Task<IActionResult> Created(FacultadCreateDto facultadDto)
         {
-
-            var facultadModel = facultadDto.toFacultadFromCreate();
-
-            await _facultadRepo.CreateAsync(facultadModel);
+            var resultado = await _facultadService.CreateAsync(facultadDto);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
             
-            return CreatedAtAction(nameof(GetById), new { id = facultadModel.Id }, facultadModel.toFacultadDto());
+            return CreatedAtAction(nameof(GetById), new { id = resultado.Data?.Id }, resultado.Data);
         }
 
         [Authorize(Policy = "AdminPolicy")]
@@ -66,45 +66,31 @@ namespace MyApiUCI.Controller
         public async Task<IActionResult> Update([FromRoute] int id,[FromBody]FacultadUpdateDto facultadDto)
         {
 
-            var facultadModel = await _facultadRepo.UpdateAsync(id, facultadDto.toFacultadFromUpdate());
+            var resultado = await _facultadService.UpdateAsync(id, facultadDto);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
             
-            if(facultadModel == null)
-            {
-                return NotFound("Faculty not found");
-            }
-
-            return Ok(facultadModel.toFacultadDto());
+            return Ok(resultado.Data);
         }
-       /*  
+        
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> Delete([FromRoute]int id, [FromBody] PasswordDto password) {
 
-            try
+            //TODO: hacer un filtro
+            var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), password.Password);
+            if (!passwordResult)
             {
-                var adminId = User.FindFirstValue("UsuarioId");
-                if(adminId == null) return BadRequest(new {msg="Token no válido"});
-                var admin = await _authService.ExisteUsuario(adminId);
-                if(admin == null) return BadRequest(new {msg="El usuario no existe"});
-                var passwordCorrecta = await _authService.VerifyUserPassword(admin, password.Password);
-                if(!passwordCorrecta) return Unauthorized(new {msg="La contraseña es incorrecta"});
-
-                var facultadModel = await _facultadRepo.DeleteAsync(id);
-                if(facultadModel == null) return NotFound("La facultad no existe");
-                //borrar sus respectivos departamentos
-                await _depaService.DeleteAllDepartamentosByFacultad(facultadModel.Id);
-                //asignarle a sus respectivas carreras un null
-
-                return Ok(new {msg= "Facultad eliminada exitosamente"} );
+                var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
+                return ActionResultHelper.HandleActionResult("Unauthorized", error);
             }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, "Ocurrió un error, contactar al administrador");
-            }
-        }  */
+            
+            var resultado = await _facultadService.DeleteAsync(id);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
 
-   
+            return Ok(resultado.Data);
+        }
     }
 }

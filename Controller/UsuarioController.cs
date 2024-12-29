@@ -5,6 +5,7 @@ using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Dtos.Usuarios;
 using ApiUCI.Extensions;
 using ApiUCI.Interfaces;
+using ApiUCI.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,116 +28,83 @@ namespace MyApiUCI.Controller
             _logger = logger;
         }
         
-        private IActionResult HandleResponse<T>(RespuestasServicios<T> respuesta)
-        {
-            if (respuesta.Success)
-            {
-                return Ok(respuesta);
-            }
-            return BadRequest(respuesta);
-        }
-
         [Authorize(Policy = "AdminPolicy")]
         [HttpPost(ApiRoutes.Usuario.RegistrarAdmin)]
         public async Task<IActionResult> RegistrarAdmin([FromBody] RegistroAdministradorDto registroDto) 
         {
-            try
-            {
-                var adminId = User.GetUserId();
-                var passwordResult = await _authService.VerifyUserPassword(adminId, registroDto.PasswordAdmin);
-                if (!passwordResult)
-                {
-                    var error = ErrorBuilder.Build("Password", "Contraseña incorrecta");
-                    return Unauthorized(RespuestasServicios<string>.ErrorResponse(error, "No autorizado"));
-                }
 
-                var respuesta = await _usuarioService.RegistrarAdministradorAsync(registroDto);
-                return HandleResponse(respuesta);
-            }
-            catch (UnauthorizedAccessException ex)
+            var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), registroDto.PasswordAdmin);
+            if (!passwordResult)
             {
-                _logger.LogError(ex, "Token no válido");
-                var error = ErrorBuilder.Build("Token", "Token no válido");
-                return BadRequest(RespuestasServicios<string>.ErrorResponse(error, "Acceso denegado"));
+                var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
+                return ActionResultHelper.HandleActionResult("Unauthorized", error);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al registrar administrador para el usuario {AdminId}", User.GetUserId());
-                var error = ErrorBuilder.Build("General", "Contactar al administrador");
-                return StatusCode(500, RespuestasServicios<string>.ErrorResponse(error, "Error interno del servidor"));
-            }
+            var resultado = await _usuarioService.RegistrarAdministradorAsync(registroDto);
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+
+            return CreatedAtAction(nameof(GetById), new { id = resultado.Data?.Id }, resultado.Data);
         }
 
-
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectUsuario query)
         {
-            var usuariosDto = await _usuarioService.GetAllAsync(query);
-            return Ok(usuariosDto);
+            var resultado = await _usuarioService.GetAllAsync(query);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+
+            return Ok(resultado.Data);
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("{Id}")]
         public async Task<IActionResult> GetById([FromRoute]string Id)
         {
-            var usuario = await _usuarioService.GetByIdAsync(Id);
-            if(usuario == null) return NotFound("No existe el usuario");
-            return Ok(usuario);
+            var resultado = await _usuarioService.GetByIdAsync(Id);
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+
+            return Ok(resultado.Data);
         }
         
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UsuarioWhiteRolUpdateDto usuarioUpdateDto)
         {
-            try 
+
+            var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), usuarioUpdateDto.PasswordAdmin );
+            if (!passwordResult)
             {
-                var adminId = User.GetUserId(); //todo: verificar
-                if(adminId == null) return BadRequest(new {errors="Token no válido"});
-
-                var passwordCorrecta = await _authService.VerifyUserPassword(adminId, usuarioUpdateDto.PasswordAdmin );
-                if(!passwordCorrecta) return Unauthorized(new {errors="Contraseña incorrecta"});
-
-                var resultado = await _usuarioService.UpdateAsync(id, usuarioUpdateDto);
-
-                if(!resultado.Succeeded) return NotFound(new {msg = resultado.Errors.Select(e => e.Description).ToArray()});
-
-                return Ok(new {msg=  "Usuario actualizado"});
+                var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
+                return ActionResultHelper.HandleActionResult("Unauthorized", error);
             }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(500, new {msg = "Algo salio mal, notificar al administrador"});
-            }
+
+            var resultado = await _usuarioService.UpdateAsync(id, usuarioUpdateDto);
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+
+            return Ok(resultado.Data);
         }
         
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] string id, [FromBody]PasswordDto password) 
         {
-            if(!ModelState.IsValid) return BadRequest(new {msg = "La contraseña es obligatoria"});
-            try
+            var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), password.Password );
+            if (!passwordResult)
             {
-                var adminId = User.FindFirstValue("UsuarioId");
-                if(adminId == null) return BadRequest(new{msg="Token no válido"});
+                var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
+                return ActionResultHelper.HandleActionResult("Unauthorized", error);
+            }
 
-                var passwordCorrecta = await _authService.VerifyUserPassword(adminId, password.Password );
-                if(!passwordCorrecta) return Unauthorized(new {errors="Contraseña incorrecta"});
-                
-                var resultado = await _usuarioService.DeleteUserYRolAsync(id, adminId);
-                if(resultado.Error)
-                {
-                    return resultado.TipoError switch
-                    {
-                        "NotFound" => NotFound(new { msg = resultado.msg}),
-                        "BadRequest" => BadRequest(new { msg = resultado.msg}),
-                        "Unauthorized" => Unauthorized(new { msg = resultado.msg}),
-                        _ => StatusCode(500, new { admin = "Falta validar esta acción. Reportar el error", msg = resultado.msg })
-                    };
-                }
-                return Ok(new {msg = resultado.msg});
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, new {msg = "Ocurrió un error, informar al administrador"});
-            }
+            var resultado = await _usuarioService.DeleteUserYRolAsync(id);
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+
+            return Ok(resultado.Data);
         }                 
     }
 }

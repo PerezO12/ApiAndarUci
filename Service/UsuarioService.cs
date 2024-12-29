@@ -15,6 +15,7 @@ using ApiUCI.Dtos.Estudiante;
 using ApiUCI.Dtos.Encargado;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Extensions;
+using MyApiUCI.Mappers;
 
 
 namespace ApiUCI.Service
@@ -22,121 +23,83 @@ namespace ApiUCI.Service
     public class UsuarioService : IUsuarioService
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly ApplicationDbContext _context;
         private readonly IEstudianteRepository _estudianteRepo;
         private readonly IEncargadoService _encargadoService;
+        private readonly ApplicationDbContext _context;
         public UsuarioService(
             UserManager<AppUser> usuarioManager,
-            ApplicationDbContext context,
             IEstudianteRepository estudianteRepo,
-            IEncargadoService encargadoService
+            IEncargadoService encargadoService,
+            ApplicationDbContext context
             )
         {
             _userManager = usuarioManager;
-            _context = context;
             _estudianteRepo = estudianteRepo;
-            _encargadoService = encargadoService;
-            
+            _encargadoService = encargadoService; 
+            _context = context;  
         }
 
-        public async Task<ResultadoDto> DeleteUserYRolAsync(string usuarioId, string adminId)
+        public async Task<RespuestasGenerales<UsuarioDto>> DeleteUserYRolAsync(string usuarioId)
         {
             try
             {
-
-                var adminUser = await _userManager.FindByIdAsync(adminId);
-                if(adminUser == null){
-                    return new ResultadoDto{
-                        msg = "No Autorizado",
-                        TipoError = "Unauthorized",
-                        Error = true
-                    }; 
-                }
                 var usuarioBorrar = await _userManager.FindByIdAsync(usuarioId);
-                if(usuarioBorrar == null || usuarioBorrar.Activo == false)
-                {
-                    return new ResultadoDto{
-                        msg = "El usuario no existe",
-                        TipoError = "BadRequest",
-                        Error = true
-                    };
-                }
+                if (usuarioBorrar == null || usuarioBorrar.Activo == false)
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Usuario","El usuario no existe");
+
                 var rol = await _userManager.GetRolesAsync(usuarioBorrar);
-                if(rol == null){
-                    return new ResultadoDto{
-                        msg = "El usuario no tiene rol",
-                        TipoError = "StatusCode500",
-                        Error = true
-                    };
-                }
+                if (rol == null || rol.Any())
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Rol", "El usuario no tiene rol", "StatusCode500");
+
                 usuarioBorrar.Activo = false;
                 var resultado = await _userManager.UpdateAsync(usuarioBorrar);
-                if(!resultado.Succeeded) 
+                if (!resultado.Succeeded)
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al eliminar el usuario", "StatusCode500");
+
+                if (rol.Contains("Estudiante"))
                 {
-                    return new ResultadoDto{
-                        msg = "Error al eliminar el usuario",
-                        TipoError = "StatusCode500",
-                        Error = true
-                    };
-                }
-                if(rol.Contains("Estudiante")) {
                     var result = await _estudianteRepo.DeleteByUserIdAsync(usuarioId);
-                    if(result == null) 
-                    {
-                        return new ResultadoDto{
-                            msg = "Error al eliminar el estudiante",
-                            TipoError = "StatusCode500",
-                            Error = true
-                        };
-                    } 
+                    if (result == null)
+                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Estudiante", "Error al eliminar el estudiante", "StatusCode500");
                 }
-                if(rol.Contains("Encargado")) {
+
+                if (rol.Contains("Encargado"))
+                {
                     var result = await _encargadoService.DeleteByUserIdAsync(usuarioId);
-                    if(result == null) 
-                    {
-                        return new ResultadoDto{
-                            msg = "Error al eliminar el encargado",
-                            TipoError = "StatusCode500",
-                            Error = true
-                        };
-                    } 
+                    if (result == null)
+                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Estudiante","Error al eliminar el encargado", "StatusCode500");
                 }
-                return new ResultadoDto {
-                    msg = "Usuario eliminado exitosamente",
-                    TipoError = "Ok",
-                    Error = false
-                };
+
+                return RespuestasGenerales<UsuarioDto>.SuccessResponse(usuarioBorrar.toUsuarioDtoBorrar(), "Usuario eliminado exitosamente");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
                 throw;
             }
         }
 
-        public async Task<IdentityResult> UpdateAsync(string userId, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
-        {
+        public async Task<RespuestasGenerales<UsuarioDto>> UpdateAsync(string userId, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
+        {   //todo: arreglar esto, separarlo para q sea mas mantenible
             try
             {
                 var usuario = await _userManager.FindByIdAsync(userId);
-                if(usuario == null) return IdentityResult.Failed(new IdentityError { Description = "Usuario no encontrado"});
+                if(usuario == null) 
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Usuario", "El usuario no existe.");
+                
                 var rolesActual = await _userManager.GetRolesAsync(usuario);
                 //comprobar q si va a cambiar el nomre de usuario no exista otro con el mismo nombre
                 if( (usuarioUpdateDto.NombreUsuario != null ) && (usuario.UserName != usuarioUpdateDto.NombreUsuario)){
-                    var existeUsername = await  _userManager.Users
+                    var existeUsername = await _userManager.Users
                         .FirstOrDefaultAsync(
                             u => u.UserName != null 
                             && u.UserName.ToLower() == usuarioUpdateDto.NombreUsuario.ToLower() 
                             && u.Id != usuario.Id);
-                    if(existeUsername != null) return IdentityResult.Failed(new IdentityError { Description = "Nombre de usuario no disponible"});
+                    if(existeUsername != null) 
+                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("UserName", "El nombre de usuario no disponible.");
                 }
                 // Mapear los valores manualmente desde el DTO
-                usuario.NombreCompleto = usuarioUpdateDto.NombreCompleto ?? usuario.NombreCompleto;
-                usuario.Activo = usuarioUpdateDto.Activo ?? usuario.Activo;
-                usuario.CarnetIdentidad = usuarioUpdateDto.CarnetIdentidad ?? usuario.CarnetIdentidad;
-                usuario.UserName = usuarioUpdateDto.NombreUsuario ?? usuario.UserName;
-                usuario.Email = usuarioUpdateDto.Email ?? usuario.Email;
-                usuario.PhoneNumber = usuarioUpdateDto.NumeroTelefono ?? usuario.PhoneNumber;
+                usuario.updateAppUserFromUsuarioWhiteRole(usuarioUpdateDto);
        
                 //verifica si no ocurrió un cambio de rol            
                 if(rolesActual.ToHashSet().SetEquals(usuarioUpdateDto.Roles))
@@ -149,25 +112,21 @@ namespace ApiUCI.Service
                             FacultadId = usuarioUpdateDto.FacultadId,
                             Activo = usuarioUpdateDto.Activo    
                         });
-                        if(estudiante == null) return IdentityResult.Failed(new IdentityError { Description = "Estudiante no encontrado"});
+                        if(estudiante == null) 
+                            return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Estudiante", "El estudiante no existe.");
                     }
                     else if(usuarioUpdateDto.Roles.Contains("Encargado"))
                     {
-                        /* var encargado = await _encargadoService
-                        .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto {
-                            DepartamentoId = usuarioUpdateDto.DepartamentoId,
-                            Activo = usuarioUpdateDto.Activo
-                        }); */
                         var encargado = await _encargadoService
                         .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto {
                             DepartamentoId = usuarioUpdateDto.DepartamentoId,
                             Activo = usuarioUpdateDto.Activo
                         });
-                        if(encargado == null) return IdentityResult.Failed(new IdentityError { Description = "Encargado no encontrado"});
+                        if(encargado == null) 
+                            return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Encargado", "El encargado no existe.");
                     }
-
                 }//si hay un cambio de rol
-                else                 
+                else               
                 {
                     //ver  q rol se le asignara para crearlo
                     if(usuarioUpdateDto.Roles.Contains("Estudiante"))//rol estudiante
@@ -184,9 +143,8 @@ namespace ApiUCI.Service
                     {   //si vamos a crear un encargado verificamos q no existe un encargado en el departamento
                         var existeEncargadoDepartamento = await _encargadoService.ExisteEncargadoByDepartamentoIdAsync(usuarioUpdateDto.DepartamentoId);
                         if(existeEncargadoDepartamento)
-                        {
-                            return IdentityResult.Failed(new IdentityError { Description = "Ya existe un encargado en el departamento"});
-                        }
+                            return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Departamento", "Ya existe un encargado en el departamento.");
+
                         await _encargadoService
                             .CreateAsync( new Encargado {
                                             UsuarioId = userId,
@@ -218,18 +176,22 @@ namespace ApiUCI.Service
 
                 // Actualizar el usuario
                 var result = await _userManager.UpdateAsync(usuario);
-                if(!result.Succeeded) return IdentityResult.Failed(new IdentityError { Description = "Error al actualizar el usuario"});
+                if(!result.Succeeded) 
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al actualizar el usuario.", "StatusCode500");
                 //ver si el password viene para cambiarlo
                 if(!string.IsNullOrWhiteSpace(usuarioUpdateDto.Password))
                 {
                     var removePasswordResult = await _userManager.RemovePasswordAsync(usuario);
-                    if(!removePasswordResult.Succeeded) return IdentityResult.Failed(new IdentityError { Description = "Error al eliminar la contraseña actual"});
+                    if(!removePasswordResult.Succeeded) 
+                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al eliminar la contraseña.", "StatusCode500");
                     
                     var addPasswordResult = await _userManager.AddPasswordAsync(usuario, usuarioUpdateDto.Password);
-                    if(!addPasswordResult.Succeeded) return IdentityResult.Failed(new IdentityError { Description = "Error al guardar la contraseña"});
+                    if(!addPasswordResult.Succeeded) 
+                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al guardar la contraseña.", "StatusCode500");
                 }
+                var roles = await _userManager.GetRolesAsync(usuario);
 
-                return IdentityResult.Success;
+                return RespuestasGenerales<UsuarioDto>.ErrorResponseService(usuario.toUsuarioDto(roles) ,"Usuario actualizado exitosamente.");
             }
             catch(Exception ex)
             {
@@ -246,18 +208,20 @@ namespace ApiUCI.Service
                 throw;
             }
         }
-        public async Task<AppUser?> DeleteAsync(string id)
+        public async Task<RespuestasGenerales<UsuarioDto?>> DeleteAsync(string id)
         {
             try
             {
                 var usuario = await _userManager.FindByIdAsync(id);
-                if(usuario == null) return null;
+                if(usuario == null) 
+                    return RespuestasGenerales<UsuarioDto?>.ErrorResponseService("Usuario", "El usuario no existe.");
                 usuario.Activo = false;
                 
                 var result = await _userManager.UpdateAsync(usuario);
-                if(result.Succeeded) return usuario;
+                if(!result.Succeeded)
+                    return RespuestasGenerales<UsuarioDto?>.ErrorResponseService("Error", "Error al borrar el usuario.");
 
-                return null;
+                return RespuestasGenerales<UsuarioDto?>.SuccessResponse(usuario.toUsuarioDtoBorrar(), "Usuario borrado.");;
             }
             catch(Exception ex)
             {
@@ -266,8 +230,9 @@ namespace ApiUCI.Service
             }
         }
 
-        public async Task<List<UsuarioDto>> GetAllAsync(QueryObjectUsuario query)
+        public async Task<RespuestasGenerales<List<UsuarioDto>>> GetAllAsync(QueryObjectUsuario query)
         {
+            //todo: esto hay q arreglarlo para hacerlo ams eficiente  y seguir buenas practicas !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             var usuariosQuery = _userManager.Users
                 .Where(user => user.NombreCompleto != "Admin Web Api")
                 .Select(user => new
@@ -350,29 +315,22 @@ namespace ApiUCI.Service
                 Roles = u.Roles!
             }).ToList();
 
-            return usuariosDto;
+            return RespuestasGenerales<List<UsuarioDto>>.SuccessResponse(usuariosDto, "Operación relaizada exitosamente.");
         }
 
-        public async Task<UsuarioDto?> GetByIdAsync(string id)
+        public async Task<RespuestasGenerales<UsuarioDto?>> GetByIdAsync(string id)
         {
             var user = await _userManager
                 .FindByIdAsync(id);
-            if (user == null) return null;
+            if (user == null) 
+                return RespuestasGenerales<UsuarioDto?>.ErrorResponseService("Usuario", "El usuario no existe.");
+            
             var roles  = await _userManager.GetRolesAsync(user);
             
-           return new UsuarioDto {
-                Id = user.Id,
-                Activo = user.Activo,
-                NombreUsuario = user.UserName!,
-                NombreCompleto = user.NombreCompleto,
-                Email = user.Email,
-                CarnetIdentidad = user.CarnetIdentidad,
-                NumeroTelefono = user.PhoneNumber,
-                Roles = roles.ToList()
-           };
+           return RespuestasGenerales<UsuarioDto?>.SuccessResponse(user.toUsuarioDto(roles), "Operación realizada exitosamente.");
         }
 
-        public async Task<RespuestasServicios<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto)
+        public async Task<RespuestasGenerales<NewAdminDto>> RegistrarAdministradorAsync(RegistroAdministradorDto registroDto)
         {
             // Crear el usuario
             var appUser = new AppUser
@@ -388,7 +346,7 @@ namespace ApiUCI.Service
             if (!createUserResult.Succeeded)
             {
                 var errores = ErrorBuilder.ParseIdentityErrors(createUserResult.Errors);
-                return RespuestasServicios<NewAdminDto>.ErrorResponse(errores);
+                return RespuestasGenerales<NewAdminDto>.ErrorResponseController(errores);
             }
 
             // Asignar rol de administrador
@@ -397,7 +355,7 @@ namespace ApiUCI.Service
             {
                 await _userManager.DeleteAsync(appUser); // Revertir creación del usuario si falla la asignación del rol
                 var errores = ErrorBuilder.ParseIdentityErrors(roleResult.Errors);
-                return RespuestasServicios<NewAdminDto>.ErrorResponse(errores);
+                return RespuestasGenerales<NewAdminDto>.ErrorResponseController(errores);
             }
 
             // Crear el DTO para el administrador
@@ -411,9 +369,11 @@ namespace ApiUCI.Service
                 NombreCompleto = appUser.NombreCompleto,
                 Roles = new List<string> { "Admin" }
             };
-
+            IList<string> roles = new List<string> { "Admin"};
             // Devolver éxito con el DTO
-            return RespuestasServicios<NewAdminDto>.SuccessResponse(newAdminDto, "Administrador creado exitosamente");
+            return RespuestasGenerales<NewAdminDto>.SuccessResponse(appUser.toAdminDto(roles), "Administrador creado exitosamente");
         }
+
+
     }
 }

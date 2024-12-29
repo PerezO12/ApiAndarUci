@@ -10,11 +10,15 @@ public partial class Formulario
 {
     [Key]
     public int Id { get; set; }    
-    [Required]
+    [Required(ErrorMessage = "El estudiante es obligatorio.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Estudiante no válido")]
     public int EstudianteId { get; set; }
-    [Required]
+    [Required(ErrorMessage = "El encargado es obligatorio.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Encargado no válido")]
     public int EncargadoId { get; set; }
-    [Required]
+
+    [Required(ErrorMessage = "El departamento es obligatorio.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Departamento no válido")]
     public int DepartamentoId { get; set; }
     public bool Firmado { get; set; } = false;
 

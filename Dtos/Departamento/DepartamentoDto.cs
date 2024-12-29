@@ -7,7 +7,7 @@ namespace MyApiUCI.Dtos.Departamento
 {
     public class DepartamentoDto
     {
-        public int Id { get; set; } //borar luego
+        public int Id { get; set; }
         public string Nombre { get; set; } = null!;
         public string? Facultad { get; set; }
         public string? EncargadoNombre { get; set; }

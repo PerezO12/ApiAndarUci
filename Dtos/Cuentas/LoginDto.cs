@@ -8,9 +8,10 @@ namespace MyApiUCI.Dtos.Cuentas
 {
     public class LoginDto
     {
-        [Required]
+        [Required(ErrorMessage = "El nombre de usuario es requerido.")]
+        [MinLength(4, ErrorMessage = "No es un nombre válido.")]
         public string Nombre { get; set; } = null!;
-        [Required]
+        [Required(ErrorMessage = "La contraseña es requerida.")]
         public string Password { get; set;} = null!;
     }
 }

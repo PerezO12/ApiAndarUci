@@ -9,10 +9,11 @@ public partial class Encargado
 {
     [Key]
     public int Id { get; set; }
-    [Required]
+    [Required(ErrorMessage = "El usuario es obligatorio.")]
     public string UsuarioId { get; set; } = null!;
 
-    [Required]
+    [Required(ErrorMessage = "El departamento es obligatorio.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Departamento no válida")]
     public int DepartamentoId { get; set; } 
 
     public byte[]? LlavePublica { get; set; }
