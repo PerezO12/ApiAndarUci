@@ -1,8 +1,7 @@
 using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Models;
+using ApiUCI.Models;
 
 namespace ApiUCI.Data
 {

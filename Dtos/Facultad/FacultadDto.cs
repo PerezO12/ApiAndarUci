@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Facultad
+namespace ApiUCI.Dtos.Facultad
 {
     public class FacultadDto
     {

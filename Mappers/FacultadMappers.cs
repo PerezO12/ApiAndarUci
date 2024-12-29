@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MyApiUCI.Dtos.Facultad;
-using MyApiUCI.Models;
+using ApiUCI.Dtos.Facultad;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Mappers
+namespace ApiUCI.Mappers
 {
     public static class FacultadMappers
     {

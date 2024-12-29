@@ -1,21 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Dtos.Usuarios;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Models;
 using ApiUCI.Dtos.Usuarios;
+using ApiUCI.Helpers;
 using ApiUCI.Interfaces;
+using ApiUCI.Models;
 using ApiUCI.Dtos;
 using ApiUCI.Dtos.Estudiante;
 using ApiUCI.Dtos.Encargado;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Extensions;
-using MyApiUCI.Mappers;
+using ApiUCI.Mappers;
 
 
 namespace ApiUCI.Service

@@ -1,16 +1,12 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Models;
+using ApiUCI.Interfaces;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Service
+namespace ApiUCI.Service
 {
     public class TokenService : ITokenService
     {

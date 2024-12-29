@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos;
 using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Extensions;
 using ApiUCI.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Dtos.Cuentas;
-using MyApiUCI.Dtos.Usuarios;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
-using MyApiUCI.Models;
+using ApiUCI.Mappers;
+using ApiUCI.Models;
 
 namespace ApiUCI.Service
 {
@@ -36,7 +29,7 @@ namespace ApiUCI.Service
             try
             {
                 var user = await _userManager.Users
-                    .FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.Nombre.ToLower());
+                    .FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.UserName.ToLower());
                 
                 if (user == null)
                     return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Usuario/Contraseña","Usuario o contraseña Incorrectos");

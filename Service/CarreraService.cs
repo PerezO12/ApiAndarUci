@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading.Tasks;
 using ApiUCI.Dtos;
 using ApiUCI.Interfaces;
-using MyApiUCI.Dtos.Carrera;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
+using ApiUCI.Dtos.Carrera;
+using ApiUCI.Helpers;
+using ApiUCI.Mappers;
 
 namespace ApiUCI.Service
 {

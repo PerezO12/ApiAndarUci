@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MyApiUCI.Models;
+namespace ApiUCI.Models;
 
 public partial class Carrera
 {
@@ -16,7 +16,6 @@ public partial class Carrera
     public string Nombre { get; set; } = null!;
     
     [Required(ErrorMessage = "La facultad es obligatoria.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Facultad no válida")]
     public int FacultadId { get; set; }
     
     public DateTime? Fechacreacion { get; set; } = DateTime.Now.ToUniversalTime();

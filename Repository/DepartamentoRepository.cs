@@ -4,14 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApiUCI.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Controller;
-using MyApiUCI.Dtos.Departamento;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
-using MyApiUCI.Models;
+using ApiUCI.Controller;
+using ApiUCI.Dtos.Departamento;
+using ApiUCI.Helpers;
+using ApiUCI.Interfaces;
+using ApiUCI.Mappers;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Repository
+namespace ApiUCI.Repository
 {
     public class DepartamentoRepository : IDepartamentoRepository
     {

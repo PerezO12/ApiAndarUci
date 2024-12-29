@@ -4,21 +4,18 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace MyApiUCI.Models;
+namespace ApiUCI.Models;
 
 public partial class Formulario
 {
     [Key]
     public int Id { get; set; }    
     [Required(ErrorMessage = "El estudiante es obligatorio.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Estudiante no válido")]
     public int EstudianteId { get; set; }
     [Required(ErrorMessage = "El encargado es obligatorio.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Encargado no válido")]
     public int EncargadoId { get; set; }
 
     [Required(ErrorMessage = "El departamento es obligatorio.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Departamento no válido")]
     public int DepartamentoId { get; set; }
     public bool Firmado { get; set; } = false;
 

@@ -1,20 +1,14 @@
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos;
 using ApiUCI.Extensions;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Dtos.Cuentas;
-using MyApiUCI.Dtos.Estudiante;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
-using MyApiUCI.Models;
+using ApiUCI.Dtos.Cuentas;
+using ApiUCI.Dtos.Estudiante;
+using ApiUCI.Helpers;
+using ApiUCI.Interfaces;
+using ApiUCI.Mappers;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Service
+namespace ApiUCI.Service
 {
     public class EstudianteService : IEstudianteService
     {
@@ -116,7 +110,7 @@ namespace MyApiUCI.Service
 
                 var appUser = new AppUser
                 {
-                    UserName = registerDto.nombreUsuario,
+                    UserName = registerDto.NombreUsuario,
                     Email = registerDto.Email,
                     NombreCompleto = registerDto.NombreCompleto,
                     CarnetIdentidad = registerDto.CarnetIdentidad

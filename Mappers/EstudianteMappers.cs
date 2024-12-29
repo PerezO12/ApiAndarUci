@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos.Estudiante;
-using MyApiUCI.Dtos.Estudiante;
-using MyApiUCI.Models;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Mappers
+namespace ApiUCI.Mappers
 {
     public static class EstudianteMappers
     {

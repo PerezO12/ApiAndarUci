@@ -1,18 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos.Estudiante;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
-using MyApiUCI.Dtos.Estudiante;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
-using MyApiUCI.Models;
+using ApiUCI.Helpers;
+using ApiUCI.Interfaces;
+using ApiUCI.Mappers;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Repository
+namespace ApiUCI.Repository
 {
     public class EstudianteRepository : IEstudianteRepository
     {

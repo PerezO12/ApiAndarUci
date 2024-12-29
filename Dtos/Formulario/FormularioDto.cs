@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Formulario
+namespace ApiUCI.Dtos.Formulario
 {
     public class FormularioDto
     {

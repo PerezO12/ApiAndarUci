@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Carrera
+namespace ApiUCI.Dtos.Carrera
 {
     public class CarreraDto
     {

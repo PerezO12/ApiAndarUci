@@ -4,16 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Formulario
+namespace ApiUCI.Dtos.Formulario
 {
     public class CreateFormularioDto
     {
-        [Required]
         public int DepartamentoId { get; set; }
-
-        [Required]
-        [MaxLength(500)]
-        [MinLength(5)]
         public required  string Motivo { get; set; }
     }
 }

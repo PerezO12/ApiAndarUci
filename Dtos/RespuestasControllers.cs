@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ApiUCI.Extensions;
 using ApiUCI.Utilities;
-using MyApiUCI.Dtos.Usuarios;
+using ApiUCI.Dtos.Usuarios;
 
 namespace ApiUCI.Dtos
 {

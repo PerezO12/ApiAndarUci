@@ -1,10 +1,9 @@
 using ApiUCI.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Models;
+using ApiUCI.Interfaces;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Repository
+namespace ApiUCI.Repository
 {
 
     public class FacultadRepository : IFacultadRepository

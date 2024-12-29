@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MyApiUCI.Models;
+namespace ApiUCI.Models;
 
 public partial class Facultad
 {

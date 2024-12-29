@@ -1,16 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos.Encargado;
 using Microsoft.EntityFrameworkCore;
-using MyApiUCI.Dtos.Encargado;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
-using MyApiUCI.Models;
+using ApiUCI.Helpers;
+using ApiUCI.Interfaces;
+using ApiUCI.Mappers;
+using ApiUCI.Models;
 
-namespace MyApiUCI.Repository
+namespace ApiUCI.Repository
 {
     public class EncargadoRepository : IEncargadoRepository
     {

@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos;
-using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Helpers.Querys;
 using ApiUCI.Interfaces;
-using MyApiUCI.Dtos.Departamento;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
-using MyApiUCI.Models;
+using ApiUCI.Dtos.Departamento;
+using ApiUCI.Mappers;
 
 namespace ApiUCI.Service
 {

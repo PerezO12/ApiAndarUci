@@ -1,25 +1,16 @@
 
 using System.Security.Cryptography;
-
 using ApiUCI.Dtos.Encargado;
-
-using MyApiUCI.Dtos.Encargado;
-using MyApiUCI.Helpers;
-using MyApiUCI.Interfaces;
-using System.Text;
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.IO.Compression;
-using MyApiUCI.Models;
 using ApiUCI.Helpers;
-using MyApiUCI.Dtos.Departamento;
+using ApiUCI.Interfaces;
+using ApiUCI.Models;
 using Microsoft.AspNetCore.Identity;
 using ApiUCI.Dtos;
-using MyApiUCI.Dtos.Cuentas;
+using ApiUCI.Dtos.Cuentas;
 using ApiUCI.Extensions;
-using MyApiUCI.Mappers;
+using ApiUCI.Mappers;
 
-namespace MyApiUCI.Service
+namespace ApiUCI.Service
 {
     public class EncargadoService : IEncargadoService
     {
@@ -96,12 +87,12 @@ namespace MyApiUCI.Service
         }
 
 
-        public async Task<RespuestasGenerales<EncargadoFirmaDto?>> GenerarFirmaDigitalAsync(string userId, EncargadoGenerarLLaveDto encargadoDto)
+        public async Task<RespuestasGenerales<EncargadoFirmaDto?>> GenerarFirmaDigitalAsync(string userId, PasswordDto password)
         {
             try
             {
                 var usuario = await _userManager.FindByIdAsync(userId); 
-                var resultadoPassword = await _signInManager.CheckPasswordSignInAsync(usuario!, encargadoDto.Password, false);
+                var resultadoPassword = await _signInManager.CheckPasswordSignInAsync(usuario!, password.Password, false);
                 if(resultadoPassword.Succeeded)
                     return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Password", "La contraseña es incorrecta.");
 

@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ApiUCI.Dtos;
 using ApiUCI.Helpers.Querys;
 using ApiUCI.Interfaces;
-using MyApiUCI.Dtos.Facultad;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Mappers;
+using ApiUCI.Dtos.Facultad;
+using ApiUCI.Mappers;
 
 namespace ApiUCI.Service
 {

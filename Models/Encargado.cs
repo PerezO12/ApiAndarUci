@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MyApiUCI.Models;
+namespace ApiUCI.Models;
 
 public partial class Encargado
 {
@@ -13,7 +13,6 @@ public partial class Encargado
     public string UsuarioId { get; set; } = null!;
 
     [Required(ErrorMessage = "El departamento es obligatorio.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Departamento no válida")]
     public int DepartamentoId { get; set; } 
 
     public byte[]? LlavePublica { get; set; }

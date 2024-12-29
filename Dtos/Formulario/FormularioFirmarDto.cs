@@ -8,7 +8,6 @@ namespace ApiUCI.Dtos.Formulario
 {
     public class FormularioFirmarDto
     {
-        [Required]
         public string LlavePrivada { get; set; } = null!;
     }
 }

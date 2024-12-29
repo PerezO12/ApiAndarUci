@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MyApiUCI.Models;
+namespace ApiUCI.Models;
 
 public partial class Estudiante
 {
@@ -13,11 +13,9 @@ public partial class Estudiante
     public string UsuarioId { get; set; } = null!;
 
     [Required(ErrorMessage = "La carrera es obligatoria.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Carrera no válida")]
     public int CarreraId { get; set; }
 
     [Required(ErrorMessage = "La facultad es obligatoria.")]
-    [Range(1, int.MaxValue, ErrorMessage = "Facultad no válida")]
     public int FacultadId { get; set; }
 
     public bool Activo { get; set; } = true;

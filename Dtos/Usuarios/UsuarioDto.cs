@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Usuarios
+namespace ApiUCI.Dtos.Usuarios
 {
     public class UsuarioDto
     {   

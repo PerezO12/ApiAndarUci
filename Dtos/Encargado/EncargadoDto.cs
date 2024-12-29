@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace MyApiUCI.Dtos.Encargado
+namespace ApiUCI.Dtos.Encargado
 {
     public class EncargadoDto
     {

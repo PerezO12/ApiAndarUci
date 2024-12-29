@@ -15,13 +15,10 @@ namespace ApiUCI.Dtos.Usuarios
         public string? Password { get; set; }
         public string? Email { get; set; }
         public string? NumeroTelefono { get; set;}
-
-        [Required]
         public List<string> Roles { get; set; } = new List<string>();
         public int DepartamentoId { get; set; } = 0;
         public int FacultadId { get; set; } = 0;
         public int CarreraId { get; set; } = 0;
-        [Required]
         public string PasswordAdmin { get; set; } = null!;
     }
 }

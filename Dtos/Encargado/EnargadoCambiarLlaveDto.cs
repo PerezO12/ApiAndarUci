@@ -8,9 +8,7 @@ namespace ApiUCI.Dtos.Encargado
 {
     public class EncargadoCambiarLlaveDto
     {
-        [Required]
         public string Password { get; set; } = null! ;
-        [Required]
         public string LlavePublica { get; set; } = null!;
     }
 }

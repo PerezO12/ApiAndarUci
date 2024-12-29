@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
-using MyApiUCI.Models;
+using ApiUCI.Models;
 
 
 public class ApplicationDbContext : IdentityDbContext<AppUser>

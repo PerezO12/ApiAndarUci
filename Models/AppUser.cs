@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 
-namespace MyApiUCI.Models
+namespace ApiUCI.Models
 {
     public class AppUser : IdentityUser
     {

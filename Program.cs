@@ -5,15 +5,16 @@ using ApiUCI.Interfaces;
 using ApiUCI.Middleware;
 using ApiUCI.Service;
 using ApiUCI.Utilities;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MyApiUCI.Interfaces;
-using MyApiUCI.Models;
-using MyApiUCI.Repository;
-using MyApiUCI.Service;
+using ApiUCI.Models;
+using ApiUCI.Repository;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 
 // Configuración de la base de datos
@@ -74,7 +76,16 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
+//fluent validation
+builder.Services
+    .AddFluentValidationAutoValidation()
+    .AddValidatorsFromAssemblyContaining<Program>();
 
+/* builder.Services.AddControllers(options =>
+{
+    // Deshabilitar la validación basada en Data Annotations
+    options.ModelValidatorProviders.Clear();
+}); */
 
 // Configuración de Identity con validaciones de seguridad de password de los usuarios
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -139,7 +150,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartamentoService, DepartamentoService>();
 builder.Services.AddScoped<ICarreraService, CarreraService>();
 builder.Services.AddScoped<IFacultadService, FacultadService>();
-
 
 // Configuración de JsonOptions
 builder.Services.AddControllers().AddJsonOptions(options =>
