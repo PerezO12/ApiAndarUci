@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Dtos.Cuentas
+namespace ApiUci.Dtos.Cuentas
 {
     public class PasswordDto
     {

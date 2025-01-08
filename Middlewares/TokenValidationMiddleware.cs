@@ -1,9 +1,9 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Extensions;
+using ApiUci.Contracts.V1;
+using ApiUci.Extensions;
 using Microsoft.AspNetCore.Identity;
-using ApiUCI.Models;
+using ApiUci.Models;
 
-namespace ApiUCI.Middleware
+namespace ApiUci.Middleware
 {
     public class TokenValidationMiddleware
     {

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Helpers
+namespace ApiUci.Helpers
 {
     public class QueryObjectCarrera
     {
-        public string? Carrera { get; set; } = null; //para buscar por
+        public string? Nombre { get; set; } = null; //para buscar por
         public string? Facultad { get; set; } = null;
         public int? FacultadId { get; set; }
 

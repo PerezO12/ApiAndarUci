@@ -1,7 +1,7 @@
-using ApiUCI.Dtos.Formulario;
-using ApiUCI.Models;
+using ApiUci.Dtos.Formulario;
+using ApiUci.Models;
 
-    namespace ApiUCI.Mappers
+    namespace ApiUci.Mappers
     {
         public static class FormularioMappers
         {
@@ -32,14 +32,14 @@ using ApiUCI.Models;
                 return  new FormularioDto {
                     id = formularioModel.Id,
                     NombreEstudiante = formularioModel.Estudiante!.AppUser!.NombreCompleto,
-                    NombreUsuarioEstudiante = formularioModel.Estudiante.AppUser.UserName,
+                    UserNameEstudiante = formularioModel.Estudiante.AppUser.UserName,
                     CarnetIdentidadEstudiante = formularioModel.Estudiante.AppUser.CarnetIdentidad,
                     EmailEstudiante = formularioModel.Estudiante.AppUser.Email,
                     NombreCarrera = formularioModel.Estudiante.Carrera!.Nombre,
                     NombreDepartamento = formularioModel.Departamento!.Nombre,
                     NombreFacultad = formularioModel.Departamento.Facultad!.Nombre,
                     Motivo = formularioModel.Motivo,
-                    NombreEncargado = formularioModel.Encargado!.AppUser!.NombreCompleto,
+                    NombreEncargado = formularioModel.Encargado!.Usuario!.NombreCompleto,
                     Firmado = formularioModel.Firmado,
                     FechaFirmado = formularioModel.FechaFirmado,
                     Fechacreacion = formularioModel.Fechacreacion
@@ -60,7 +60,7 @@ using ApiUCI.Models;
             {
                 return new FormularioEstudianteDto{
                     Id = FormularioModel.Id,
-                    NombreEncargado = FormularioModel.Encargado!.AppUser!.NombreCompleto!,
+                    NombreEncargado = FormularioModel.Encargado!.Usuario!.NombreCompleto!,
                     NombreDepartamento= FormularioModel.Departamento!.Nombre,
                     Motivo = FormularioModel.Motivo,
                     Firmado = FormularioModel.Firmado,

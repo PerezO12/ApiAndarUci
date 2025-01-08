@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Dtos.Usuarios;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Models;
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Estudiante;
-using ApiUCI.Dtos.Encargado;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Extensions;
-using ApiUCI.Mappers;
+using ApiUci.Dtos.Usuarios;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Models;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Estudiante;
+using ApiUci.Dtos.Encargado;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Extensions;
+using ApiUci.Mappers;
 
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class UsuarioService : IUsuarioService
     {
@@ -72,136 +72,7 @@ namespace ApiUCI.Service
                 throw;
             }
         }
-
-        public async Task<RespuestasGenerales<UsuarioDto>> UpdateAsync(string userId, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
-        {   //todo: arreglar esto, separarlo para q sea mas mantenible
-            try
-            {
-                var usuario = await _userManager.FindByIdAsync(userId);
-                if(usuario == null) 
-                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Usuario", "El usuario no existe.");
-                
-                var rolesActual = await _userManager.GetRolesAsync(usuario);
-                //comprobar q si va a cambiar el nomre de usuario no exista otro con el mismo nombre
-                if( (usuarioUpdateDto.NombreUsuario != null ) && (usuario.UserName != usuarioUpdateDto.NombreUsuario)){
-                    var existeUsername = await _userManager.Users
-                        .FirstOrDefaultAsync(
-                            u => u.UserName != null 
-                            && u.UserName.ToLower() == usuarioUpdateDto.NombreUsuario.ToLower() 
-                            && u.Id != usuario.Id);
-                    if(existeUsername != null) 
-                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("UserName", "El nombre de usuario no disponible.");
-                }
-                // Mapear los valores manualmente desde el DTO
-                usuario.updateAppUserFromUsuarioWhiteRole(usuarioUpdateDto);
-       
-                //verifica si no ocurrió un cambio de rol            
-                if(rolesActual.ToHashSet().SetEquals(usuarioUpdateDto.Roles))
-                {
-                    if(usuarioUpdateDto.Roles.Contains("Estudiante"))
-                    {
-                        var estudiante = await _estudianteRepo
-                        .UpdateEstudianteByUserIdAsync(userId, new EstudianteUpdateDto{
-                            CarreraId = usuarioUpdateDto.CarreraId,
-                            FacultadId = usuarioUpdateDto.FacultadId,
-                            Activo = usuarioUpdateDto.Activo    
-                        });
-                        if(estudiante == null) 
-                            return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Estudiante", "El estudiante no existe.");
-                    }
-                    else if(usuarioUpdateDto.Roles.Contains("Encargado"))
-                    {
-                        var encargado = await _encargadoService
-                        .UpdateEncargadoByUserIdAsync(userId, new EncargadoUpdateDto {
-                            DepartamentoId = usuarioUpdateDto.DepartamentoId,
-                            Activo = usuarioUpdateDto.Activo
-                        });
-                        if(encargado == null) 
-                            return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Encargado", "El encargado no existe.");
-                    }
-                }//si hay un cambio de rol
-                else               
-                {
-                    //ver  q rol se le asignara para crearlo
-                    if(usuarioUpdateDto.Roles.Contains("Estudiante"))//rol estudiante
-                    {
-                        await _estudianteRepo
-                            .CreateAsync(new Estudiante {
-                                            UsuarioId = userId,
-                                            CarreraId = usuarioUpdateDto.CarreraId,
-                                            FacultadId = usuarioUpdateDto.FacultadId
-                                        });
-                        await _userManager.AddToRoleAsync(usuario, "Estudiante");
-                    }
-                    else if(usuarioUpdateDto.Roles.Contains("Encargado"))//encargado
-                    {   //si vamos a crear un encargado verificamos q no existe un encargado en el departamento
-                        var existeEncargadoDepartamento = await _encargadoService.ExisteEncargadoByDepartamentoIdAsync(usuarioUpdateDto.DepartamentoId);
-                        if(existeEncargadoDepartamento)
-                            return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Departamento", "Ya existe un encargado en el departamento.");
-
-                        await _encargadoService
-                            .CreateAsync( new Encargado {
-                                            UsuarioId = userId,
-                                            DepartamentoId = usuarioUpdateDto.DepartamentoId
-                                        });
-                        await _userManager.AddToRoleAsync(usuario, "Encargado");
-                    }
-                    else if(usuarioUpdateDto.Roles.Contains("Admin"))//admin
-                    {
-                        await _userManager.AddToRoleAsync(usuario, "Admin");
-                    }
-                    //ver rol antiguo para borrarlo
-                    if(rolesActual.Contains("Estudiante"))
-                    {
-                        await _estudianteRepo.DeleteByUserIdAsync(userId);
-                        await _userManager.RemoveFromRoleAsync(usuario, "Estudiante");
-                    }
-                    else if(rolesActual.Contains("Encargado"))
-                    {
-                        await _encargadoService.DeleteByUserIdAsync(userId);
-                        await _userManager.RemoveFromRoleAsync(usuario, "Encargado");
-                    }
-                    else if(rolesActual.Contains("Admin"))
-                    {
-                        await _userManager.RemoveFromRoleAsync(usuario, "Admin");
-                    }
-                    
-                }
-
-                // Actualizar el usuario
-                var result = await _userManager.UpdateAsync(usuario);
-                if(!result.Succeeded) 
-                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al actualizar el usuario.", "StatusCode500");
-                //ver si el password viene para cambiarlo
-                if(!string.IsNullOrWhiteSpace(usuarioUpdateDto.Password))
-                {
-                    var removePasswordResult = await _userManager.RemovePasswordAsync(usuario);
-                    if(!removePasswordResult.Succeeded) 
-                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al eliminar la contraseña.", "StatusCode500");
-                    
-                    var addPasswordResult = await _userManager.AddPasswordAsync(usuario, usuarioUpdateDto.Password);
-                    if(!addPasswordResult.Succeeded) 
-                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Error", "Error al guardar la contraseña.", "StatusCode500");
-                }
-                var roles = await _userManager.GetRolesAsync(usuario);
-
-                return RespuestasGenerales<UsuarioDto>.ErrorResponseService(usuario.toUsuarioDto(roles) ,"Usuario actualizado exitosamente.");
-            }
-            catch(Exception ex)
-            {
-                
-                if(usuarioUpdateDto.Roles.Contains("Estudiante"))
-                {
-                    await _estudianteRepo.DeleteByUserIdAsync(userId);
-                }   
-                else if(usuarioUpdateDto.Roles.Contains("Encargado"))
-                {
-                    await _encargadoService.DeleteByUserIdAsync(userId);
-                }
-                Console.WriteLine(ex);
-                throw;
-            }
-        }
+ 
         public async Task<RespuestasGenerales<UsuarioDto?>> DeleteAsync(string id)
         {
             try
@@ -243,28 +114,21 @@ namespace ApiUCI.Service
 
             // Filtros
             if (query.SoloActivos)
-            {
                 usuariosQuery = usuariosQuery.Where(u => u.User.Activo == true);
-            }
+
             if (!string.IsNullOrWhiteSpace(query.CarnetIdentidad))
-            {
                 usuariosQuery = usuariosQuery.Where(u => u.User.CarnetIdentidad.ToLower().Contains(query.CarnetIdentidad.ToLower()));
-            }
             if (!string.IsNullOrWhiteSpace(query.Nombre))
-            {
                 usuariosQuery = usuariosQuery.Where(u => u.User.NombreCompleto != null &&
                                                         u.User.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
-            }
+            
             if (!string.IsNullOrWhiteSpace(query.Email))
-            {
                 usuariosQuery = usuariosQuery.Where(u => u.User.Email != null &&
                                                         u.User.Email.ToLower().Contains(query.Email.ToLower()));
-            }
-            if (!string.IsNullOrWhiteSpace(query.NombreUsuario))
-            {
+            
+            if (!string.IsNullOrWhiteSpace(query.Usuario))
                 usuariosQuery = usuariosQuery.Where(u => u.User.UserName != null &&
-                                                        u.User.UserName.ToLower().Contains(query.NombreUsuario.ToLower()));
-            }
+                                                        u.User.UserName.ToLower().Contains(query.Usuario.ToLower()));
 
             // Ordenar
             if (!string.IsNullOrWhiteSpace(query.OrdenarPor))
@@ -301,7 +165,7 @@ namespace ApiUCI.Service
             {
                 Id = u.User.Id,
                 Activo = u.User.Activo,
-                NombreUsuario = u.User.UserName!,
+                UserName = u.User.UserName!,
                 NombreCompleto = u.User.NombreCompleto,
                 Email = u.User.Email,
                 CarnetIdentidad = u.User.CarnetIdentidad,
@@ -329,7 +193,7 @@ namespace ApiUCI.Service
             // Crear el usuario
             var appUser = new AppUser
             {
-                UserName = registroDto.NombreUsuario,
+                UserName = registroDto.UserName,
                 Email = registroDto.Email,
                 NombreCompleto = registroDto.NombreCompleto,
                 CarnetIdentidad = registroDto.CarnetIdentidad
@@ -358,7 +222,7 @@ namespace ApiUCI.Service
                 Id = appUser.Id,
                 Activo = appUser.Activo,
                 CarnetIdentidad = appUser.CarnetIdentidad,
-                NombreUsuario = appUser.UserName!,
+                UserName = appUser.UserName!,
                 Email = appUser.Email,
                 NombreCompleto = appUser.NombreCompleto,
                 Roles = new List<string> { "Admin" }
@@ -368,6 +232,164 @@ namespace ApiUCI.Service
             return RespuestasGenerales<NewAdminDto>.SuccessResponse(appUser.toAdminDto(roles), "Administrador creado exitosamente");
         }
 
+        public async Task<RespuestasGenerales<UsuarioDto>> UpdateAsync(string userId, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
+        {
+            try
+            {   //obtenemos el usuario y validamos si existe
+                var usuario = await _userManager.FindByIdAsync(userId);
+                if (usuario == null)
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Usuario", "El usuario no existe.");
 
+                //se  mapean los datos
+                usuario.updateAppUserFromUsuarioWhiteRole(usuarioUpdateDto);
+
+                var result = await _userManager.UpdateAsync(usuario);
+                if (!result.Succeeded)
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseController(ErrorBuilder.ParseIdentityErrors(result.Errors));
+
+                //se verifica s hay cambio de contrasena
+                if (!string.IsNullOrWhiteSpace(usuarioUpdateDto.Password))
+                {
+                    var cambioPasswordResponse = await CambiarPasswordUsuario(usuario, usuarioUpdateDto.Password);
+                    if (!cambioPasswordResponse.Success)
+                        return RespuestasGenerales<UsuarioDto>.ErrorResponseService("Password", cambioPasswordResponse.Message ?? "Error al cambiar la contraseña.");
+                }
+
+                //si verifica si hay cambio de roles si no hay o lo q sea y toma dec segun eso
+                var resultRolesNuevos = await CambiarRolesYremoverEntidades(usuario, usuarioUpdateDto.Roles);
+                if(!resultRolesNuevos.Success)
+                    return RespuestasGenerales<UsuarioDto>.ErrorResponseController(resultRolesNuevos.Errors!, "Error al cambiar los roles.");
+                
+                //se crean las entidades relacionadas
+                await UpdateOrCreateRelatedEntities(usuario, usuarioUpdateDto);
+
+
+                return RespuestasGenerales<UsuarioDto>.SuccessResponse(usuario.toUsuarioDto(resultRolesNuevos.Data), "Usuario actualizado exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+
+        /* Metodos auxiliares a update user, tmb pueden tener otros propositos */
+
+        public async Task<RespuestasGenerales<bool>> CambiarPasswordUsuario(AppUser usuario, string newPassword)
+        {
+            if (string.IsNullOrWhiteSpace(newPassword))
+                return RespuestasGenerales<bool>.ErrorResponseService("Password", "La nueva contraseña no puede estar vacía.");
+            
+            var removePasswordResult = await _userManager.RemovePasswordAsync(usuario);
+            if (!removePasswordResult.Succeeded)
+                return RespuestasGenerales<bool>.ErrorResponseController(ErrorBuilder.ParseIdentityErrors(removePasswordResult.Errors));
+
+            var addPasswordResult = await _userManager.AddPasswordAsync(usuario, newPassword);
+            if (!addPasswordResult.Succeeded)
+            {
+                var errores = ErrorBuilder.ParseIdentityErrors(addPasswordResult.Errors);
+                return RespuestasGenerales<bool>.ErrorResponseController(errores);
+            }
+
+            return RespuestasGenerales<bool>.SuccessResponse(true, "Contraseña actualizada exitosamente.");
+        }
+
+        
+        /* Manejo de camabios de rol */
+        private async Task<RespuestasGenerales<IEnumerable<string>>> CambiarRolesYremoverEntidades(AppUser usuario, List<string> rolesNuevos)
+        {
+            try
+            {
+                var rolesRemover =  await _userManager.GetRolesAsync(usuario);
+
+                // Si no hay cambios en los roles, actualiza las entidades relacionadas
+                if (rolesRemover.ToHashSet().SetEquals(rolesNuevos.ToHashSet()))
+                    return RespuestasGenerales<IEnumerable<string>>.SuccessResponse(rolesRemover, "No hay cambios en los roles.");
+
+                // Si hay cambios de roles
+                var addResult = await _userManager.AddToRolesAsync(usuario, rolesNuevos);
+                if(!addResult.Succeeded)
+                    throw new Exception("Error añadiendo roles.");
+
+                var removeResult = await _userManager.RemoveFromRolesAsync(usuario, rolesRemover);
+                if(!removeResult.Succeeded)
+                throw new Exception("Error removiendo roles.");
+
+                //remover las entidades relacionadas
+                await RemoveEntidades(usuario, rolesRemover);//remueve las entidades viejas
+                return RespuestasGenerales<IEnumerable<string>>.SuccessResponse(rolesNuevos, "Roles actualizados exitosamente.");
+            }
+            catch (Exception ex)
+            {
+                await _userManager.RemoveFromRolesAsync(usuario, rolesNuevos);//si falla intenta remover los roles nuevos
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+        /* Update entidades relacionadas */
+        private async Task<RespuestasGenerales<UsuarioDto>> UpdateOrCreateRelatedEntities(AppUser usuario, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
+        {
+            try
+            {
+                if (usuarioUpdateDto.Roles.Contains("Estudiante"))
+                {
+                    //actualiza el estudiante si existe
+                    var estudiante = await _estudianteRepo.UpdateEstudianteByUserIdAsync(usuario.Id, new EstudianteUpdateDto
+                    {
+                        CarreraId = usuarioUpdateDto.CarreraId,
+                        FacultadId = usuarioUpdateDto.FacultadId,
+                        Activo = usuarioUpdateDto.Activo
+                    });
+                    //si no existe crealo
+                    if (estudiante == null)
+                    {
+                        await _estudianteRepo.CreateAsync(new Estudiante
+                        {
+                            UsuarioId = usuario.Id,
+                            CarreraId = usuarioUpdateDto.CarreraId,
+                            FacultadId = usuarioUpdateDto.FacultadId
+                        });
+                    }
+                }
+                else if (usuarioUpdateDto.Roles.Contains("Encargado"))
+                {   //actualiza el encargado
+                    var encargado = await _encargadoService.UpdateEncargadoByUserIdAsync(usuario.Id, new EncargadoUpdateDto
+                    {
+                        DepartamentoId = usuarioUpdateDto.DepartamentoId,
+                        Activo = usuarioUpdateDto.Activo
+                    });
+                    //si no existe se crea
+                    if (encargado == null)
+                    {
+                        await _encargadoService.CreateAsync(new Encargado
+                        {
+                            UsuarioId = usuario.Id,
+                            DepartamentoId = usuarioUpdateDto.DepartamentoId
+                        });
+                    }
+                }
+
+                return RespuestasGenerales<UsuarioDto>.SuccessResponse(usuario.toUsuarioDto());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+        private async Task RemoveEntidades(AppUser usuario, IEnumerable<string> entidadesRemover)
+        {
+            foreach (var rol in entidadesRemover)
+            {
+                if (rol == "Estudiante")
+                {
+                    await _estudianteRepo.DeleteByUserIdAsync(usuario.Id);
+                }
+                else if (rol == "Encargado")
+                {
+                    await _encargadoService.DeleteByUserIdAsync(usuario.Id);
+                }
+            }
+        }
     }
 }

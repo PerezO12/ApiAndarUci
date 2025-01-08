@@ -1,15 +1,15 @@
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ApiUCI.Dtos.Formulario;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Contracts.V1;
-using ApiUCI.Extensions;
-using ApiUCI.Utilities;
+using ApiUci.Dtos.Formulario;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Helpers.Querys;
+using ApiUci.Contracts.V1;
+using ApiUci.Extensions;
+using ApiUci.Utilities;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Formulario.RutaGenaral)]
     [ApiController]

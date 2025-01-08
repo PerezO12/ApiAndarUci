@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Encargado;
+using ApiUci.Dtos.Encargado;
 using FluentValidation;
 
-namespace ApiUCI.Validators.Encargado
+namespace ApiUci.Validators.Encargado
 {
     public class EncargadoCambiarLlaveDtoValidator : AbstractValidator<EncargadoCambiarLlaveDto>
     {

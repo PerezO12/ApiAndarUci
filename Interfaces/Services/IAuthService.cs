@@ -1,9 +1,9 @@
 
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Models;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IAuthService
     {

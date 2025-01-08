@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Dtos.Formulario
+namespace ApiUci.Dtos.Formulario
 {
     public class FormularioDto
     {
         //Datos del estudiante
         public int id { get; set; }
         public string NombreEstudiante { get; set; } = null!;
-        public string? NombreUsuarioEstudiante { get; set; }
+        public string? UserNameEstudiante { get; set; }
         public string CarnetIdentidadEstudiante { get; set; } = null!;
         public string? EmailEstudiante { get; set; }
         public string NombreCarrera { get; set; } = null!;

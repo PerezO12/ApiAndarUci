@@ -1,8 +1,8 @@
-using ApiUCI.Dtos.Estudiante;
-using ApiUCI.Helpers;
-using ApiUCI.Models;
+using ApiUci.Dtos.Estudiante;
+using ApiUci.Helpers;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IEstudianteRepository
     {

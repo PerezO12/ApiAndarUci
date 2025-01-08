@@ -1,12 +1,12 @@
-using ApiUCI.Contracts.V1;
+using ApiUci.Contracts.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Utilities;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Utilities;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [ApiController]
     [Route(ApiRoutes.Estudiante.RutaGenaral)]

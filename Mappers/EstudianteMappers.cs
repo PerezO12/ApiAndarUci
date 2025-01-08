@@ -1,7 +1,7 @@
-using ApiUCI.Dtos.Estudiante;
-using ApiUCI.Models;
+using ApiUci.Dtos.Estudiante;
+using ApiUci.Models;
 
-namespace ApiUCI.Mappers
+namespace ApiUci.Mappers
 {
     public static class EstudianteMappers
     {
@@ -15,18 +15,19 @@ namespace ApiUCI.Mappers
             return estudianteExistente;
         }
 
-        public static EstudianteDto toEstudianteDto(this Estudiante estudiante)
+        public static EstudianteDto toEstudianteDto(this Estudiante estudiante, IList<string>? roles = null)
         {
             return new EstudianteDto{
                 Id = estudiante.Id,
                 UsuarioId = estudiante.UsuarioId,
                 NombreCompleto = estudiante.AppUser!.NombreCompleto,
                 CarnetIdentidad = estudiante.AppUser.CarnetIdentidad,
-                NombreUsuario = estudiante.AppUser.UserName,
+                UserName = estudiante.AppUser.UserName,
                 Email = estudiante.AppUser.Email,
                 NumeroTelefono = estudiante.AppUser.PhoneNumber,
-                NombreCarrera = estudiante.Carrera!.Nombre,
-                NombreFacultad = estudiante.Facultad!.Nombre
+                Carrera = estudiante.Carrera!.toCarreraDto(),
+                Facultad = estudiante.Facultad!.toFacultadDto(),
+                Roles = roles,
             };
         }
     }

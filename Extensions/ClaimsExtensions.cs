@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace ApiUCI.Extensions
+namespace ApiUci.Extensions
 {
     public static class ClaimsExtensions
     {

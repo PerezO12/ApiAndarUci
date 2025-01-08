@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ApiUCI.Models;
+namespace ApiUci.Models;
 
 public partial class Departamento
 {
@@ -19,12 +19,10 @@ public partial class Departamento
     [Range(1, int.MaxValue, ErrorMessage = "Facultad no válida")]
     public int FacultadId { get; set; }
 
-    [ForeignKey("Encargado")]
-    [Range(1, int.MaxValue, ErrorMessage = "Encargado no válido")]
     public int? EncargadoId { get; set; }
 
     public DateTime? Fechacreacion { get; set; } = DateTime.Now.ToUniversalTime();
-    
+
     public bool Activo { get; set; } = true;
 
     public virtual Encargado? Encargado { get; set; }

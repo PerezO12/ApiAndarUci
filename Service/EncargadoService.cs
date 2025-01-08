@@ -1,16 +1,16 @@
 
 using System.Security.Cryptography;
-using ApiUCI.Dtos.Encargado;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Models;
+using ApiUci.Dtos.Encargado;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Models;
 using Microsoft.AspNetCore.Identity;
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Extensions;
-using ApiUCI.Mappers;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Extensions;
+using ApiUci.Mappers;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class EncargadoService : IEncargadoService
     {
@@ -160,8 +160,8 @@ namespace ApiUCI.Service
                 var encargado = await _encargadoRepo.GetByIdAsync(id);
                 if (encargado == null)
                     return RespuestasGenerales<EncargadoDto?>.ErrorResponseService("Encargado", "El encargado no existe.");
-
-                return RespuestasGenerales<EncargadoDto?>.SuccessResponse(encargado.toEncargadoDtoFromEncargado(), "Encargado obtenido exitosamente.");
+                var roles = await _userManager.GetRolesAsync(encargado.Usuario!);
+                return RespuestasGenerales<EncargadoDto?>.SuccessResponse(encargado.toEncargadoDtoFromEncargado(roles!), "Encargado obtenido exitosamente.");
             }
             catch (Exception ex)
             {
@@ -181,10 +181,10 @@ namespace ApiUCI.Service
             try
             {
                 var encargado = await _encargadoRepo.GetByUserIdAsync(id);
-                if (encargado == null)
+                if (encargado == null || encargado?.Usuario == null)
                     return RespuestasGenerales<EncargadoDto?>.ErrorResponseService("Encargado", "No se encontró el encargado.");
-
-                return RespuestasGenerales<EncargadoDto?>.SuccessResponse(encargado.toEncargadoDtoFromEncargado(), "Encargado obtenido exitosamente.");
+                var roles = await _userManager.GetRolesAsync(encargado.Usuario);
+                return RespuestasGenerales<EncargadoDto?>.SuccessResponse(encargado.toEncargadoDtoFromEncargado(roles), "Encargado obtenido exitosamente.");
             }
             catch (Exception ex)
             {
@@ -206,8 +206,8 @@ namespace ApiUCI.Service
 
                 if (encargado == null) return null;
 
-                await _userManager.RemoveFromRoleAsync(encargado.AppUser!, "Encargado");
-                await _userManager.AddToRoleAsync(encargado.AppUser!, "Profesor");//arreglar esto luego 
+                await _userManager.RemoveFromRoleAsync(encargado.Usuario!, "Encargado");
+                await _userManager.AddToRoleAsync(encargado.Usuario!, "Profesor");//arreglar esto luego 
                 
                 if (borrarDepartamento)
                 {
@@ -280,7 +280,7 @@ namespace ApiUCI.Service
             // Crear el usuario
             var appUser = new AppUser
             {
-                UserName = registerDto.NombreUsuario,
+                UserName = registerDto.UserName,
                 Email = registerDto.Email,
                 NombreCompleto = registerDto.NombreCompleto,
                 CarnetIdentidad = registerDto.CarnetIdentidad
@@ -326,7 +326,7 @@ namespace ApiUCI.Service
                 Id = appUser.Id,
                 Activo = appUser.Activo,
                 CarnetIdentidad = appUser.CarnetIdentidad,
-                NombreUsuario = appUser.UserName!,
+                UserName = appUser.UserName!,
                 Email = appUser.Email,
                 NombreCompleto = appUser.NombreCompleto,
                 Roles = new List<string> { "Encargado" }

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Cuentas;
+using ApiUci.Dtos.Cuentas;
 using FluentValidation;
 
-namespace ApiUCI.Validators
+namespace ApiUci.Validators
 {
     public class PasswordDtoValidator : AbstractValidator<PasswordDto>
     {

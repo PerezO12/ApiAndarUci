@@ -1,11 +1,11 @@
-using ApiUCI.Dtos.Formulario;
-using ApiUCI.Helpers.Querys;
+using ApiUci.Dtos.Formulario;
+using ApiUci.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Models;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Models;
 
-namespace ApiUCI.Repository
+namespace ApiUci.Repository
 {
     public class FormularioRepository : IFormularioRepository
     {
@@ -81,7 +81,7 @@ namespace ApiUCI.Repository
                         NombreCarrera = f.Estudiante.Carrera!.Nombre,
                         NombreDepartamento = f.Departamento!.Nombre,
                         Firmado = f.Firmado,
-                        NombreEncargado = f.Encargado!.AppUser!.NombreCompleto!,
+                        NombreEncargado = f.Encargado!.Usuario!.NombreCompleto!,
                         Fechacreacion = f.Fechacreacion,
                         FechaFirmado = f.FechaFirmado
                     })
@@ -140,7 +140,7 @@ namespace ApiUCI.Repository
         public async Task<List<FormularioEncargadoDto>> GetAllFormulariosByEncargado(string userId, QueryObjectFormularioEncargado query)
         {
             var formularios =  _context.Formulario
-                .Where(e => e.Activo == true && e.Encargado!.AppUser!.Id == userId)
+                .Where(e => e.Activo == true && e.Encargado!.Usuario!.Id == userId)
                 .Select(e => new FormularioEncargadoDto{
                     Id = e.Id,
                     NombreCompletoEstudiante = e.Estudiante!.AppUser!.NombreCompleto!,
@@ -193,7 +193,7 @@ namespace ApiUCI.Repository
                 .Select(e => new FormularioEstudianteDto
                 {
                     Id = e.Id,
-                    NombreEncargado = e.Encargado!.AppUser!.NombreCompleto!,
+                    NombreEncargado = e.Encargado!.Usuario!.NombreCompleto!,
                     NombreDepartamento= e.Departamento!.Nombre,
                     Motivo = e.Motivo,
                     Firmado = e.Firmado,
@@ -224,7 +224,7 @@ namespace ApiUCI.Repository
                     .Include(f => f.Departamento)
                     .Include(f => f.Departamento!.Facultad)
                     .Include(f => f.Encargado)
-                    .Include(f => f.Encargado!.AppUser)
+                    .Include(f => f.Encargado!.Usuario)
                     .FirstOrDefaultAsync();
                     
                 if (formulario == null)
@@ -248,7 +248,7 @@ namespace ApiUCI.Repository
                 {
                     Id = f.Id,
                     NombreCompletoEstudiante = f.Estudiante!.AppUser!.NombreCompleto!,
-                    NombreUsuario = f.Estudiante.AppUser.UserName,
+                    UserName = f.Estudiante.AppUser.UserName,
                     Email = f.Estudiante.AppUser.Email,
                     CarnetIdentidad = f.Estudiante.AppUser.CarnetIdentidad,
                     NumeroTelefono = f.Estudiante.AppUser.PhoneNumber,

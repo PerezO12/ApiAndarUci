@@ -1,5 +1,5 @@
 
-namespace ApiUCI.Contracts.V1
+namespace ApiUci.Contracts.V1
 {
     public class ApiRoutes
     {
@@ -9,10 +9,7 @@ namespace ApiUCI.Contracts.V1
 
         public static class Account
         {
-            public const string RutaGenaral = Base + "/account";
-            
-            
-            
+            public const string RutaGenaral = Base + "/account";            
             public const string Login = "login";
             public const string ObtenerPerfil = "obtener-perfil";
             public const string CambiarPassword = "cambiar-password";

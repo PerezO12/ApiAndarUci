@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Cuentas;
+using ApiUci.Dtos.Cuentas;
 using FluentValidation;
 
-namespace ApiUCI.Validators.Usuario
+namespace ApiUci.Validators.Usuario
 {
     public class RegistroAdministradorDtoValidator : AbstractValidator<RegistroAdministradorDto>
     {
         public RegistroAdministradorDtoValidator()
         {
-            RuleFor(x => x.NombreUsuario)
+            RuleFor(x => x.UserName)
                 .NotEmpty().WithMessage("El nombre es obligatorio.")
                 .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
                 .MaximumLength(50).WithMessage("El nombre no puede exceder los 50 caracteres.")
@@ -41,8 +41,8 @@ namespace ApiUCI.Validators.Usuario
                 .Matches(@"^[0-9]*$").WithMessage("El carné de identidad solo debe contener números.");
 
             // Validar PasswordAdmin
-            RuleFor(x => x.PasswordAdmin)
-                .NotEmpty().WithMessage("La contraseña administrativa es requerida.");
+/*             RuleFor(x => x.PasswordAdmin)
+                .NotEmpty().WithMessage("La contraseña administrativa es requerida."); */
         }
     }
 }

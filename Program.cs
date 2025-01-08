@@ -1,10 +1,10 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Data;
-using ApiUCI.Filters;
-using ApiUCI.Interfaces;
-using ApiUCI.Middleware;
-using ApiUCI.Service;
-using ApiUCI.Utilities;
+using ApiUci.Contracts.V1;
+using ApiUci.Data;
+using ApiUci.Filters;
+using ApiUci.Interfaces;
+using ApiUci.Middleware;
+using ApiUci.Service;
+using ApiUci.Utilities;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,9 +12,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using ApiUCI.Models;
-using ApiUCI.Repository;
-
+using ApiUci.Models;
+using ApiUci.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,11 +80,6 @@ builder.Services
     .AddFluentValidationAutoValidation()
     .AddValidatorsFromAssemblyContaining<Program>();
 
-/* builder.Services.AddControllers(options =>
-{
-    // Deshabilitar la validación basada en Data Annotations
-    options.ModelValidatorProviders.Clear();
-}); */
 
 // Configuración de Identity con validaciones de seguridad de password de los usuarios
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -151,42 +145,27 @@ builder.Services.AddScoped<IDepartamentoService, DepartamentoService>();
 builder.Services.AddScoped<ICarreraService, CarreraService>();
 builder.Services.AddScoped<IFacultadService, FacultadService>();
 
-// Configuración de JsonOptions
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    // Usa referencias de objetos en lugar de seguir serializando de forma infinita
-    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-    // Para ignorar datos en null
-    //options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-});
-
-//manejo global de modelo no válido
-builder.Services.AddControllers(options => 
-{
-    options.Filters.Add<ValidateModelFilter>();
-});
-
-//manejo global d expcetiones
-builder.Services.AddControllers(options => 
-{
-    options.Filters.Add<ExceptionFilter>();
-});
-
-//aplicar logging globalmente
-builder.Services.AddControllers(option => 
-{
-    option.Filters.Add<LoggingFilter>();
-}); 
-
-// Filtro de estandarizacion de respueastas
+//controller
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<EstandarResponseFilter>();
+    //options.ModelValidatorProviders.Clear(); // Deshabilita Data Annotations
+    //options.Filters.Add<ValidateModelFilter>(); //filtro de validacion
+    options.Filters.Add<ExceptionFilter>();//manejo global d expcetiones
+    options.Filters.Add<LoggingFilter>();//aplicar logging globalmente
+    options.Filters.Add<EstandarResponseFilter>();//estandarizacion de respuestas
+}).AddJsonOptions(opt => {
+    // Configuración de JsonOptions
+    // Usa referencias de objetos en lugar de seguir serializando de forma infinita
+    opt.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+
+    // Para ignorar datos en null
+    opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
+
 
 var app = builder.Build();
 
-//Creacion del usuario admin en la primera migration
+//Creacion del usuario admin en la primera ejecución
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -227,3 +206,5 @@ app.UseMiddleware<TokenValidationMiddleware>();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { } // Clase parcial para pruebas.

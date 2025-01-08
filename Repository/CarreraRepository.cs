@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Dtos.Carrera;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Mappers;
-using ApiUCI.Models;
+using ApiUci.Dtos.Carrera;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Mappers;
+using ApiUci.Models;
 
-namespace ApiUCI.Repository
+namespace ApiUci.Repository
 {
     public class CarreraRepository : ICarreraRepository
     {
@@ -79,24 +79,21 @@ namespace ApiUCI.Repository
         {
             try
             {
-
                 var carreras = _context.Carrera
                     .Where(c => c.Activo == true)
                     .Include(c => c.Facultad)
                     .AsQueryable();
                 
                 //Validacion de busquedas
-                if(!string.IsNullOrWhiteSpace(query.Carrera))
-                {
-                    carreras = carreras.Where( c => c.Nombre.ToLower() == query.Carrera.ToLower() );
-                }
+                if(!string.IsNullOrWhiteSpace(query.Nombre))
+                    carreras = carreras.Where( c => c.Nombre.ToLower().Contains(query.Nombre.ToLower()) );
+
                 if(!string.IsNullOrWhiteSpace(query.Facultad))
-                {
-                    carreras = carreras.Where( c => c.Facultad!.Nombre.ToLower() == query.Facultad.ToLower() );
-                }
-                if( query.FacultadId.HasValue && query.FacultadId > 0) {
+                    carreras = carreras.Where( c => c.Facultad!.Nombre.ToLower().Contains(query.Facultad.ToLower()));
+
+                if( query.FacultadId.HasValue && query.FacultadId > 0)
                     carreras = carreras.Where( c => c.FacultadId == query.FacultadId);
-                }
+            
                 //Orndea
                 if(!string.IsNullOrWhiteSpace(query.OrdernarPor))
                 {

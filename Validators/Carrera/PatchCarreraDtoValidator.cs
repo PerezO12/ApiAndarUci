@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
-using ApiUCI.Dtos.Carrera;
+using ApiUci.Dtos.Carrera;
 
-namespace ApiUCI.Validators.Carrera
+namespace ApiUci.Validators.Carrera
 {
     public class PatchCarreraDtoValidator : AbstractValidator<PatchCarreraDto>
     {

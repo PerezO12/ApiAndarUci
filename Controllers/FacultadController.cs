@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using ApiUCI.Interfaces;
-using ApiUCI.Dtos.Facultad;
+using ApiUci.Interfaces;
+using ApiUci.Dtos.Facultad;
 using Microsoft.AspNetCore.Authorization;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Contracts.V1;
-using ApiUCI.Utilities;
-using ApiUCI.Extensions;
+using ApiUci.Helpers.Querys;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Contracts.V1;
+using ApiUci.Utilities;
+using ApiUci.Extensions;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Facultad.RutaGenaral)]
     [ApiController]

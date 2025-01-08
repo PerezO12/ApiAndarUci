@@ -1,9 +1,9 @@
-using ApiUCI.Interfaces;
+using ApiUci.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Models;
+using ApiUci.Models;
 
-namespace ApiUCI.Data
+namespace ApiUci.Data
 {
     public static class SeedData
     {

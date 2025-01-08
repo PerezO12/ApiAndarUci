@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Formulario;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Helpers;
-using ApiUCI.Models;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Formulario;
+using ApiUci.Helpers.Querys;
+using ApiUci.Helpers;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IFormularioService
     {

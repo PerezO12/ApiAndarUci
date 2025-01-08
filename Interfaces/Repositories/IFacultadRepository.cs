@@ -1,7 +1,7 @@
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Models;
+using ApiUci.Helpers.Querys;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IFacultadRepository
     {

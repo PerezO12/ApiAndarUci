@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Contracts.V1;
+using ApiUci.Contracts.V1;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Rol.RutaGenaral)]
     [ApiController]

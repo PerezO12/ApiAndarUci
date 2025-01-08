@@ -1,23 +1,23 @@
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Dtos.Usuarios;
-using ApiUCI.Models;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Dtos.Usuarios;
+using ApiUci.Models;
 
-namespace ApiUCI.Mappers
+namespace ApiUci.Mappers
 {
     public static class UsuarioMappers
     {
-        public static UsuarioDto toUsuarioDto(this AppUser usuario, IList<string> roles)
+        public static UsuarioDto toUsuarioDto(this AppUser usuario, IEnumerable<string>? roles = null)
         {
             return new UsuarioDto
             {
                 Id = usuario.Id,
-                NombreCompleto = usuario.NombreCompleto,
-                CarnetIdentidad = usuario.CarnetIdentidad,
+                NombreCompleto = usuario.NombreCompleto ?? string.Empty,
+                CarnetIdentidad = usuario.CarnetIdentidad ?? string.Empty, 
                 Activo = usuario.Activo,
-                NombreUsuario = usuario.UserName!,
+                UserName = usuario.UserName,
                 Email = usuario.Email,
                 NumeroTelefono = usuario.PhoneNumber,
-                Roles = roles
+                Roles = roles ?? new List<string>()
             };
         }
         public static UsuarioDto toUsuarioDtoBorrar(this AppUser usuario)
@@ -28,7 +28,7 @@ namespace ApiUCI.Mappers
                 NombreCompleto = usuario.NombreCompleto,
                 CarnetIdentidad = usuario.CarnetIdentidad,
                 Activo = usuario.Activo,
-                NombreUsuario = usuario.UserName!,
+                UserName = usuario.UserName,
                 Email = usuario.Email,
                 NumeroTelefono = usuario.PhoneNumber
             };
@@ -41,7 +41,7 @@ namespace ApiUCI.Mappers
                 NombreCompleto = usuario.NombreCompleto,
                 CarnetIdentidad = usuario.CarnetIdentidad,
                 Activo = usuario.Activo,
-                NombreUsuario = usuario.UserName!,
+                UserName = usuario.UserName,
                 Email = usuario.Email,
                 Roles = roles
             };
@@ -53,7 +53,7 @@ namespace ApiUCI.Mappers
             {
                 Id = usuario.Id,
                 NombreCompleto = usuario.NombreCompleto,
-                NombreUsuario = usuario.UserName!,
+                UserName = usuario.UserName,
                 Email = usuario.Email,
                 Roles = roles,
                 Token = token
@@ -62,9 +62,9 @@ namespace ApiUCI.Mappers
         public static AppUser updateAppUserFromUsuarioWhiteRole(this AppUser usuario, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
         {
             usuario.NombreCompleto = usuarioUpdateDto.NombreCompleto ?? usuario.NombreCompleto;
-            usuario.Activo = usuarioUpdateDto.Activo ?? usuario.Activo;
+            usuario.Activo = usuarioUpdateDto.Activo;
             usuario.CarnetIdentidad = usuarioUpdateDto.CarnetIdentidad ?? usuario.CarnetIdentidad;
-            usuario.UserName = usuarioUpdateDto.NombreUsuario ?? usuario.UserName;
+            usuario.UserName = usuarioUpdateDto.UserName ?? usuario.UserName;
             usuario.Email = usuarioUpdateDto.Email ?? usuario.Email;
             usuario.PhoneNumber = usuarioUpdateDto.NumeroTelefono ?? usuario.PhoneNumber;
 

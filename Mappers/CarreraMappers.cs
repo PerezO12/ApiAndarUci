@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Carrera;
-using ApiUCI.Models;
+using ApiUci.Dtos.Carrera;
+using ApiUci.Models;
 
-namespace ApiUCI.Mappers
+namespace ApiUci.Mappers
 {
     public static class CarreraMappers
     {

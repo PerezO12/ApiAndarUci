@@ -1,15 +1,15 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Extensions;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Interfaces;
-using ApiUCI.Utilities;
+using ApiUci.Contracts.V1;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Extensions;
+using ApiUci.Helpers.Querys;
+using ApiUci.Interfaces;
+using ApiUci.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ApiUCI.Dtos.Departamento;
+using ApiUci.Dtos.Departamento;
 
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Departamento.RutaGenaral)]
     [ApiController]

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
-using ApiUCI.Dtos.Cuentas;
+using ApiUci.Dtos.Cuentas;
 
-namespace ApiUCI.Validators.Account
+namespace ApiUci.Validators.Account
 {
     public class LoginDtoValidator : AbstractValidator<LoginDto>
     {

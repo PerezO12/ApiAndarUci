@@ -1,14 +1,14 @@
 using FluentValidation;
-using ApiUCI.Dtos.Cuentas;
+using ApiUci.Dtos.Cuentas;
 
-namespace ApiUCI.Validators.Estudiante
+namespace ApiUci.Validators.Estudiante
 {
     public class RegisterEstudianteDtoValidator : AbstractValidator<RegisterEstudianteDto>
     {
         public RegisterEstudianteDtoValidator()
         {
-            // Validación para nombreUsuario
-            RuleFor(x => x.NombreUsuario)
+            // Validación para userName
+            RuleFor(x => x.UserName)
                 .NotEmpty().WithMessage("El nombre es obligatorio.")
                 .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
                 .MaximumLength(50).WithMessage("El nombre no puede exceder los 50 caracteres.")

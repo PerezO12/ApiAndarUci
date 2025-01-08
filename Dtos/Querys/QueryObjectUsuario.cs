@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Helpers
+namespace ApiUci.Helpers
 {
     public class QueryObjectUsuario
     {
         //BUSQUEDAS
         public bool SoloActivos {get; set;} = true;
         public string? Nombre { get; set; } = null; //para buscar por
-        public string? NombreUsuario { get; set; } = null;
+        public string? Usuario { get; set; } = null;
         public string? Email { get; set; } = null;
         public string? CarnetIdentidad { get; set; } = null;
         //ORDENAR

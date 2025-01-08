@@ -1,9 +1,9 @@
 
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Carrera;
-using ApiUCI.Helpers;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Carrera;
+using ApiUci.Helpers;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface ICarreraService
     {

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Helpers.Querys
+namespace ApiUci.Helpers.Querys
 {
     public class QueryObjectDepartamentos
     {
-        public string? Departamento { get; set; } = null; //para buscar por
+        public string? Nombre { get; set; } = null; //para buscar por
         public string? Facultad { get; set; } = null;
-        //public string? Encargado { get; set; } = null;
+        public string? Encargado { get; set; } = null;
         public int? FacultadId { get; set; } = null;
         public int? EncargadoId { get; set; } = null;
         public string OrdenarPor { get; set; } = "Fecha"; //Para ordenar

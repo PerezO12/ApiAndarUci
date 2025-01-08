@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Departamento;
-using ApiUCI.Models;
+using ApiUci.Dtos.Departamento;
+using ApiUci.Models;
 
-namespace ApiUCI.Mappers
+namespace ApiUci.Mappers
 {
     public static class DepartamentoMappers
     {
@@ -15,7 +15,7 @@ namespace ApiUCI.Mappers
                 Id = departamentoModel.Id, //Borrar
                 Nombre = departamentoModel.Nombre,
                 Facultad = departamentoModel.Facultad?.Nombre,
-                EncargadoNombre = departamentoModel.Encargado?.AppUser?.NombreCompleto ?? "",
+                EncargadoNombre = departamentoModel.Encargado?.Usuario?.NombreCompleto ?? "",
                 EncargadoId = departamentoModel.EncargadoId,
                 FechaCreacion = departamentoModel?.Fechacreacion
             };

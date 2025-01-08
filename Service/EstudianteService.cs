@@ -1,14 +1,14 @@
-using ApiUCI.Dtos;
-using ApiUCI.Extensions;
+using ApiUci.Dtos;
+using ApiUci.Extensions;
 using Microsoft.AspNetCore.Identity;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Dtos.Estudiante;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Mappers;
-using ApiUCI.Models;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Dtos.Estudiante;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Mappers;
+using ApiUci.Models;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class EstudianteService : IEstudianteService
     {
@@ -40,8 +40,8 @@ namespace ApiUCI.Service
                 var estudiante = await _estudianteRepo.GetByIdAsync(id);
                 if (estudiante == null)
                     return RespuestasGenerales<EstudianteDto?>.ErrorResponseService("Estudiante", "El estudiante no existe.");
-
-                return RespuestasGenerales<EstudianteDto?>.SuccessResponse(estudiante.toEstudianteDto(), "Estudiante obtenido exitosamente.");
+                var roles = await _userManager.GetRolesAsync(estudiante.AppUser!);
+                return RespuestasGenerales<EstudianteDto?>.SuccessResponse(estudiante.toEstudianteDto(roles!), "Estudiante obtenido exitosamente.");
             }
             catch (Exception ex)
             {
@@ -72,9 +72,11 @@ namespace ApiUCI.Service
             try
             {
                 var estudiante = await _estudianteRepo.GetEstudianteByUserId(userId);
-                if (estudiante == null)
+                if (estudiante == null || estudiante?.AppUser == null)
                     return RespuestasGenerales<EstudianteDto?>.ErrorResponseService("Usuario", "El usuario no existe.");
-                return RespuestasGenerales<EstudianteDto?>.SuccessResponse(estudiante.toEstudianteDto(), "Estudiante obtenido exitosamente.");
+                var roles = await _userManager.GetRolesAsync(estudiante.AppUser);
+
+                return RespuestasGenerales<EstudianteDto?>.SuccessResponse(estudiante.toEstudianteDto(roles), "Estudiante obtenido exitosamente.");
             }
             catch (Exception ex)
             {
@@ -110,7 +112,7 @@ namespace ApiUCI.Service
 
                 var appUser = new AppUser
                 {
-                    UserName = registerDto.NombreUsuario,
+                    UserName = registerDto.UserName,
                     Email = registerDto.Email,
                     NombreCompleto = registerDto.NombreCompleto,
                     CarnetIdentidad = registerDto.CarnetIdentidad
@@ -145,7 +147,7 @@ namespace ApiUCI.Service
                     Id = appUser.Id,
                     Activo = appUser.Activo,
                     CarnetIdentidad = appUser.CarnetIdentidad,
-                    NombreUsuario = appUser.UserName!,
+                    UserName = appUser.UserName!,
                     Email = appUser.Email,
                     NombreCompleto = appUser.NombreCompleto,
                     Roles = new List<string> { "Estudiante" }

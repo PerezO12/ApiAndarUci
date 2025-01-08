@@ -1,11 +1,11 @@
-using ApiUCI.Dtos.Encargado;
+using ApiUci.Dtos.Encargado;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Mappers;
-using ApiUCI.Models;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Mappers;
+using ApiUci.Models;
 
-namespace ApiUCI.Repository
+namespace ApiUci.Repository
 {
     public class EncargadoRepository : IEncargadoRepository
     {
@@ -47,13 +47,13 @@ namespace ApiUCI.Repository
         {
             var encargados = _context.Encargado
                 .Where(e => e.Activo == true)
-                .Include(e => e.AppUser)
+                .Include(e => e.Usuario)
                 .Include(e => e.Departamento)
                 .AsQueryable();
             //Busquedas
             if(query.Nombre != null)//BUSCAR POR NOMBRE Encargado
             {
-                encargados = encargados.Where(e => e.AppUser!.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
+                encargados = encargados.Where(e => e.Usuario!.NombreCompleto.ToLower().Contains(query.Nombre.ToLower()));
             }
             if(query.DepartamentoNombre != null)//buscar Nombre departamento
             {
@@ -61,7 +61,7 @@ namespace ApiUCI.Repository
             }
             if(query.CarnetIdentidad != null)//Carnet Identidad
             {
-                encargados = encargados.Where(e => e.AppUser!.CarnetIdentidad.Contains(query.CarnetIdentidad));
+                encargados = encargados.Where(e => e.Usuario!.CarnetIdentidad.Contains(query.CarnetIdentidad));
             }
             if(query.UsuarioId != null)//Usuario Id
             {
@@ -90,7 +90,7 @@ namespace ApiUCI.Repository
             {
                 if(query.OrdernarPor.Equals("Nombre", StringComparison.OrdinalIgnoreCase))
                 {
-                    encargados = query.Descender ? encargados.OrderByDescending(e => e.AppUser!.NombreCompleto) : encargados.OrderBy(e => e.AppUser!.NombreCompleto);
+                    encargados = query.Descender ? encargados.OrderByDescending(e => e.Usuario!.NombreCompleto) : encargados.OrderBy(e => e.Usuario!.NombreCompleto);
                 }
                 else if(query.OrdernarPor.Equals("Departamento", StringComparison.OrdinalIgnoreCase))
                 {
@@ -105,7 +105,7 @@ namespace ApiUCI.Repository
         {
             return await _context.Encargado
                 .Where(c => c.Id == Id && c.Activo == true)
-                .Include(e => e.AppUser)
+                .Include(e => e.Usuario)
                 .Include(e => e.Departamento)
                 .FirstOrDefaultAsync();
         }
@@ -114,7 +114,7 @@ namespace ApiUCI.Repository
         {
             return await _context.Encargado
                 .Where(c => c.UsuarioId == id && c.Activo == true)
-                .Include(e => e.AppUser)
+                .Include(e => e.Usuario)
                 .Include(e => e.Departamento)
                     .ThenInclude(f => f!.Facultad)
                 .FirstOrDefaultAsync();
@@ -123,7 +123,7 @@ namespace ApiUCI.Repository
         public async Task<Encargado?> GetEncargadoByDepartamentoId(int departamentoId)
         {
             return await _context.Encargado
-            .Include(e => e.AppUser)
+            .Include(e => e.Usuario)
             .FirstOrDefaultAsync(e => e.Activo && e.DepartamentoId == departamentoId);
         }
         public async Task<bool> ExisteEncargadoByDepartamentoIdAsync(int departamentoId)
@@ -133,7 +133,8 @@ namespace ApiUCI.Repository
  
         public async Task<Encargado?> GetEncargadoByUserIdAsync(string usuarioId)
         {
-            return await _context.Encargado.FirstOrDefaultAsync(e => e.Activo == true && e.UsuarioId == usuarioId);
+            return await _context.Encargado
+                .FirstOrDefaultAsync(e => e.Activo == true && e.UsuarioId == usuarioId);
         }
 
         public async Task<Encargado?> UpdateAsync(int id, EncargadoUpdateDto encargadoUpdateDto)
@@ -162,7 +163,7 @@ namespace ApiUCI.Repository
         public async Task<Encargado?> DeleteByDepartamentoIdAsync(int departamentoId)
         {
             var encargado = await _context.Encargado
-                .Include(d => d.AppUser)
+                .Include(d => d.Usuario)
                 .FirstOrDefaultAsync(e => e.DepartamentoId == departamentoId);
             if(encargado == null) return null;
 

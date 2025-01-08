@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace ApiUCI.Extensions
+namespace ApiUci.Extensions
 {
     public class ErrorBuilder
     {

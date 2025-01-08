@@ -1,15 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Formulario;
-using ApiUCI.Helpers;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Interfaces;
-using ApiUCI.Mappers;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Formulario;
+using ApiUci.Helpers;
+using ApiUci.Helpers.Querys;
+using ApiUci.Interfaces;
+using ApiUci.Mappers;
 
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class FormularioService : IFormularioService
     {
@@ -124,7 +124,7 @@ namespace ApiUCI.Service
                     EstudianteId = formulario.EstudianteId,
                     EncargadoId = formulario.EncargadoId,
                     NombreEstudiante = formulario.Estudiante!.AppUser!.NombreCompleto,
-                    NombreEncargado = formulario.Encargado!.AppUser!.NombreCompleto,
+                    NombreEncargado = formulario.Encargado!.Usuario!.NombreCompleto,
                     NombreDepartamento = formulario!.Departamento!.Nombre,
                     Fechacreacion = formulario.Fechacreacion,
                     Motivo = formulario.Motivo

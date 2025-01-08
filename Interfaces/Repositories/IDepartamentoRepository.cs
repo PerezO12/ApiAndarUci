@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Dtos.Departamento;
-using ApiUCI.Helpers;
-using ApiUCI.Models;
+using ApiUci.Helpers.Querys;
+using ApiUci.Dtos.Departamento;
+using ApiUci.Helpers;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IDepartamentoRepository
     {

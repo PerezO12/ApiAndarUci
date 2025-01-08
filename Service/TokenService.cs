@@ -3,10 +3,10 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using ApiUCI.Interfaces;
-using ApiUCI.Models;
+using ApiUci.Interfaces;
+using ApiUci.Models;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class TokenService : ITokenService
     {

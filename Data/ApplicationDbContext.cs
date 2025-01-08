@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Models;
+using ApiUci.Models;
 
 
 public class ApplicationDbContext : IdentityDbContext<AppUser>
@@ -23,10 +23,15 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Encargado>()
+    builder.Entity<Departamento>()
+        .HasOne(d => d.Encargado)
+        .WithOne(e => e.Departamento)
+        .HasForeignKey<Departamento>(d => d.EncargadoId)  // 'EncargadoId' es la clave foránea en Departamento
+        .OnDelete(DeleteBehavior.SetNull);  // Si se elimina el Encargado, se establece a null en Departamento
+
+    builder.Entity<Encargado>()
         .HasIndex(e => e.DepartamentoId)
-        .IsUnique()
-        .HasFilter("\"Activo\" = true");
+        .IsUnique(); 
 
         List<IdentityRole> roles = new List<IdentityRole>
         {

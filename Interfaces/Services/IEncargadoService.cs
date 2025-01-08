@@ -1,10 +1,10 @@
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Dtos.Encargado;
-using ApiUCI.Helpers;
-using ApiUCI.Models;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Dtos.Encargado;
+using ApiUci.Helpers;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IEncargadoService
     {

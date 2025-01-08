@@ -1,10 +1,10 @@
 
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Dtos.Facultad;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Helpers.Querys;
+using ApiUci.Dtos.Facultad;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IFacultadService
     {

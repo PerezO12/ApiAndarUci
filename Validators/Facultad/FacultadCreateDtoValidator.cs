@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
-using ApiUCI.Dtos.Facultad;
+using ApiUci.Dtos.Facultad;
 
-namespace ApiUCI.Validators.Facultad
+namespace ApiUci.Validators.Facultad
 {
     public class FacultadCreateDtoValidator : AbstractValidator<FacultadCreateDto>
     {

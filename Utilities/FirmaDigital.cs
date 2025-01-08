@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ApiUCI.Helpers
+namespace ApiUci.Helpers
 {
     public class FirmaDigital
     {

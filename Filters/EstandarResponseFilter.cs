@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos;
+using ApiUci.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace ApiUCI.Filters
+namespace ApiUci.Filters
 {
     public class EstandarResponseFilter : IActionFilter
     {

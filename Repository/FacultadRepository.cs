@@ -1,9 +1,9 @@
-using ApiUCI.Helpers.Querys;
+using ApiUci.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Interfaces;
-using ApiUCI.Models;
+using ApiUci.Interfaces;
+using ApiUci.Models;
 
-namespace ApiUCI.Repository
+namespace ApiUci.Repository
 {
 
     public class FacultadRepository : IFacultadRepository
@@ -53,10 +53,8 @@ namespace ApiUCI.Repository
         {
             var facultades = _context.Facultad.Where(f => f.Activo == true).AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(query.Facultad))
-            {
-                facultades = facultades.Where(f => f.Nombre.ToLower() == query.Facultad.ToLower());
-            }
+            if (!string.IsNullOrWhiteSpace(query.Nombre))
+                facultades = facultades.Where(f => f.Nombre.ToLower().Contains(query.Nombre.ToLower()));
 
             // Ordenar
             if (!string.IsNullOrWhiteSpace(query.OrdernarPor))

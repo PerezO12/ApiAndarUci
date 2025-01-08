@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Dtos.Facultad
+namespace ApiUci.Dtos.Facultad
 {
     public class FacultadCreateDto
     {

@@ -5,15 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace ApiUCI.Dtos.Cuentas
+namespace ApiUci.Dtos.Cuentas
 {
     public class RegisterEstudianteDto
     {
-        public string? NombreUsuario { get; set; }
-        public string Email { get; set; } = null!;
-        public string Password { get; set; } = null!;
-        public string NombreCompleto { get; set; } = null!;
-        public string CarnetIdentidad { get; set; } = null!;
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty!;
+        public string NombreCompleto { get; set; } = string.Empty;
+        public string CarnetIdentidad { get; set; } = string.Empty;
         public int CarreraId { get; set; }
         public int FacultadId { get; set; }
         

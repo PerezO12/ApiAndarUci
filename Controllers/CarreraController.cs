@@ -1,25 +1,30 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Interfaces;
-using ApiUCI.Utilities;
+using ApiUci.Contracts.V1;
+using ApiUci.Interfaces;
+using ApiUci.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ApiUCI.Dtos.Carrera;
-using ApiUCI.Helpers;
+using ApiUci.Dtos.Carrera;
+using ApiUci.Helpers;
+using ApiUci.Extensions;
+using ApiUci.Dtos.Cuentas;
 
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Carrera.RutaGenaral)]
     [ApiController]
     public class CarreraController : ControllerBase
     {
         private readonly ICarreraService _carreraService;
+        private readonly IAuthService _authService;
 
-        public CarreraController( ICarreraService carreraService)
+        public CarreraController( ICarreraService carreraService, IAuthService authService)
         {
             _carreraService = carreraService;
+            _authService = authService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] QueryObjectCarrera query)
         {
@@ -29,6 +34,7 @@ namespace ApiUCI.Controller
 
             return Ok(resultado.Data);
         }
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByID([FromRoute] int id)
         {
@@ -62,8 +68,15 @@ namespace ApiUCI.Controller
         }
         [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id, [FromBody] PasswordDto password)
         {
+            //TODO: hacer un filtro
+            var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), password.Password);
+            if (!passwordResult)
+            {
+                var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
+                return ActionResultHelper.HandleActionResult("Unauthorized", error);
+            }
             var resultado = await _carreraService.DeleteAsync(id);
             if(!resultado.Success)
                 return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);

@@ -1,7 +1,7 @@
-using ApiUCI.Dtos.Facultad;
-using ApiUCI.Models;
+using ApiUci.Dtos.Facultad;
+using ApiUci.Models;
 
-namespace ApiUCI.Mappers
+namespace ApiUci.Mappers
 {
     public static class FacultadMappers
     {

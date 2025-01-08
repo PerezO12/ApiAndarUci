@@ -1,7 +1,7 @@
-using ApiUCI.Dtos.Encargado;
-using ApiUCI.Models;
+using ApiUci.Dtos.Encargado;
+using ApiUci.Models;
 
-namespace ApiUCI.Mappers
+namespace ApiUci.Mappers
 {
     public static class EncargadoMappers
     {
@@ -14,18 +14,19 @@ namespace ApiUCI.Mappers
 
             return encargadoExistente;
         }
-        public static EncargadoDto toEncargadoDtoFromEncargado(this Encargado encargadoModel)
+        public static EncargadoDto toEncargadoDtoFromEncargado(this Encargado encargadoModel, IList<string>? roles = null)
         {
             return new EncargadoDto{
                     Id = encargadoModel.Id,
                     UsuarioId = encargadoModel.UsuarioId,
-                    DepartamentoNombre = encargadoModel.Departamento!.Nombre,
-                    DepartamentoId = encargadoModel.Departamento.Id,
-                    NombreCompleto = encargadoModel.AppUser!.NombreCompleto,
-                    CarnetIdentidad = encargadoModel.AppUser.CarnetIdentidad,
-                    NombreUsuario = encargadoModel.AppUser.UserName,
-                    Email = encargadoModel.AppUser.Email,
-                    NumeroTelefono = encargadoModel.AppUser.PhoneNumber
+                    Departamento = encargadoModel.Departamento!.toDepartamentDto(),
+                    Facultad = encargadoModel.Departamento!.Facultad!.toFacultadDto(),
+                    NombreCompleto = encargadoModel.Usuario!.NombreCompleto,
+                    CarnetIdentidad = encargadoModel.Usuario.CarnetIdentidad,
+                    UserName = encargadoModel.Usuario.UserName,
+                    Email = encargadoModel.Usuario.Email,
+                    NumeroTelefono = encargadoModel.Usuario.PhoneNumber,
+                    Roles = roles
             };
         }
     }

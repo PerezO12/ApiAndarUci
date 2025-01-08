@@ -1,11 +1,11 @@
-using ApiUCI.Dtos.Estudiante;
+using ApiUci.Dtos.Estudiante;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Mappers;
-using ApiUCI.Models;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Mappers;
+using ApiUci.Models;
 
-namespace ApiUCI.Repository
+namespace ApiUci.Repository
 {
     public class EstudianteRepository : IEstudianteRepository
     {

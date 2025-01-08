@@ -1,9 +1,9 @@
-using ApiUCI.Dtos.Formulario;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Helpers;
-using ApiUCI.Models;
+using ApiUci.Dtos.Formulario;
+using ApiUci.Helpers.Querys;
+using ApiUci.Helpers;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IFormularioRepository
     {

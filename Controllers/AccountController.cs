@@ -1,12 +1,12 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Extensions;
-using ApiUCI.Interfaces;
-using ApiUCI.Utilities;
+using ApiUci.Contracts.V1;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Extensions;
+using ApiUci.Interfaces;
+using ApiUci.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Account.RutaGenaral)]
     [ApiController]

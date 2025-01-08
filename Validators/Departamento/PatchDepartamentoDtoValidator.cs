@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
-using ApiUCI.Dtos.Departamento;
+using ApiUci.Dtos.Departamento;
 
-namespace ApiUCI.Validators.Departamento
+namespace ApiUci.Validators.Departamento
 {
     public class PatchDepartamentoDtoValidator : AbstractValidator<PatchDepartamentoDto>
     {

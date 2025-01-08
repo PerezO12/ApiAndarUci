@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace ApiUCI.Filters
+namespace ApiUci.Filters
 {
     public class ValidateModelFilter : IActionFilter
     {

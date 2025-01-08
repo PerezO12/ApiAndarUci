@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Dtos.Cuentas
+namespace ApiUci.Dtos.Cuentas
 {
     public class NewEstudianteDto
     {
         public string Id { get; set; } = null!;
-        public string NombreUsuario { get; set;} = null!; 
+        public string UserName { get; set;} = null!; 
         public string CarnetIdentidad { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string NombreCompleto { get; set; } = null!;

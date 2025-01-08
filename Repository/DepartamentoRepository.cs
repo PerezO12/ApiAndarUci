@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Helpers.Querys;
+using ApiUci.Helpers.Querys;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Controller;
-using ApiUCI.Dtos.Departamento;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
-using ApiUCI.Mappers;
-using ApiUCI.Models;
+using ApiUci.Controller;
+using ApiUci.Dtos.Departamento;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
+using ApiUci.Mappers;
+using ApiUci.Models;
 
-namespace ApiUCI.Repository
+namespace ApiUci.Repository
 {
     public class DepartamentoRepository : IDepartamentoRepository
     {
@@ -69,26 +69,27 @@ namespace ApiUCI.Repository
                     .Where(d => d.Activo == true)
                     .Include(d => d.Facultad)
                     .Include(d => d.Encargado)
-                        .ThenInclude(e => e!.AppUser)
+                        .ThenInclude(e => e!.Usuario)
                     .AsQueryable();
                 //validaciones de busquesdas
 
-                if(!string.IsNullOrWhiteSpace(query.Departamento))
-                {
-                    departamentos = departamentos.Where(d => d.Nombre.Contains(query.Departamento, StringComparison.OrdinalIgnoreCase));
-                }
+                if(!string.IsNullOrWhiteSpace(query.Nombre))
+                    departamentos = departamentos.Where(d => d.Nombre.ToLower().Contains(query.Nombre.ToLower()));
+                
                 if(!string.IsNullOrWhiteSpace(query.Facultad))
-                {
-                    departamentos = departamentos.Where(d => d.Facultad!.Nombre.Contains(query.Facultad, StringComparison.OrdinalIgnoreCase));
-                }
+                    departamentos = departamentos.Where(d => d.Facultad!.Nombre.ToLower().Contains(query.Facultad.ToLower()));
+                
+                if(!string.IsNullOrWhiteSpace(query.Encargado))
+                    departamentos = departamentos
+                        .Where(d => d.Encargado != null 
+                            && d.Encargado.Usuario != null
+                            && d.Encargado.Usuario.NombreCompleto.ToLower().Contains(query.Encargado.ToLower()));
+
                 if(query.FacultadId.HasValue && query.FacultadId > 0)
-                {
                     departamentos = departamentos.Where(d => d.FacultadId == query.FacultadId);
-                }
+                
                 if(query.EncargadoId.HasValue && query.FacultadId > 0)
-                {
                     departamentos = departamentos.Where(d => d.EncargadoId == query.EncargadoId);
-                }
                 //Ordenamiento
                 if(!string.IsNullOrWhiteSpace(query.OrdenarPor))
                 {
@@ -137,7 +138,7 @@ namespace ApiUCI.Repository
                 return  await _context.Departamento
                     .Include( d => d.Facultad)
                     .Include(d => d.Encargado)
-                        .ThenInclude(e => e!.AppUser)
+                        .ThenInclude(e => e!.Usuario)
                     .FirstOrDefaultAsync( d => d.Id == id && d.Activo == true);
 
             }
@@ -185,7 +186,6 @@ namespace ApiUCI.Repository
             {
                 var existeDepartamento = await _context.Departamento
                     .Include(d => d.Facultad)
-                    .Include(d => d.Encargado)
                     .FirstOrDefaultAsync(d => d.Id == id && d.Activo == true);
                 if(existeDepartamento == null)
                     return null;

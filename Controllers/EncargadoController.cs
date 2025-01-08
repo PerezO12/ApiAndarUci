@@ -1,14 +1,14 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Dtos.Encargado;
-using ApiUCI.Extensions;
-using ApiUCI.Utilities;
+using ApiUci.Contracts.V1;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Dtos.Encargado;
+using ApiUci.Extensions;
+using ApiUci.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ApiUCI.Helpers;
-using ApiUCI.Interfaces;
+using ApiUci.Helpers;
+using ApiUci.Interfaces;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {
     [Route(ApiRoutes.Encargado.RutaGenaral)]
     [ApiController]
@@ -16,12 +16,9 @@ namespace ApiUCI.Controller
     {
         private readonly IEncargadoService _encargadoService;
 
-        private readonly ILogger _logger;
-
-        public EncargadoController(IEncargadoService encargadoService, ILogger logger)
+        public EncargadoController(IEncargadoService encargadoService)
         {
             _encargadoService = encargadoService;
-            _logger = logger;
         }
 
         [Authorize(Policy = "AdminPolicy")]

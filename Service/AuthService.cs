@@ -1,13 +1,13 @@
-using ApiUCI.Dtos;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Extensions;
-using ApiUCI.Interfaces;
+using ApiUci.Dtos;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Extensions;
+using ApiUci.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ApiUCI.Mappers;
-using ApiUCI.Models;
+using ApiUci.Mappers;
+using ApiUci.Models;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class AuthService : IAuthService
     {

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ApiUCI.Helpers.Querys
+namespace ApiUci.Helpers.Querys
 {
     public class QueryObjectFacultad
     {
-        public string? Facultad { get; set; } = null;
+        public string? Nombre { get; set; } = null;
 
         public string OrdernarPor { get; set; } = "Fecha"; //Para ordenar
         public bool Descender { get; set; } = false; 

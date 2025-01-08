@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiUCI.Utilities
+namespace ApiUci.Utilities
 {
     public static class ActionResultHelper
     {

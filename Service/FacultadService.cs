@@ -1,10 +1,10 @@
-using ApiUCI.Dtos;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Interfaces;
-using ApiUCI.Dtos.Facultad;
-using ApiUCI.Mappers;
+using ApiUci.Dtos;
+using ApiUci.Helpers.Querys;
+using ApiUci.Interfaces;
+using ApiUci.Dtos.Facultad;
+using ApiUci.Mappers;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class FacultadService : IFacultadService
     {

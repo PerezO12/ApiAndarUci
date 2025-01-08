@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace ApiUCI.Utilities
+namespace ApiUci.Utilities
 {
     public class CustomIdentityErrorDescriber : IdentityErrorDescriber
     {

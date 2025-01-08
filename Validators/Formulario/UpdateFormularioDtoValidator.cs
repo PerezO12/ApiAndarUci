@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Formulario;
+using ApiUci.Dtos.Formulario;
 using FluentValidation;
 
-namespace ApiUCI.Validators.Formulario
+namespace ApiUci.Validators.Formulario
 {
     public class UpdateFormularioDtoValidator : AbstractValidator<UpdateFormularioDto>
     {

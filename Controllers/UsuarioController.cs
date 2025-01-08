@@ -1,15 +1,15 @@
-using ApiUCI.Contracts.V1;
-using ApiUCI.Dtos.Cuentas;
-using ApiUCI.Dtos.Usuarios;
-using ApiUCI.Extensions;
-using ApiUCI.Interfaces;
-using ApiUCI.Utilities;
+using ApiUci.Contracts.V1;
+using ApiUci.Dtos.Cuentas;
+using ApiUci.Dtos.Usuarios;
+using ApiUci.Extensions;
+using ApiUci.Interfaces;
+using ApiUci.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using ApiUCI.Helpers;
+using ApiUci.Helpers;
 
-namespace ApiUCI.Controller
+namespace ApiUci.Controller
 {   
     [Authorize(Policy = "AdminPolicy")]
     [Route(ApiRoutes.Usuario.RutaGenaral)]
@@ -18,12 +18,10 @@ namespace ApiUCI.Controller
     {
         private readonly IUsuarioService _usuarioService;
         private readonly IAuthService _authService;
-        public readonly ILogger _logger;
-        public UsuarioController(IUsuarioService usuarioService, IAuthService authService, ILogger logger)
+        public UsuarioController(IUsuarioService usuarioService, IAuthService authService)
         {
             _usuarioService = usuarioService;
             _authService = authService;
-            _logger = logger;
         }
         
         [Authorize(Policy = "AdminPolicy")]
@@ -31,12 +29,12 @@ namespace ApiUCI.Controller
         public async Task<IActionResult> RegistrarAdmin([FromBody] RegistroAdministradorDto registroDto) 
         {
 
-            var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), registroDto.PasswordAdmin);
+/*             var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), registroDto.PasswordAdmin);
             if (!passwordResult)
             {
                 var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
                 return ActionResultHelper.HandleActionResult("Unauthorized", error);
-            }
+            } */
             var resultado = await _usuarioService.RegistrarAdministradorAsync(registroDto);
 
             if(!resultado.Success)
@@ -70,14 +68,14 @@ namespace ApiUCI.Controller
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] UsuarioWhiteRolUpdateDto usuarioUpdateDto)
         {
-
+/* 
             var passwordResult = await _authService.VerifyUserPassword(User.GetUserId(), usuarioUpdateDto.PasswordAdmin );
             if (!passwordResult)
             {
                 var error = ErrorBuilder.Build("Password", "Contraseña incorrecta.");
                 return ActionResultHelper.HandleActionResult("Unauthorized", error);
             }
-
+ */
             var resultado = await _usuarioService.UpdateAsync(id, usuarioUpdateDto);
 
             if(!resultado.Success)

@@ -1,10 +1,10 @@
 
-using ApiUCI.Dtos;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Dtos.Departamento;
+using ApiUci.Dtos;
+using ApiUci.Helpers.Querys;
+using ApiUci.Dtos.Departamento;
 
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {   
     public interface IDepartamentoService
     {

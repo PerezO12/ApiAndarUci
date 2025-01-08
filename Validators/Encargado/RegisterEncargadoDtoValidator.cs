@@ -5,16 +5,16 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation;
-using ApiUCI.Dtos.Cuentas;
+using ApiUci.Dtos.Cuentas;
 
-namespace ApiUCI.Validators.Encargado
+namespace ApiUci.Validators.Encargado
 {
     public class RegisterEncargadoDtoValidator : AbstractValidator<RegisterEncargadoDto>
     {
         public RegisterEncargadoDtoValidator()
         {
 
-            RuleFor(x => x.NombreUsuario)
+            RuleFor(x => x.UserName)
                 .NotEmpty().WithMessage("El nombre es obligatorio.")
                 .MinimumLength(3).WithMessage("El nombre debe tener al menos 3 caracteres.")
                 .MaximumLength(50).WithMessage("El nombre no puede exceder los 50 caracteres.")

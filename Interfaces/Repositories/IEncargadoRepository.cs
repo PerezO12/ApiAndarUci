@@ -1,8 +1,8 @@
-using ApiUCI.Dtos.Encargado;
-using ApiUCI.Helpers;
-using ApiUCI.Models;
+using ApiUci.Dtos.Encargado;
+using ApiUci.Helpers;
+using ApiUci.Models;
 
-namespace ApiUCI.Interfaces
+namespace ApiUci.Interfaces
 {
     public interface IEncargadoRepository
     {

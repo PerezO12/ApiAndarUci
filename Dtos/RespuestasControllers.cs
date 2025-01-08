@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Extensions;
-using ApiUCI.Utilities;
-using ApiUCI.Dtos.Usuarios;
+using ApiUci.Extensions;
+using ApiUci.Utilities;
+using ApiUci.Dtos.Usuarios;
 
-namespace ApiUCI.Dtos
+namespace ApiUci.Dtos
 {
     public class RespuestasGenerales<T>
     {

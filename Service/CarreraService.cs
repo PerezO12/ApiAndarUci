@@ -1,10 +1,10 @@
-using ApiUCI.Dtos;
-using ApiUCI.Interfaces;
-using ApiUCI.Dtos.Carrera;
-using ApiUCI.Helpers;
-using ApiUCI.Mappers;
+using ApiUci.Dtos;
+using ApiUci.Interfaces;
+using ApiUci.Dtos.Carrera;
+using ApiUci.Helpers;
+using ApiUci.Mappers;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class CarreraService : ICarreraService
     {

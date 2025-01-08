@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ApiUCI.Dtos.Usuarios;
+using ApiUci.Dtos.Usuarios;
 using FluentValidation;
 
-namespace ApiUCI.Validators.Usuario
+namespace ApiUci.Validators.Usuario
 {
     public class UsuarioWhiteRolUpdateDtoValidator : AbstractValidator<UsuarioWhiteRolUpdateDto>
     {
@@ -24,14 +24,15 @@ namespace ApiUCI.Validators.Usuario
                 .Matches(@"[A-Z]").WithMessage("La contraseña debe contener al menos una letra mayúscula.")
                 .Matches(@"[a-z]").WithMessage("La contraseña debe contener al menos una letra minúscula.")
                 .Matches(@"[0-9]").WithMessage("La contraseña debe contener al menos un número.")
-                .Matches(@"[\W_]").WithMessage("La contraseña debe contener al menos un carácter especial.");
+                .Matches(@"[\W_]").WithMessage("La contraseña debe contener al menos un carácter especial.")
+                .When(x => !string.IsNullOrEmpty(x.Password));
             
             RuleFor(x => x.CarnetIdentidad)
                 .Length(11).WithMessage("El carné de identidad debe tener exactamente 11 caracteres.")
                 .Matches(@"^[0-9]*$").WithMessage("El carné de identidad solo debe contener números.");
 
-            RuleFor(x => x.PasswordAdmin)
-                .NotEmpty().WithMessage("La contraseña administrativa es requerida.");
+/*             RuleFor(x => x.PasswordAdmin)
+                .NotEmpty().WithMessage("La contraseña administrativa es requerida."); */
         }
     }
 }

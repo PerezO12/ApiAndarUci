@@ -1,10 +1,10 @@
-using ApiUCI.Dtos;
-using ApiUCI.Helpers.Querys;
-using ApiUCI.Interfaces;
-using ApiUCI.Dtos.Departamento;
-using ApiUCI.Mappers;
+using ApiUci.Dtos;
+using ApiUci.Helpers.Querys;
+using ApiUci.Interfaces;
+using ApiUci.Dtos.Departamento;
+using ApiUci.Mappers;
 
-namespace ApiUCI.Service
+namespace ApiUci.Service
 {
     public class DepartamentoService : IDepartamentoService
     {
@@ -98,14 +98,14 @@ namespace ApiUCI.Service
         public async Task<RespuestasGenerales<DepartamentoDto>> UpdateAsync(int departamentoId, UpdateDepartamentoDto departamentoDto)
         {
             try
-            {
-                if(!await _facultadRepo.FacultyExists(departamentoDto.FacultadId))
+            {   var facultad = await _facultadRepo.GetByIdAsync(departamentoDto.FacultadId);
+                if(facultad == null)
                     return RespuestasGenerales<DepartamentoDto>.ErrorResponseService("Facultad", "La facultad no existe"); 
 
                 var departamento = await _departamentoRepo.UpdateAsync(departamentoId, departamentoDto.toDepartamentoFromUpdate());
                 if(departamento == null)
                     return RespuestasGenerales<DepartamentoDto>.ErrorResponseService("Departamento", "El departamento no existe", "NotFound");
-
+                departamento.Facultad = facultad;//para no tener q ahcer la solicitud 2 veces
                 return RespuestasGenerales<DepartamentoDto>.SuccessResponse(departamento.toDepartamentDto(), "Departamento actualizado exitosamente");
             }
             catch(Exception ex)
