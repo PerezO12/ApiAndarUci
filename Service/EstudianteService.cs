@@ -7,6 +7,7 @@ using ApiUci.Helpers;
 using ApiUci.Interfaces;
 using ApiUci.Mappers;
 using ApiUci.Models;
+using ApiUci.Helpers.Querys;
 
 namespace ApiUci.Service
 {
@@ -15,14 +16,20 @@ namespace ApiUci.Service
         private readonly IEstudianteRepository _estudianteRepo;
         private readonly UserManager<AppUser> _userManager;
         private readonly IFacultadRepository _facuRepo;
+        private readonly IFormularioRepository _formularioRepo;
         private readonly ICarreraRepository _carreraRepo;
+        private readonly IDepartamentoRepository _depaRepo;
+        private readonly IUsuarioService _usuarioService;
         private readonly ILogger<EstudianteService> _logger;
 
         public EstudianteService(
             IEstudianteRepository estudianteRepository,
             UserManager<AppUser> userManager,
             IFacultadRepository facuRepo,
+            IDepartamentoRepository depaRepo,
             ICarreraRepository carreraRepo,
+            IFormularioRepository formularioRepo,
+            IUsuarioService usuarioService,
             ILogger<EstudianteService> logger
         )
         {
@@ -30,6 +37,9 @@ namespace ApiUci.Service
             _carreraRepo = carreraRepo;
             _facuRepo = facuRepo;
             _userManager = userManager;
+            _depaRepo = depaRepo;
+            _usuarioService = usuarioService;
+            _formularioRepo = formularioRepo;
             _logger = logger;
         }
 
@@ -160,6 +170,35 @@ namespace ApiUci.Service
                 _logger.LogError($"Error al registrar un nuevo estudiante. Exception: {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<bool> ComprobarBajaEstudiante(int estudianteId)
+        {
+            var estudiante = await _estudianteRepo.GetByIdAsync(estudianteId);
+            if(estudiante == null) return false;
+
+            var departamentosCorrespondientes = await _depaRepo.GetAllDepartamentosByFacultadId(estudiante.FacultadId);
+            if (departamentosCorrespondientes == null || !departamentosCorrespondientes.Any()) return false;
+
+            var formularios = await _formularioRepo.GetAllFormulariosByEstudiante(estudiante.UsuarioId, new QueryObjectFormularioEstudiantes());
+            if (formularios == null) return false;
+
+            var departamentosIds = departamentosCorrespondientes.Select(d => d.Id).ToHashSet();
+
+            var formulariosFirmados = formularios
+                .Where(f => f.Firmado)
+                .Select(f => f.DepartamentoId)
+                .ToHashSet();
+
+            var todosFirmados = departamentosIds.All(departamentoId => formulariosFirmados.Contains(departamentoId));
+
+            if (todosFirmados)
+            {
+                await _usuarioService.DeleteAsync(estudiante.UsuarioId);
+                await _estudianteRepo.DeleteAsync(estudianteId);
+            }
+
+            return false;
         }
     }
 

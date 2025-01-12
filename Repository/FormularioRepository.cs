@@ -195,6 +195,7 @@ namespace ApiUci.Repository
                     Id = e.Id,
                     NombreEncargado = e.Encargado!.Usuario!.NombreCompleto!,
                     NombreDepartamento= e.Departamento!.Nombre,
+                    DepartamentoId = e.DepartamentoId,
                     Motivo = e.Motivo,
                     Firmado = e.Firmado,
                     FechaFirmado = e.FechaFirmado,

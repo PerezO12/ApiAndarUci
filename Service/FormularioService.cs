@@ -18,18 +18,21 @@ namespace ApiUci.Service
         private readonly IEstudianteRepository _estudianteRepo;
 
         private readonly IEncargadoService _encargadoService;
+        private readonly IEstudianteService _estudianteService;
         private readonly IDepartamentoRepository _departamentoRepo;
         public FormularioService( 
             IFormularioRepository formularioRepo, 
             IEstudianteRepository estudianteRepo,
             IEncargadoService encargadoService,
-            IDepartamentoRepository departamentoRepo
+            IDepartamentoRepository departamentoRepo,
+            IEstudianteService estudianteService
             )
         {
             _formularioRepo = formularioRepo;
             _estudianteRepo = estudianteRepo;
             _encargadoService = encargadoService;
             _departamentoRepo = departamentoRepo;
+            _estudianteService = estudianteService;
         }
 
         public async Task<RespuestasGenerales<FormularioEstudianteDto>> CreateFormularioAsync(string userId, CreateFormularioDto formularioDto)
@@ -153,7 +156,8 @@ namespace ApiUci.Service
                 formulario.FechaFirmado = DateTime.UtcNow;
 
                 var formularioFirmado = await _formularioRepo.UpdateAsync(formulario.Id, formulario);
-
+                //cada vez q se firme el formulario se llama la funcion de comprobar si se le da de baja al estudiante
+                await _estudianteService.ComprobarBajaEstudiante(formulario.EstudianteId);
                 return RespuestasGenerales<FormularioEncargadoDto>.SuccessResponse(formularioFirmado!.toFormularioEncargadoDto(), "Formulario firmado exitosamente.");
             }
             catch (FormatException)

@@ -8,6 +8,7 @@ namespace ApiUci.Dtos.Formulario
     public class FormularioEstudianteDto
     {
         public int Id { get; set; }
+        public int DepartamentoId{ get; set; }
         public string NombreEncargado {get; set;}  = null!;
         public string NombreDepartamento { get; set; } = null!;
         public string Motivo { get; set; } = null!;

@@ -107,7 +107,7 @@ namespace ApiUci.Controller
                 //Validaciones
             if(!resultado.Success)
                 return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
-                
+            
             return Ok(resultado.Data);
         }
 

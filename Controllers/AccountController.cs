@@ -56,5 +56,16 @@ namespace ApiUci.Controller
             
             return Ok(resultado.Data);  
         }
+        [Authorize]
+        [HttpPost(ApiRoutes.Account.Logout)]
+        public async Task<IActionResult> Logout()
+        {
+            var resultado = await _authService.LogoutAsync(User.GetUserId());
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+            
+            return Ok(resultado.Data);
+        }
     }
 }

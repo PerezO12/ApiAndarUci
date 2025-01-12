@@ -13,6 +13,7 @@ namespace ApiUci.Contracts.V1
             public const string Login = "login";
             public const string ObtenerPerfil = "obtener-perfil";
             public const string CambiarPassword = "cambiar-password";
+            public const string Logout = "logout";
         }
         public static class Carrera
         {

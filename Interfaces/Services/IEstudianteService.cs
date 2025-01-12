@@ -9,10 +9,12 @@ namespace ApiUci.Interfaces
 {
     public interface IEstudianteService
     {
-        public Task<RespuestasGenerales<List<EstudianteDto>>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query);
-        public Task<RespuestasGenerales<EstudianteDto?>> GetEstudianteWithByUserId(string id);
-        public Task<RespuestasGenerales<Estudiante?>> GetEstudianteByUserId(string id);
-        public Task<RespuestasGenerales<EstudianteDto?>> GetByIdWithDetailsAsync(int id);
-        public Task<RespuestasGenerales<NewEstudianteDto>> RegisterEstudianteAsync(RegisterEstudianteDto registerDto);
+        Task<RespuestasGenerales<List<EstudianteDto>>> GetEstudiantesWithDetailsAsync(QueryObjectEstudiante query);
+        Task<RespuestasGenerales<EstudianteDto?>> GetEstudianteWithByUserId(string id);
+        Task<RespuestasGenerales<Estudiante?>> GetEstudianteByUserId(string id);
+        Task<RespuestasGenerales<EstudianteDto?>> GetByIdWithDetailsAsync(int id);
+        Task<RespuestasGenerales<NewEstudianteDto>> RegisterEstudianteAsync(RegisterEstudianteDto registerDto);
+
+        Task<bool> ComprobarBajaEstudiante(int estudianteId);
     }
 }

@@ -120,6 +120,26 @@ namespace ApiUci.Service
             return await _userManager.FindByIdAsync(userId);
         }
 
+        public Task<RespuestasGenerales<bool>> LogoutAsync(string userId)
+        {
+            try
+            {
+                var user = _userManager.FindByIdAsync(userId).Result;
+                if (user == null)
+                    return Task.FromResult(RespuestasGenerales<bool>.ErrorResponseService("Usuario", "El usuario no existe"));
 
+                var result = _userManager.RemoveAuthenticationTokenAsync(user, "JWT", "AccessToken").Result;
+
+                if (!result.Succeeded)
+                    return Task.FromResult(RespuestasGenerales<bool>.ErrorResponseService("Token", "Error al cerrar sesión"));
+
+                return Task.FromResult(RespuestasGenerales<bool>.SuccessResponse(true, "Sesión cerrada exitosamente"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
     }
 }
