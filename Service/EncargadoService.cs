@@ -42,7 +42,7 @@ namespace ApiUci.Service
             {
                 var usuario = await _userManager.FindByIdAsync(userId); 
                 var resultadoPassword = await _signInManager.CheckPasswordSignInAsync(usuario!, encargadoDto.Password, false);
-                if(resultadoPassword.Succeeded)
+                if(!resultadoPassword.Succeeded)
                     return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Password", "La contraseña es incorrecta.");
 
                 // Decodificmamos la llave pública
@@ -93,7 +93,7 @@ namespace ApiUci.Service
             {
                 var usuario = await _userManager.FindByIdAsync(userId); 
                 var resultadoPassword = await _signInManager.CheckPasswordSignInAsync(usuario!, password.Password, false);
-                if(resultadoPassword.Succeeded)
+                if(!resultadoPassword.Succeeded)
                     return RespuestasGenerales<EncargadoFirmaDto?>.ErrorResponseService("Password", "La contraseña es incorrecta.");
 
 

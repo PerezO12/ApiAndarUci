@@ -51,7 +51,7 @@ namespace ApiUci.Service
 
             var existeFormulario = await _formularioRepo.FormByEstudianteDepartamentoAsync(estudiante.Id, formularioDto.DepartamentoId);
             if (existeFormulario != null)
-                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("El formulario ya existe.");
+                return RespuestasGenerales<FormularioEstudianteDto>.ErrorResponseService("Formulario", "El formulario ya existe.");
 
             var formulario = await _formularioRepo.CreateAsync(formularioDto.toFormularioFromCreate(estudiante, encargado));
 
