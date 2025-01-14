@@ -17,6 +17,8 @@ namespace ApiUci.Contracts.V1
             public const string Generar2Fa = "generate-2fa";
             public const string Enable2Fa = "enable-2fa";
             public const string Validar2Fa = "validate-2fa";
+            public const string Desactivar2Fa = "desactivar-2fa";
+
         }
         public static class Carrera
         {

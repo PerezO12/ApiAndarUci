@@ -106,5 +106,17 @@ namespace ApiUci.Controller
             
             return Ok(resultado.Data);
         }
+
+        [Authorize]
+        [HttpPost(ApiRoutes.Account.Desactivar2Fa)]
+        public async Task<IActionResult> DesactivarDobleFactorAuth([FromBody] Code2Fa code2Fa)
+        {
+            var resultado = await _authService.DesactivarDobleFactorAsync(User.GetUserId(), code2Fa.Code);
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+            
+            return Ok(resultado.Data);
+        }
     }
 }

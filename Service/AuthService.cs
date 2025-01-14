@@ -30,18 +30,20 @@ namespace ApiUci.Service
         {
             try
             {
-                /* var user = await _userManager.Users
-                    .FirstOrDefaultAsync(u => u.UserName != null && u.UserName.ToLower() == loginDto.UserName.ToLower()); */
+
                 var user = await _userManager.Users
                     .FirstOrDefaultAsync(u => u.NormalizedUserName == loginDto.UserName.ToUpper());
                 
                 if (user == null)
-                    return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Usuario/Contraseña","Usuario o contraseña Incorrectos");
+                    return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Usuario/Contraseña","El nombre de usuario o la contraseña proporcionados no son correctos.");
 
-                var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+                if(user.LockoutEnd != null)
+                    return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Cuenta bloqueada", "La cuenta está temporalmente bloqueada debido a múltiples intentos fallidos. Intente nuevamente después de que finalice el bloqueo.");
+
+                var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, true);
                                 
                 if (!result.Succeeded)
-                    return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Usuario/Contraseña","Usuario o contraseña Incorrectos");
+                    return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Usuario/Contraseña","El nombre de usuario o la contraseña proporcionados no son correctos.");
                     
 
                 var roles = await _userManager.GetRolesAsync(user);
@@ -49,16 +51,7 @@ namespace ApiUci.Service
                 if (roles == null || !roles.Any())
                     return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Roles", "No se pudo obtener el perfil del usuario.", "Unauthorized");
                 
-                /* bool requiere2Fa = false;
-                //todo:revizar
-                if (await _userManager.GetTwoFactorEnabledAsync(user)) requiere2Fa = true; */
 
-                /* var requiere2Fa = await _userManager.GetTwoFactorEnabledAsync(user);
-                
-                
-                var token = await _tokenService.CreateTokenAsync(user, requiere2Fa); */
-
-                //si no tiene 2fa, se guarda el token en la base de datos
                 if(await _userManager.GetTwoFactorEnabledAsync(user))
                 {
                     var tempToken = _tokenService.CreateTemporaryTokenAsync(user);
@@ -92,8 +85,8 @@ namespace ApiUci.Service
                 var roles = await _userManager.GetRolesAsync(usuarioModel);
                 if (roles == null || !roles.Any())
                     return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Roles", "No se pudo obtener el perfil del usuario.", "Unauthorized");
-
-                var userPerfilDto = usuarioModel.toUserPerfilDto(roles);
+                var tieneDobleFactor = await _userManager.GetTwoFactorEnabledAsync(usuarioModel);
+                var userPerfilDto = usuarioModel.toUserPerfilDto(roles,null, tieneDobleFactor );
 
                 return RespuestasGenerales<UserPerfilDto>.SuccessResponse(userPerfilDto, "Perfil obtenido exitosamente");
             }
@@ -221,14 +214,31 @@ namespace ApiUci.Service
             var user = await _userManager.FindByIdAsync(userId);
             if(user == null) return RespuestasGenerales<TokenDto>.ErrorResponseService("Usuario", "El usuario no existe.", "Unauthorized");
         
-        var isValid = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
+            var isValid = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
 
-        if (!isValid) return RespuestasGenerales<TokenDto>.ErrorResponseService("Código", "Código de autenticación inválido.");
+            if (!isValid) return RespuestasGenerales<TokenDto>.ErrorResponseService("Código", "Código de autenticación inválido.");
 
-        var token = await _tokenService.CreateTokenAsync(user);
-        //si el token es válido, se guarda en la base de datos
-        await _userManager.SetAuthenticationTokenAsync(user, "JWT", "AccessToken", token);
-        return  RespuestasGenerales<TokenDto>.SuccessResponse(new TokenDto { Token = token }, "Autenticación de dos factores validada exitosamente.");
+            var token = await _tokenService.CreateTokenAsync(user);
+            //si el token es válido, se guarda en la base de datos
+            await _userManager.SetAuthenticationTokenAsync(user, "JWT", "AccessToken", token);
+            return  RespuestasGenerales<TokenDto>.SuccessResponse(new TokenDto { Token = token }, "Autenticación de dos factores validada exitosamente.");
+        }
+
+        public async Task<RespuestasGenerales<bool>> DesactivarDobleFactorAsync(string userId, string code)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user == null) return RespuestasGenerales<bool>.ErrorResponseService("Usuario", "El usuario no existe.", "Unauthorized");
+
+            if (!user.TwoFactorEnabled) return RespuestasGenerales<bool>.ErrorResponseService("DobleFactor", "El doble factor de autenticación ya está desactivado.");
+
+            var isValid = await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, code);
+            if (!isValid) return RespuestasGenerales<bool>.ErrorResponseService("Código", "Código de autenticación inválido.");
+        
+            var result = await _userManager.SetTwoFactorEnabledAsync(user, false);
+            if (!result.Succeeded)
+                return RespuestasGenerales<bool>.ErrorResponseService("Usuario", "Error al desactivar el doble factor de autenticación.", "statusCode500");
+
+            return RespuestasGenerales<bool>.SuccessResponse(true, "Doble factor de autenticación desactivado exitosamente.");
         }
     }
 }

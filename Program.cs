@@ -84,10 +84,14 @@ builder.Services
 // Configuración de Identity con validaciones de seguridad de password de los usuarios
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
+    //configuracioens de password
     options.Password.RequireDigit = true;
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 8;
+    //configuracion del bloquedo por intentos fachidos
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+    options.Lockout.MaxFailedAccessAttempts = 5;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders()

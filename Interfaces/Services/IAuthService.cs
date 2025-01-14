@@ -17,5 +17,6 @@ namespace ApiUci.Interfaces
         Task<RespuestasGenerales<QrCodeUri>> GenerarTwoFactorAuthAsync(string userId,  HttpRequest request);
         Task<RespuestasGenerales<bool>> EnableTwoFactorAuthAsync(string userId, string code);
         Task<RespuestasGenerales<TokenDto>> ValidateTwoFactorAuthAsync(string userId, string code);
+        Task<RespuestasGenerales<bool>> DesactivarDobleFactorAsync(string userId, string code);
     }
 }
