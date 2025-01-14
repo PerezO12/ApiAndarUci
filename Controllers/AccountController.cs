@@ -3,6 +3,7 @@ using ApiUci.Dtos.Cuentas;
 using ApiUci.Extensions;
 using ApiUci.Interfaces;
 using ApiUci.Utilities;
+using ApiUCI.Dtos.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ namespace ApiUci.Controller
             _authService = authService;
             _logger = logger;
         }
-
+        //Metodo para loguear, y verifica si tienes 2fa activo
         [HttpPost(ApiRoutes.Account.Login)]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -61,6 +62,44 @@ namespace ApiUci.Controller
         public async Task<IActionResult> Logout()
         {
             var resultado = await _authService.LogoutAsync(User.GetUserId());
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+            
+            return Ok(resultado.Data);
+        }
+        //Genera el codigo QR para la autenticación de dos factores
+        [Authorize]
+        [HttpPost(ApiRoutes.Account.Generar2Fa)]
+        public async Task<IActionResult> GenerateTwoFactorAuth()
+        {
+            var resultado = await _authService.GenerarTwoFactorAuthAsync(User.GetUserId(), Request);
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+            
+            return Ok(resultado.Data);
+        }
+
+        //Habilita la autenticación de dos factores y resive el primer codigo
+        [Authorize]
+        [HttpPost(ApiRoutes.Account.Enable2Fa)]
+        public async Task<IActionResult> EnableTwoFactorAuth([FromBody] Code2Fa code2Fa)
+        {
+            var resultado = await _authService.EnableTwoFactorAuthAsync(User.GetUserId(), code2Fa.Code);
+
+            if(!resultado.Success)
+                return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);
+            
+            return Ok(resultado.Data);
+        }
+
+        //Valida el codigo y retorna el token de autenticación
+        [Authorize]
+        [HttpPost(ApiRoutes.Account.Validar2Fa)]
+        public async Task<IActionResult> ValidateTwoFactorAuth([FromBody] Code2Fa code2Fa)
+        {
+            var resultado = await _authService.ValidateTwoFactorAuthAsync(User.GetUserId(), code2Fa.Code);
 
             if(!resultado.Success)
                 return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);

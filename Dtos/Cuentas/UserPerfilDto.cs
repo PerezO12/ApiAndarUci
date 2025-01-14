@@ -13,5 +13,6 @@ namespace ApiUci.Dtos.Cuentas
         public IList<string> Roles { get; set; } = new List<string>();
         public string? Email { get; set; }
         public string? Token {get; set;}
+        public bool TwoFactorEnabled { get; set; }  = false;
     }
 }

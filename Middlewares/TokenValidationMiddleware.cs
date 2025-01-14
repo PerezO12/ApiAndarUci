@@ -25,16 +25,23 @@ namespace ApiUci.Middleware
         public async Task Invoke(HttpContext context)
         {
             var path = context.Request.Path.ToString();
+            var isTokenTemporal = context.User.IsTokenTemporal(); //Ver si el token es temporal
+            if (isTokenTemporal && path.StartsWith($"/{ApiRoutes.Account.RutaGenaral}/{ApiRoutes.Account.Validar2Fa}", StringComparison.OrdinalIgnoreCase))
+            {
+                await _next(context);
+                return;
+            }
             //Console.WriteLine("Rutas públicas: " + string.Join(", ", PublicRoutes));
             //Console.WriteLine("Path: " + path);
             // Excluir las rutas públicas
-            if (string.IsNullOrEmpty(path) || PublicRoutes.Contains(path, StringComparer.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(path) ||
+                    PublicRoutes.Contains(path, StringComparer.OrdinalIgnoreCase) ||
+                    path.StartsWith("/images", StringComparison.OrdinalIgnoreCase))
             {
                 //Console.WriteLine("Entre: " + string.Join(", ", PublicRoutes));
                 await _next(context);
                 return;
             }
-
             var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
             var usuarioId = context.User.GetUserId();//TODO:VERIFICAR
 

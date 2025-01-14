@@ -47,7 +47,7 @@ namespace ApiUci.Mappers
             };
         }
 
-        public static UserPerfilDto toUserPerfilDto(this AppUser usuario, IList<string> roles, string? token = null)
+        public static UserPerfilDto toUserPerfilDto(this AppUser usuario, IList<string> roles, string? token = null, bool twoFactorEnabled = false)
         {
             return new UserPerfilDto
             {
@@ -56,9 +56,11 @@ namespace ApiUci.Mappers
                 UserName = usuario.UserName,
                 Email = usuario.Email,
                 Roles = roles,
-                Token = token
+                Token = token,
+                TwoFactorEnabled = twoFactorEnabled
             };
         }
+        
         public static AppUser updateAppUserFromUsuarioWhiteRole(this AppUser usuario, UsuarioWhiteRolUpdateDto usuarioUpdateDto)
         {
             usuario.NombreCompleto = usuarioUpdateDto.NombreCompleto ?? usuario.NombreCompleto;

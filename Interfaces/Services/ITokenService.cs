@@ -9,5 +9,6 @@ namespace ApiUci.Interfaces
     public interface ITokenService
     {
         Task<string> CreateTokenAsync(AppUser user);
+        string CreateTemporaryTokenAsync(AppUser user);
     }
 }

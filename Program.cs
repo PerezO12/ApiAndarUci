@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using ApiUci.Models;
 using ApiUci.Repository;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,7 +75,6 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
-
 //fluent validation
 builder.Services
     .AddFluentValidationAutoValidation()
@@ -90,6 +90,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequiredLength = 8;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders()
 .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
 // Configuración del JWT Bearer
@@ -162,6 +163,12 @@ builder.Services.AddControllers(options =>
     opt.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
 });
 
+// Configuración del servicio para servir archivos estáticos
+builder.Services.AddControllersWithViews();
+
+// Registrar el servicio de limpieza en segundo plano
+builder.Services.AddHostedService<CleanUpImageService>();
+
 
 var app = builder.Build();
 
@@ -201,6 +208,15 @@ app.UseAuthorization();
 
 // Middleware personalizado (asegúrate de colocarlo después de UseAuthentication y antes de MapControllers)
 app.UseMiddleware<TokenValidationMiddleware>();
+
+// Sirve archivos estáticos desde la carpeta "wwwroot" o cualquier otra carpeta
+app.UseStaticFiles(); // Para servir archivos desde wwwroot por defecto
+// Si quieres servir archivos desde otra carpeta fuera de wwwroot
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "imagenes")),
+    RequestPath = "/images"
+});
 
 // Mapeo de controladores
 app.MapControllers();

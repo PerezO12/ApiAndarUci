@@ -26,9 +26,9 @@ namespace ApiUci.Service
             var claims = new List<Claim>
             {
                 new Claim("UsuarioId", user.Id), //todo;arreglar esto
-                //new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.UserName!),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id) // ID del usuario
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id), // ID del usuario
             };
             var roles = await _userManager.GetRolesAsync(user);
             foreach (var role in roles)
@@ -41,6 +41,35 @@ namespace ApiUci.Service
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(7),
+                SigningCredentials = creds,
+                Issuer = _config["JWT:Issuer"],
+                Audience = _config["JWT:Audience"]
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+    
+        public string CreateTemporaryTokenAsync(AppUser user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim("UsuarioId", user.Id), //todo;arreglar esto
+                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                new Claim(JwtRegisteredClaimNames.GivenName, user.UserName!),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim("temp_token", "true") 
+            };
+            var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(10),//todo:cambiar
+                NotBefore = DateTime.UtcNow,
                 SigningCredentials = creds,
                 Issuer = _config["JWT:Issuer"],
                 Audience = _config["JWT:Audience"]
