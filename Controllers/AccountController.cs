@@ -1,4 +1,5 @@
 using ApiUci.Contracts.V1;
+using ApiUci.Dtos;
 using ApiUci.Dtos.Cuentas;
 using ApiUci.Extensions;
 using ApiUci.Interfaces;
@@ -25,7 +26,11 @@ namespace ApiUci.Controller
         [HttpPost(ApiRoutes.Account.Login)]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var resultado = await _authService.Login(loginDto);
+            var ipAddress = HttpContext.Items["ClientIp"]?.ToString();//el ip se add en el middleware
+            if(ipAddress == null)
+                return BadRequest(ErrorBuilder.Build("ipAddress", "No se pudo obtener la dirección IP"));
+
+            var resultado = await _authService.Login(loginDto, ipAddress);
 
             if(!resultado.Success)
                 return ActionResultHelper.HandleActionResult(resultado.ActionResult, resultado.Errors);

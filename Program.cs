@@ -15,6 +15,12 @@ using Microsoft.OpenApi.Models;
 using ApiUci.Models;
 using ApiUci.Repository;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using ApiUCI.Interfaces.Services;
+using ApiUCI.Service;
+using ApiUCI.Middlewares;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -149,6 +155,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IDepartamentoService, DepartamentoService>();
 builder.Services.AddScoped<ICarreraService, CarreraService>();
 builder.Services.AddScoped<IFacultadService, FacultadService>();
+builder.Services.AddScoped<IIpBlockService, IpBlockService>();
 
 //controller
 builder.Services.AddControllers(options =>
@@ -173,6 +180,37 @@ builder.Services.AddControllersWithViews();
 // Registrar el servicio de limpieza en segundo plano
 builder.Services.AddHostedService<CleanUpImageService>();
 
+// Habilitar HTTPS en desarrollo y producción
+//todo: revizar
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.HttpsPort = 443; // Puerta de enlace predeterminada para HTTPS
+});
+/* builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Listen(IPAddress.Any, 443, listenOptions =>
+    {
+        listenOptions.UseHttps("path-to-your-cert.pfx", "your-cert-password");
+    });
+}); */
+
+//configruacion del limite de solicitudes x minuto
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 7,
+                Window = TimeSpan.FromMinutes(1),
+                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                QueueLimit = 3
+            }));
+});
+
+
 
 var app = builder.Build();
 
@@ -193,7 +231,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -204,7 +241,12 @@ if (app.Environment.IsDevelopment())
 // Middleware de CORS (antes de la autenticación)
 app.UseCors("AllowAllOrigins");
 
+app.UseMiddleware<ClientIpMiddleware>(); //para extraer el ip del cliente desde cualquier lugar
+//Middleware para ips bloqueados
+app.UseMiddleware<IpBlockMiddleware>();
+
 app.UseHttpsRedirection();
+app.UseHsts();//Ver si lo dejo aqui
 
 // Middleware de autenticación y autorización
 app.UseAuthentication();
@@ -212,6 +254,13 @@ app.UseAuthorization();
 
 // Middleware personalizado (asegúrate de colocarlo después de UseAuthentication y antes de MapControllers)
 app.UseMiddleware<TokenValidationMiddleware>();
+
+
+//limitador de solicitudes por tiempo
+//todo:nuevo, probar si fucniona bien
+app.UseRateLimiter();
+
+
 
 // Sirve archivos estáticos desde la carpeta "wwwroot" o cualquier otra carpeta
 app.UseStaticFiles(); // Para servir archivos desde wwwroot por defecto

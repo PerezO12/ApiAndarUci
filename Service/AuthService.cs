@@ -8,6 +8,7 @@ using ApiUci.Mappers;
 using ApiUci.Models;
 using ApiUCI.Dtos.Auth;
 using ApiUCI.Utilities;
+using ApiUCI.Interfaces.Services;
 
 namespace ApiUci.Service
 {
@@ -16,17 +17,20 @@ namespace ApiUci.Service
         private readonly SignInManager<AppUser> _signInManager;
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;
+        private readonly IIpBlockService _ipBlockService;
         public AuthService(
             UserManager<AppUser> userManager,
             SignInManager<AppUser> signInManager,
-            ITokenService tokenService
+            ITokenService tokenService,
+            IIpBlockService ipBlockService
         )
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _signInManager = signInManager;
+            _ipBlockService = ipBlockService;
         }
-        public async Task<RespuestasGenerales<UserPerfilDto>> Login(LoginDto loginDto)
+        public async Task<RespuestasGenerales<UserPerfilDto>> Login(LoginDto loginDto, string ipAddress)
         {
             try
             {
@@ -43,7 +47,11 @@ namespace ApiUci.Service
                 var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, true);
                                 
                 if (!result.Succeeded)
+                {
+                    //add un intento fallido al ip
+                    await _ipBlockService.RegisterFailedAttemptAsync(ipAddress);
                     return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Usuario/Contraseña","El nombre de usuario o la contraseña proporcionados no son correctos.");
+                }
                     
 
                 var roles = await _userManager.GetRolesAsync(user);

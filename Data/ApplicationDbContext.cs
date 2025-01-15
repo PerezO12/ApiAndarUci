@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ApiUci.Models;
+using ApiUCI.Models;
 
 
 public class ApplicationDbContext : IdentityDbContext<AppUser>
@@ -18,6 +19,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     public DbSet<Encargado> Encargado { get; set; }
     public DbSet<Departamento> Departamento { get; set; }   
     public DbSet<Formulario> Formulario { get; set; }
+    public DbSet<FailedLoginAttempt> FailedLoginAttempt {get; set;}
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
