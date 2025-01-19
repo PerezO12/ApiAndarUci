@@ -87,6 +87,8 @@ builder.Services
     .AddValidatorsFromAssemblyContaining<Program>();
 
 
+
+
 // Configuración de Identity con validaciones de seguridad de password de los usuarios
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
@@ -186,13 +188,19 @@ builder.Services.AddHttpsRedirection(options =>
 {
     options.HttpsPort = 443; // Puerta de enlace predeterminada para HTTPS
 });
-/* builder.WebHost.ConfigureKestrel(options =>
+// Configurar el servidor Kestrel para usar el certificado SSL
+//todo: estoy usando un certificado autofirmado, para desarrollo.
+builder.WebHost.ConfigureKestrel(options =>
 {
-    options.Listen(IPAddress.Any, 443, listenOptions =>
+    options.Listen(IPAddress.Loopback, 5001, listenOptions => 
     {
-        listenOptions.UseHttps("path-to-your-cert.pfx", "your-cert-password");
+        listenOptions.UseHttps(
+            Path.Combine(Directory.GetCurrentDirectory(), "certificadosAutoFirmados", "server.pfx"),
+            builder.Configuration["Certificado:Password"]
+        );
     });
-}); */
+});
+
 
 //configruacion del limite de solicitudes x minuto
 builder.Services.AddRateLimiter(options =>
@@ -203,7 +211,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "UnknownIP",
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 7,
+                PermitLimit = 100,
                 Window = TimeSpan.FromMinutes(1),
                 QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                 QueueLimit = 3
@@ -230,6 +238,8 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+//redirigir el trafigo http a https
+app.UseHttpsRedirection();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -237,7 +247,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
 // Middleware de CORS (antes de la autenticación)
 app.UseCors("AllowAllOrigins");
 
@@ -257,10 +266,7 @@ app.UseMiddleware<TokenValidationMiddleware>();
 
 
 //limitador de solicitudes por tiempo
-//todo:nuevo, probar si fucniona bien
 app.UseRateLimiter();
-
-
 
 // Sirve archivos estáticos desde la carpeta "wwwroot" o cualquier otra carpeta
 app.UseStaticFiles(); // Para servir archivos desde wwwroot por defecto
