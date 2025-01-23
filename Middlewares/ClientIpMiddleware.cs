@@ -17,8 +17,6 @@ namespace ApiUCI.Middlewares
     public async Task Invoke(HttpContext context)
     {
         var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "IP no encontrada";
-        Console.WriteLine("¨{{{{{{{{{{{{{{{{{{{{{{{{{}}}}}}}}}}}}}}}}}}}}}}}}}");
-        Console.WriteLine(clientIp);
         context.Items["ClientIp"] = clientIp; 
 
         await _next(context);

@@ -21,7 +21,7 @@ namespace ApiUci.Filters
             context.Result = new ObjectResult(new
             {
                 Details = context.Exception.Message,
-                Message = "Ha ocurrido un error interno en el servidor. Por favor, contacte al soporte."
+                Message = "Ha ocurrido un error. Por favor, contacte al soporte."
             })
             {
                 StatusCode = 500

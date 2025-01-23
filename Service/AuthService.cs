@@ -94,7 +94,10 @@ namespace ApiUci.Service
                 if (roles == null || !roles.Any())
                     return RespuestasGenerales<UserPerfilDto>.ErrorResponseService("Roles", "No se pudo obtener el perfil del usuario.", "Unauthorized");
                 var tieneDobleFactor = await _userManager.GetTwoFactorEnabledAsync(usuarioModel);
-                var userPerfilDto = usuarioModel.toUserPerfilDto(roles,null, tieneDobleFactor );
+                //generamos un nuevo token en la reautenticacion
+                //var token = await _tokenService.CreateTokenAsync(usuarioModel);
+                //await _userManager.SetAuthenticationTokenAsync(usuarioModel, "JWT", "AccessToken", token);
+                var userPerfilDto = usuarioModel.toUserPerfilDto(roles, null, tieneDobleFactor );
 
                 return RespuestasGenerales<UserPerfilDto>.SuccessResponse(userPerfilDto, "Perfil obtenido exitosamente");
             }

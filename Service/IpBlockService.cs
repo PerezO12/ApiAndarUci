@@ -18,7 +18,7 @@ namespace ApiUCI.Service
         {
             _context = context;
             _maxAttempts = maxAttempts;
-            _blockDuration = blockDuration ?? TimeSpan.FromMinutes(30);
+            _blockDuration = blockDuration ?? TimeSpan.FromMinutes(15);
         }
 
         //verifica si esta bloqueado, y si ya paso la fecha de bloqueo
